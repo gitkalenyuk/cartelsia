@@ -1497,6 +1497,29 @@ textarea,
   background: var(--accent-muted);
   border-bottom: 1px solid var(--accent-border);
 }
+.bpane__viewport {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+  display: flex;
+}
+.bpane__overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.bpane__blocked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  max-width: 340px;
+  padding: 24px;
+}
 .spin {
   animation: spin 700ms linear infinite;
 }

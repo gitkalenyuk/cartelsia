@@ -2,6 +2,7 @@ import { createElement, useEffect, useRef, useState } from 'react'
 import {
   ArrowLeft,
   ArrowRight,
+  ExternalLink,
   KeyRound,
   Mail,
   RotateCw,
@@ -36,8 +37,9 @@ function normalizeUrl(input: string): string {
 
 function Pane(props: {
   initialUrl: string
-  presets: { label: string; url: string; icon: React.ReactNode }[]
+  presets: { label: string; url: string; icon: React.ReactNode; external?: boolean }[]
   grab?: boolean
+  blankOverlay?: React.ReactNode
   testId: string
 }): React.JSX.Element {
   const ref = useRef<Webview | null>(null)
@@ -125,11 +127,23 @@ function Pane(props: {
           spellCheck={false}
         />
         {props.presets.map((p) => (
-          <button key={p.label} className="pill" onClick={() => go(p.url)} title={p.url}>
+          <button
+            key={p.label}
+            className="pill"
+            onClick={() => (p.external ? window.open(p.url) : go(p.url))}
+            title={p.url}
+          >
             {p.icon}
             {p.label}
           </button>
         ))}
+        <IconButton
+          icon={<ExternalLink size={14} />}
+          label={t.browserOpenExternal}
+          onClick={() => {
+            if (url && url !== 'about:blank') window.open(url)
+          }}
+        />
       </div>
       {props.grab ? (
         <div className="bpane__grab">
@@ -143,16 +157,21 @@ function Pane(props: {
           </label>
         </div>
       ) : null}
-      {createElement('webview', {
-        ref: (el: HTMLElement | null) => {
-          ref.current = el as Webview | null
-        },
-        src: props.initialUrl,
-        partition: PARTITION,
-        allowpopups: 'true',
-        useragent: UA,
-        style: { flex: 1, width: '100%', border: 'none' }
-      } as Record<string, unknown>)}
+      <div className="bpane__viewport">
+        {createElement('webview', {
+          ref: (el: HTMLElement | null) => {
+            ref.current = el as Webview | null
+          },
+          src: props.initialUrl,
+          partition: PARTITION,
+          allowpopups: 'true',
+          useragent: UA,
+          style: { width: '100%', height: '100%', border: 'none' }
+        } as Record<string, unknown>)}
+        {props.blankOverlay && (url === 'about:blank' || url === '') ? (
+          <div className="bpane__overlay">{props.blankOverlay}</div>
+        ) : null}
+      </div>
     </div>
   )
 }
@@ -163,6 +182,17 @@ const CARTESIA_URL = 'https://play.cartesia.ai/keys'
 export function BrowserView(): React.JSX.Element {
   // у тестах не вантажимо важкі зовнішні сайти (швидке закриття)
   const e2e = window.cartelsia.env?.e2e
+  const mailOverlay = (
+    <div className="bpane__blocked">
+      <Mail size={30} style={{ color: 'var(--text-faint)' }} />
+      <div className="empty__title">{t.browserMailBlockedTitle}</div>
+      <div className="empty__hint">{t.browserMailBlockedBody}</div>
+      <button className="btn btn--primary" onClick={() => window.open(MAIL_URL)} data-testid="open-mail">
+        <ExternalLink size={14} />
+        {t.browserOpenMail}
+      </button>
+    </div>
+  )
   return (
     <div className="browser-view">
       <div className="browser-hint">
@@ -177,8 +207,9 @@ export function BrowserView(): React.JSX.Element {
       <div className="browser-panes">
         <Pane
           testId="pane-mail"
-          initialUrl={e2e ? 'about:blank' : MAIL_URL}
-          presets={[{ label: t.browserGmail, url: MAIL_URL, icon: <Mail size={13} /> }]}
+          initialUrl="about:blank"
+          blankOverlay={mailOverlay}
+          presets={[{ label: t.browserGmail, url: MAIL_URL, icon: <Mail size={13} />, external: true }]}
         />
         <Pane
           testId="pane-cartesia"

@@ -13,15 +13,13 @@ import { loadJson, saveJson } from '../persistence/jsonStore'
 import type { CartesiaClient } from '../cartesia/client'
 import type { UsageLedger } from '../persistence/usageLedger'
 
-/** Точний «+1 місяць»: 31 січня + 1 міс = 28/29 лютого, час доби зберігається */
-export function addOneMonth(from: Date): Date {
-  const d = new Date(from.getTime())
-  const day = d.getDate()
-  d.setDate(1)
-  d.setMonth(d.getMonth() + 1)
-  const daysInTarget = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
-  d.setDate(Math.min(day, daysInTarget))
-  return d
+/**
+ * Момент розморозки = 00:00 1-го числа наступного місяця.
+ * Cartesia скидає кредити 1 числа календарного місяця (перевірено на дашборді:
+ * «Credits refresh on Aug 1»), а не через місяць від вичерпання.
+ */
+export function nextCreditReset(from: Date): Date {
+  return new Date(from.getFullYear(), from.getMonth() + 1, 1, 0, 0, 0, 0)
 }
 
 export function maskKey(key: string): string {
@@ -206,13 +204,13 @@ export class KeyPool extends EventEmitter {
     }
   }
 
-  /** Заморозка рівно на +1 місяць від цього моменту */
+  /** Заморозка до 1-го числа наступного місяця (коли Cartesia скидає кредити) */
   freeze(keyId: string, reason: FreezeReason): void {
     const k = this.mustGet(keyId)
     const now = this.now()
     k.status = 'frozen'
     k.frozenAt = now.toISOString()
-    k.frozenUntil = addOneMonth(now).toISOString()
+    k.frozenUntil = nextCreditReset(now).toISOString()
     k.freezeReason = reason
     if (reason === 'quota_exceeded') k.usedChars = k.limit // звірка ledger із реальністю
     this.persist()

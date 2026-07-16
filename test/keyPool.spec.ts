@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { KeyPool, addOneMonth, maskKey } from '../src/main/keys/keyPool'
+import { KeyPool, nextCreditReset, maskKey } from '../src/main/keys/keyPool'
 import { mockClient, mockLedger, tempDir } from './helpers'
 
 const K1 = 'sk_car_AAAAAAAAAAAAAAAAAAAA01'
@@ -10,15 +10,24 @@ function makePool(now?: () => Date): KeyPool {
   return new KeyPool(tempDir(), mockClient(), mockLedger(), now)
 }
 
-describe('addOneMonth', () => {
-  it('додає рівно місяць', () => {
-    const d = addOneMonth(new Date('2026-07-16T14:30:00Z'))
-    expect(d.toISOString()).toBe('2026-08-16T14:30:00.000Z')
+describe('nextCreditReset', () => {
+  it('дає 1-ше число наступного місяця', () => {
+    const d = nextCreditReset(new Date(2026, 6, 16, 14, 30)) // 16 липня
+    expect(d.getFullYear()).toBe(2026)
+    expect(d.getMonth()).toBe(7) // серпень
+    expect(d.getDate()).toBe(1)
+    expect(d.getHours()).toBe(0)
   })
-  it('31 січня → 28 лютого (не переливається в березень)', () => {
-    const d = addOneMonth(new Date('2026-01-31T10:00:00Z'))
-    expect(d.getUTCMonth()).toBe(1) // лютий
-    expect(d.getUTCDate()).toBe(28)
+  it('останній день місяця → 1-ше наступного', () => {
+    const d = nextCreditReset(new Date(2026, 6, 31, 23, 59)) // 31 липня
+    expect(d.getMonth()).toBe(7) // серпень
+    expect(d.getDate()).toBe(1)
+  })
+  it('грудень → січень наступного року', () => {
+    const d = nextCreditReset(new Date(2026, 11, 20)) // 20 грудня
+    expect(d.getFullYear()).toBe(2027)
+    expect(d.getMonth()).toBe(0) // січень
+    expect(d.getDate()).toBe(1)
   })
 })
 
@@ -76,22 +85,24 @@ describe('KeyPool', () => {
     expect(after.remaining).toBe(0)
   })
 
-  it('заморозка рівно +1 місяць і розморозка по tick', async () => {
-    let nowValue = new Date('2026-07-16T12:00:00Z')
+  it('заморозка до 1-го числа наступного місяця і розморозка по tick', async () => {
+    let nowValue = new Date(2026, 6, 16, 12, 0) // 16 липня
     const pool = makePool(() => nowValue)
     await pool.addKeys([K1])
     const key = pool.listPublic()[0]
     pool.freeze(key.id, 'low-remaining')
     const frozen = pool.listPublic()[0]
-    expect(new Date(frozen.frozenUntil!).toISOString()).toBe('2026-08-16T12:00:00.000Z')
+    const until = new Date(frozen.frozenUntil!)
+    expect(until.getMonth()).toBe(7) // серпень
+    expect(until.getDate()).toBe(1)
 
-    // за день до розморозки — нічого
-    nowValue = new Date('2026-08-15T12:00:00Z')
+    // 31 липня — ще заморожений
+    nowValue = new Date(2026, 6, 31, 23, 0)
     pool.tick()
     expect(pool.listPublic()[0].status).toBe('frozen')
 
-    // після дати — активний, лічильник скинуто
-    nowValue = new Date('2026-08-16T12:00:01Z')
+    // 1 серпня — активний, лічильник скинуто
+    nowValue = new Date(2026, 7, 1, 0, 1)
     pool.tick()
     const unfrozen = pool.listPublic()[0]
     expect(unfrozen.status).toBe('active')
