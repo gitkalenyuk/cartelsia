@@ -43,8 +43,10 @@ function groupWords(ts: WordTimestamps, offset: number): Cue[] {
 }
 
 export class SubtitleError extends Error {
-  constructor(public missingChunks: number[]) {
+  missingChunks: number[]
+  constructor(missingChunks: number[]) {
     super('Не всі фрагменти мають таймкоди (потрібен субтитр-режим)')
+    this.missingChunks = missingChunks
   }
 }
 

@@ -51,7 +51,12 @@ export async function toCartesiaError(res: Response): Promise<CartesiaError> {
     body = { message: raw.slice(0, 300) }
   }
   const code = body.error_code
-  const message = body.message || body.title || body.error || raw.slice(0, 300) || `HTTP ${res.status}`
+  let message = body.message || body.title || body.error || raw.slice(0, 300) || `HTTP ${res.status}`
+  if (code === 'plan_upgrade_required') {
+    // перевірено на живому API (07.2026): клонування/локалізація вимагають платний тариф
+    message =
+      'Функція недоступна на безкоштовному тарифі Cartesia — потрібен платний план (від $5/міс) на акаунті цього ключа'
+  }
   const opts = { status: res.status, errorCode: code, requestId: body.request_id }
 
   if (code === 'quota_exceeded') return new CartesiaError('quota_exceeded', message, opts)
