@@ -73,6 +73,8 @@ const api = {
       ipcRenderer.invoke(IPC.AUDIO_SAVE_MERGED, { chatId, data, format, suggestedName }),
     saveChunk: (chatId: string, file: string): Promise<{ path: string | null }> =>
       ipcRenderer.invoke(IPC.AUDIO_SAVE_CHUNK, { chatId, file }),
+    readChunk: (chatId: string, file: string): Promise<ArrayBuffer> =>
+      ipcRenderer.invoke(IPC.AUDIO_READ_CHUNK, { chatId, file }),
     reveal: (path: string): Promise<void> => ipcRenderer.invoke(IPC.AUDIO_REVEAL, { path })
   },
   voices: {

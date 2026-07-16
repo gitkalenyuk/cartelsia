@@ -91,7 +91,10 @@ export function ChunkCard(props: { chatId: string; chunk: Chunk }): React.JSX.El
     if (updated) useChatsStore.getState().applyChunk(chatId, updated)
   }
 
-  const dur = isCurrent && duration ? duration : selectedVersion?.durationSec ?? 0
+  const dur =
+    isCurrent && isFinite(duration) && duration > 0
+      ? duration
+      : selectedVersion?.durationSec ?? 0
   const time = isCurrent ? currentTime : 0
 
   return (

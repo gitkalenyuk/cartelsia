@@ -26,6 +26,7 @@ export const IPC = {
   // аудіо
   AUDIO_SAVE_MERGED: 'audio:saveMerged',
   AUDIO_SAVE_CHUNK: 'audio:saveChunk',
+  AUDIO_READ_CHUNK: 'audio:readChunk',
   AUDIO_REVEAL: 'audio:revealInFolder',
   // голоси
   VOICES_LIST: 'voices:list',

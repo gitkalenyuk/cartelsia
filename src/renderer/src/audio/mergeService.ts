@@ -1,5 +1,4 @@
 import type { Chat } from '@shared/types'
-import { mediaUrl } from '../stores/playerStore'
 import { toast } from '../stores/appStore'
 import { t } from '../i18n/uk'
 import LameWorker from './lame.worker?worker'
@@ -74,9 +73,10 @@ export async function mergeChat(chat: Chat, opts: MergeOptions): Promise<ArrayBu
       chunk.versions[chunk.versions.length - 1]
     if (!version) continue
 
-    const res = await fetch(mediaUrl(chat.id, version.file))
-    if (!res.ok) throw new Error(`Не вдалося прочитати аудіо фрагмента #${chunk.index + 1}`)
-    const decoded = await ctx.decodeAudioData(await res.arrayBuffer())
+    const bytes = await window.cartelsia.audio.readChunk(chat.id, version.file)
+    if (!bytes || bytes.byteLength === 0)
+      throw new Error(`Не вдалося прочитати аудіо фрагмента #${chunk.index + 1}`)
+    const decoded = await ctx.decodeAudioData(bytes)
 
     // моно-мікс + ресемпл до цільової частоти, якщо потрібно
     let mono: Float32Array

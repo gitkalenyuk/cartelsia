@@ -277,7 +277,7 @@ function KeyRow(props: { apiKey: ApiKeyPublic }): React.JSX.Element {
             data-testid="key-check"
           >
             {checking ? <span className="spinner" /> : <RefreshCcw size={13} />}
-            {checking ? t.checking : t.checkNow}
+            {checking ? t.checking : 'Перевірити'}
           </button>
           <Dropdown
             trigger={

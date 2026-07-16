@@ -316,6 +316,16 @@ export class Scheduler extends EventEmitter {
         const res = await this.client.ttsBytes(rawKey.key, chunk.text, settings)
         audio = res.audio
         format = res.format
+        // стрімлений MP3 без Xing-заголовка не дає duration у <audio> — рахуємо з CBR-бітрейту
+        if (format === 'mp3') {
+          durationSec = (audio.length * 8) / (settings.output.bitRate ?? 128000)
+        } else {
+          durationSec = pcmDurationSec(Math.max(0, audio.length - 44), {
+            sampleRate: settings.output.sampleRate,
+            channels: 1,
+            bitsPerSample: 16
+          })
+        }
       }
 
       const version: Omit<ChunkVersion, 'file'> = {

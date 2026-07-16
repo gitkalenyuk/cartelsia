@@ -141,8 +141,8 @@ export function Sidebar(): React.JSX.Element {
         data-testid="pool-footer"
       >
         {t.availableChars}{' '}
-        <strong className="tnum">{fmtNum(remaining)}</strong> {t.chars} ·{' '}
-        <strong className="tnum">{activeKeys}</strong> {t.keysGenitive}
+        <strong className="tnum">{fmtNum(remaining)}</strong> {t.chars} {t.onKeys}{' '}
+        <strong className="tnum">{t.keysLoc(activeKeys)}</strong>
       </div>
 
       <ConfirmDialog

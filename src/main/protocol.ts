@@ -33,9 +33,13 @@ export function handleMediaProtocol(voices: VoicesService): void {
         const abs = normalize(join(root, ...rel))
         if (!abs.startsWith(root)) return new Response('forbidden', { status: 403 })
         // net.fetch по file:// нативно обробляє Range-заголовки
-        return net.fetch(pathToFileURL(abs).toString(), {
+        const fileRes = await net.fetch(pathToFileURL(abs).toString(), {
           headers: req.headers
         })
+        // без CORS-заголовка fetch() із renderer (file://-origin) падає; <audio> не підпадає
+        const headers = new Headers(fileRes.headers)
+        headers.set('Access-Control-Allow-Origin', '*')
+        return new Response(fileRes.body, { status: fileRes.status, headers })
       }
 
       if (host === 'preview') {
@@ -44,7 +48,9 @@ export function handleMediaProtocol(voices: VoicesService): void {
         const remote = Buffer.from(encoded, 'base64url').toString('utf8')
         if (!/^https:\/\//.test(remote)) return new Response('forbidden', { status: 403 })
         const { data, contentType } = await voices.fetchPreview(remote)
-        return new Response(new Uint8Array(data), { headers: { 'Content-Type': contentType } })
+        return new Response(new Uint8Array(data), {
+          headers: { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*' }
+        })
       }
 
       return new Response('not found', { status: 404 })

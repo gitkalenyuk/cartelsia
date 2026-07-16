@@ -41,6 +41,7 @@ export const t = {
   availableChars: 'доступно',
   onKeys: 'на',
   keysGenitive: 'ключах',
+  keysLoc: (n: number) => (n % 10 === 1 && n % 100 !== 11 ? `${n} ключі` : `${n} ключах`),
   notEnoughChars: 'Недостатньо символів на ключах',
   addKeysHint: 'Додайте ключі, щоб продовжити',
   noVoiceSelected: 'Оберіть голос',
@@ -110,7 +111,17 @@ export const t = {
   used: 'Використано',
   remaining: 'Залишок',
   unfreezesAt: 'Розморозиться',
-  inDays: (d: number) => `через ${d} діб`,
+  inDays: (d: number) => {
+    const mod10 = d % 10
+    const mod100 = d % 100
+    const word =
+      mod10 === 1 && mod100 !== 11
+        ? 'добу'
+        : mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)
+          ? 'доби'
+          : 'діб'
+    return `через ${d} ${word}`
+  },
   statusActive: 'Активний',
   statusFrozen: 'Заморожений',
   statusInvalid: 'Невалідний',

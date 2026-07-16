@@ -203,6 +203,9 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
       scheduler.revoiceChunk(p.chatId, p.chunkId, p.overrides)
   )
 
+  // у E2E-режимі нативні діалоги неможливо автоматизувати — пишемо одразу в output/
+  const skipDialogs = process.env.CARTELSIA_E2E === '1'
+
   // ---------- Аудіо ----------
   ipcMain.handle(
     IPC.AUDIO_SAVE_MERGED,
@@ -210,7 +213,7 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
       const win = getWindow()
       const defaultPath = join(outputDir(), p.suggestedName)
       let target = defaultPath
-      if (win) {
+      if (win && !skipDialogs) {
         const res = await dialog.showSaveDialog(win, {
           title: 'Зберегти обʼєднаний файл',
           defaultPath,
@@ -233,6 +236,10 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     const win = getWindow()
     const src = chats.audioPath(p.chatId, p.file)
     const defaultPath = join(outputDir(), basename(src))
+    if (skipDialogs) {
+      writeFileSync(defaultPath, readFileSync(src))
+      return { path: defaultPath }
+    }
     if (!win) return { path: null }
     const res = await dialog.showSaveDialog(win, {
       title: 'Зберегти фрагмент',
@@ -241,6 +248,12 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     if (res.canceled || !res.filePath) return { path: null }
     writeFileSync(res.filePath, readFileSync(src))
     return { path: res.filePath }
+  })
+
+  // байти чанка для склейки в renderer (fetch до кастомного протоколу CORS-примхливий)
+  ipcMain.handle(IPC.AUDIO_READ_CHUNK, (_e, p: { chatId: string; file: string }) => {
+    const buf = readFileSync(chats.audioPath(p.chatId, p.file))
+    return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)
   })
 
   ipcMain.handle(IPC.AUDIO_REVEAL, (_e, p: { path: string }) => shell.showItemInFolder(p.path))
@@ -311,7 +324,12 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
       throw err
     }
     const win = getWindow()
-    const defaultPath = join(outputDir(), `${chat.title.slice(0, 30) || 'subtitles'}.${p.format}`)
+    const safeTitle = chat.title.replace(/[<>:"/\\|?*]/g, '').slice(0, 30) || 'subtitles'
+    const defaultPath = join(outputDir(), `${safeTitle}.${p.format}`)
+    if (skipDialogs) {
+      writeFileSync(defaultPath, content, 'utf8')
+      return { path: defaultPath }
+    }
     if (!win) return { path: null }
     const res = await dialog.showSaveDialog(win, {
       title: 'Експорт субтитрів',

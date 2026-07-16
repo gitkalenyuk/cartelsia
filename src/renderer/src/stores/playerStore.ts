@@ -28,7 +28,10 @@ const audio = new Audio()
 let rafId = 0
 
 function tickTime(): void {
-  usePlayerStore.setState({ currentTime: audio.currentTime, duration: audio.duration || 0 })
+  usePlayerStore.setState({
+    currentTime: audio.currentTime,
+    duration: isFinite(audio.duration) ? audio.duration : 0
+  })
   rafId = requestAnimationFrame(tickTime)
 }
 
@@ -50,7 +53,12 @@ audio.addEventListener('ended', () => {
   }
 })
 audio.addEventListener('loadedmetadata', () => {
-  usePlayerStore.setState({ duration: audio.duration || 0 })
+  usePlayerStore.setState({ duration: isFinite(audio.duration) ? audio.duration : 0 })
+})
+audio.addEventListener('durationchange', () => {
+  if (isFinite(audio.duration) && audio.duration > 0) {
+    usePlayerStore.setState({ duration: audio.duration })
+  }
 })
 
 function load(track: PlayerTrack): void {

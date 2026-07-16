@@ -186,7 +186,7 @@ export function Composer(): React.JSX.Element {
           <>
             {t.needChars} ≈ <strong className="tnum">{fmtNum(charCount)}</strong> {t.chars} ·{' '}
             {t.availableChars} <strong className="tnum">{fmtNum(remaining)}</strong> {t.onKeys}{' '}
-            {keys.filter((k) => k.status === 'active').length} {t.keysGenitive}
+            {t.keysLoc(keys.filter((k) => k.status === 'active').length)}
             {notEnough ? <span> — {t.notEnoughChars}</span> : null}
           </>
         ) : showOnboarding ? (
