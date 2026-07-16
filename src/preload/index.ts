@@ -138,6 +138,9 @@ const api = {
     setKeyUsage: (keyId: string, usedChars: number): Promise<ApiKeyPublic> =>
       ipcRenderer.invoke(IPC.DEBUG_SET_KEY_USAGE, { keyId, usedChars })
   },
+  env: {
+    e2e: process.env.CARTELSIA_E2E === '1'
+  },
   onEvent: (cb: (event: MainEvent) => void): (() => void) => {
     const listener = (_e: Electron.IpcRendererEvent, event: MainEvent): void => cb(event)
     ipcRenderer.on(IPC.EVENT, listener)

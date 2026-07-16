@@ -4,6 +4,7 @@ import { ChatView } from './components/chat/ChatView'
 import { KeysView } from './components/keys/KeysView'
 import { VoicesView } from './components/voices/VoicesView'
 import { CloneVoiceView } from './components/voices/CloneVoiceView'
+import { BrowserView } from './components/browser/BrowserView'
 import { StatsView } from './components/stats/StatsView'
 import { SettingsView } from './components/settings/SettingsView'
 import { ToastHost } from './components/common/ToastHost'
@@ -39,16 +40,22 @@ export default function App(): React.JSX.Element {
     <div className="shell">
       <div className="dragbar" />
       <Sidebar />
-      <main className="main">
-        <div className="main__inner">
-          {view === 'chat' && <ChatView />}
-          {view === 'keys' && <KeysView />}
-          {view === 'voices' && <VoicesView />}
-          {view === 'clone' && <CloneVoiceView />}
-          {view === 'stats' && <StatsView />}
-          {view === 'settings' && <SettingsView />}
-        </div>
-      </main>
+      {view === 'browser' ? (
+        <main className="main" style={{ overflow: 'hidden' }}>
+          <BrowserView />
+        </main>
+      ) : (
+        <main className="main">
+          <div className="main__inner">
+            {view === 'chat' && <ChatView />}
+            {view === 'keys' && <KeysView />}
+            {view === 'voices' && <VoicesView />}
+            {view === 'clone' && <CloneVoiceView />}
+            {view === 'stats' && <StatsView />}
+            {view === 'settings' && <SettingsView />}
+          </div>
+        </main>
+      )}
       <ToastHost />
     </div>
   )

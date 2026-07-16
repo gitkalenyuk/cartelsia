@@ -10,7 +10,8 @@ import {
   Pencil,
   Mic,
   Send,
-  MessagesSquare
+  MessagesSquare,
+  Globe
 } from 'lucide-react'
 import { t } from '../../i18n/uk'
 import {
@@ -30,6 +31,7 @@ const NAV: { view: ViewId; label: string; icon: React.JSX.Element }[] = [
   { view: 'keys', label: t.keys, icon: <KeyRound size={16} /> },
   { view: 'voices', label: t.voices, icon: <AudioLines size={16} /> },
   { view: 'clone', label: t.cloneVoiceTab, icon: <Mic size={16} /> },
+  { view: 'browser', label: t.browserTab, icon: <Globe size={16} /> },
   { view: 'stats', label: t.stats, icon: <BarChart3 size={16} /> },
   { view: 'settings', label: t.settings, icon: <SettingsIcon size={16} /> }
 ]

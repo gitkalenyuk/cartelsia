@@ -1441,6 +1441,66 @@ textarea,
   background: rgba(42, 171, 238, 0.08);
 }
 
+/* ============ Вбудований браузер ============ */
+.browser-view {
+  height: calc(100vh - var(--titlebar-h));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.browser-hint {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 16px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+.browser-panes {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 0;
+}
+.bpane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border-right: 1px solid var(--border-subtle);
+}
+.bpane:last-child {
+  border-right: none;
+}
+.bpane__bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.bpane__url {
+  flex: 1;
+  height: 28px;
+  font-size: var(--fs-sm);
+  font-family: var(--font-mono);
+  padding: 4px 8px;
+}
+.bpane__grab {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 8px;
+  background: var(--accent-muted);
+  border-bottom: 1px solid var(--accent-border);
+}
+.spin {
+  animation: spin 700ms linear infinite;
+}
+
 /* ============ Спінер ============ */
 .spinner {
   width: 14px;

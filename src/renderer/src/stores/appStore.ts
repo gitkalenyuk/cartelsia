@@ -11,7 +11,7 @@ import type {
   VoiceFavorite
 } from '@shared/types'
 
-export type ViewId = 'chat' | 'keys' | 'voices' | 'clone' | 'stats' | 'settings'
+export type ViewId = 'chat' | 'keys' | 'voices' | 'clone' | 'browser' | 'stats' | 'settings'
 
 interface UiState {
   view: ViewId
