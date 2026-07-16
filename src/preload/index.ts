@@ -20,8 +20,8 @@ import type {
 const api = {
   keys: {
     list: (): Promise<ApiKeyPublic[]> => ipcRenderer.invoke(IPC.KEYS_LIST),
-    add: (keys: string[], label?: string): Promise<AddKeysResult> =>
-      ipcRenderer.invoke(IPC.KEYS_ADD, { keys, label }),
+    add: (keys: string[], label?: string, role?: 'pool' | 'clone'): Promise<AddKeysResult> =>
+      ipcRenderer.invoke(IPC.KEYS_ADD, { keys, label, role }),
     importTxt: (): Promise<AddKeysResult> => ipcRenderer.invoke(IPC.KEYS_IMPORT_TXT),
     update: (id: string, patch: { label?: string; limit?: number }): Promise<ApiKeyPublic> =>
       ipcRenderer.invoke(IPC.KEYS_UPDATE, { id, patch }),
@@ -106,7 +106,18 @@ const api = {
     favoritesList: (): Promise<VoiceFavorite[]> => ipcRenderer.invoke(IPC.VOICES_FAVORITES_LIST),
     favoritesToggle: (voice: Omit<VoiceFavorite, 'addedAt'>): Promise<VoiceFavorite[]> =>
       ipcRenderer.invoke(IPC.VOICES_FAVORITES_TOGGLE, voice),
-    clonesList: (): Promise<ClonedVoiceMeta[]> => ipcRenderer.invoke(IPC.VOICES_CLONES_LIST)
+    clonesList: (): Promise<ClonedVoiceMeta[]> => ipcRenderer.invoke(IPC.VOICES_CLONES_LIST),
+    getPreview: (opts: {
+      voiceId: string
+      previewUrl?: string
+      language?: string
+    }): Promise<{ file: string; generated: boolean }> =>
+      ipcRenderer.invoke(IPC.VOICES_GET_PREVIEW, opts),
+    scanClones: (): Promise<{
+      clones: ClonedVoiceMeta[]
+      scannedKeys: number
+      errors: { keyLabel: string; message: string }[]
+    }> => ipcRenderer.invoke(IPC.VOICES_SCAN_CLONES)
   },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke(IPC.SETTINGS_GET),

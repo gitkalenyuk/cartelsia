@@ -113,7 +113,11 @@ export class KeyPool extends EventEmitter {
   }
 
   /** Додавання ключів (вручну або з файлу) з дедуплікацією і авто-валідацією */
-  async addKeys(rawKeys: string[], label?: string): Promise<AddKeysResult> {
+  async addKeys(
+    rawKeys: string[],
+    label?: string,
+    role: 'pool' | 'clone' = 'pool'
+  ): Promise<AddKeysResult> {
     const result: AddKeysResult = { added: [], rejected: [] }
     const seen = new Set(this.keys.map((k) => k.key))
 
@@ -141,10 +145,15 @@ export class KeyPool extends EventEmitter {
       const entry: ApiKey = {
         id: crypto.randomUUID(),
         key,
-        label: label || `Ключ ${this.keys.length + 1}`,
+        label:
+          label ||
+          (role === 'clone'
+            ? `Клон-ключ ${this.keys.filter((k) => k.role === 'clone').length + 1}`
+            : `Ключ ${this.keys.filter((k) => k.role !== 'clone').length + 1}`),
         usedChars: 0,
         limit: DEFAULT_KEY_LIMIT,
         status: valid ? 'active' : 'invalid',
+        role,
         createdAt: this.now().toISOString(),
         lastValidatedAt: this.now().toISOString()
       }
@@ -296,6 +305,8 @@ export class KeyPool extends EventEmitter {
     return this.keys
       .filter((k) => {
         if (pinnedKeyId && k.id !== pinnedKeyId) return false
+        // клон-ключі працюють ТІЛЬКИ для своїх клон-голосів (pinned)
+        if (!pinnedKeyId && k.role === 'clone') return false
         if (k.status !== 'active') return false
         if (this.remaining(k) < cost) return false
         if (this.freeSlots(k.id) <= 0) return false
@@ -315,14 +326,14 @@ export class KeyPool extends EventEmitter {
       (k) =>
         k.status === 'active' &&
         this.remaining(k) >= cost &&
-        (!pinnedKeyId || k.id === pinnedKeyId)
+        (pinnedKeyId ? k.id === pinnedKeyId : k.role !== 'clone')
     )
   }
 
   /** Чи зможе якийсь ключ КОЛИСЬ узяти чанк такої вартості (для waiting-key vs blocked) */
   anyKeyCouldEver(cost: number, pinnedKeyId?: string): boolean {
     return this.keys.some((k) => {
-      if (pinnedKeyId && k.id !== pinnedKeyId) return false
+      if (pinnedKeyId ? k.id !== pinnedKeyId : k.role === 'clone') return false
       if (k.status === 'invalid') return false
       if (k.status === 'frozen') return k.limit >= cost // після розморозки ліміт скидається
       return this.remaining(k) >= cost || k.limit >= cost // заморозиться і скинеться

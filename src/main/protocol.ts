@@ -17,7 +17,7 @@ export function registerMediaScheme(): void {
 /**
  * ПІСЛЯ app.whenReady():
  *  media://chunk/<chatId>/<relPath...>  → файл із data/chats/<chatId>/<relPath>
- *  media://preview/<base64url(url)>     → проксі превʼю голосу через main-fetch (CORS)
+ *  media://sample/<fileName>            → кешований семпл голосу з data/previews
  */
 export function handleMediaProtocol(voices: VoicesService): void {
   protocol.handle('media', async (req) => {
@@ -42,15 +42,14 @@ export function handleMediaProtocol(voices: VoicesService): void {
         return new Response(fileRes.body, { status: fileRes.status, headers })
       }
 
-      if (host === 'preview') {
-        const encoded = parts[0]
-        if (!encoded) return new Response('bad request', { status: 400 })
-        const remote = Buffer.from(encoded, 'base64url').toString('utf8')
-        if (!/^https:\/\//.test(remote)) return new Response('forbidden', { status: 403 })
-        const { data, contentType } = await voices.fetchPreview(remote)
-        return new Response(new Uint8Array(data), {
-          headers: { 'Content-Type': contentType, 'Access-Control-Allow-Origin': '*' }
-        })
+      if (host === 'sample') {
+        const fileName = parts[0]
+        if (!fileName || fileName.includes('..')) return new Response('bad request', { status: 400 })
+        const abs = normalize(voices.previewPath(fileName))
+        const sampleRes = await net.fetch(pathToFileURL(abs).toString(), { headers: req.headers })
+        const headers = new Headers(sampleRes.headers)
+        headers.set('Access-Control-Allow-Origin', '*')
+        return new Response(sampleRes.body, { status: sampleRes.status, headers })
       }
 
       return new Response('not found', { status: 404 })

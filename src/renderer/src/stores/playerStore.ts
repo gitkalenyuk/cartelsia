@@ -126,11 +126,3 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 export function mediaUrl(chatId: string, file: string): string {
   return `media://chunk/${chatId}/${file.split('/').map(encodeURIComponent).join('/')}`
 }
-
-export function previewUrl(remote: string): string {
-  const encoded = btoa(String.fromCharCode(...new TextEncoder().encode(remote)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/, '')
-  return `media://preview/${encoded}`
-}

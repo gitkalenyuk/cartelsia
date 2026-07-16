@@ -3,6 +3,8 @@
 // ---------- Ключі ----------
 export type KeyStatus = 'active' | 'frozen' | 'invalid'
 export type FreezeReason = 'low-remaining' | 'quota_exceeded'
+/** pool — звичайний ключ для генерацій; clone — ключ акаунта з клон-голосом (не бере участі в загальному пулі) */
+export type KeyRole = 'pool' | 'clone'
 
 export interface ApiKey {
   id: string
@@ -11,6 +13,7 @@ export interface ApiKey {
   usedChars: number // локальний лічильник: API не віддає залишок кредитів
   limit: number // 20000 за замовчуванням, per-key override
   status: KeyStatus
+  role?: KeyRole // відсутнє = 'pool' (сумісність зі старими keys.json)
   frozenAt?: string
   frozenUntil?: string
   freezeReason?: FreezeReason

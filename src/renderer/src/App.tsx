@@ -3,6 +3,7 @@ import { Sidebar } from './components/layout/Sidebar'
 import { ChatView } from './components/chat/ChatView'
 import { KeysView } from './components/keys/KeysView'
 import { VoicesView } from './components/voices/VoicesView'
+import { CloneVoiceView } from './components/voices/CloneVoiceView'
 import { StatsView } from './components/stats/StatsView'
 import { SettingsView } from './components/settings/SettingsView'
 import { ToastHost } from './components/common/ToastHost'
@@ -43,6 +44,7 @@ export default function App(): React.JSX.Element {
           {view === 'chat' && <ChatView />}
           {view === 'keys' && <KeysView />}
           {view === 'voices' && <VoicesView />}
+          {view === 'clone' && <CloneVoiceView />}
           {view === 'stats' && <StatsView />}
           {view === 'settings' && <SettingsView />}
         </div>

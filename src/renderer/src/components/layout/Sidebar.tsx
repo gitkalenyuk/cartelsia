@@ -7,7 +7,10 @@ import {
   Settings as SettingsIcon,
   MoreHorizontal,
   Trash2,
-  Pencil
+  Pencil,
+  Mic,
+  Send,
+  MessagesSquare
 } from 'lucide-react'
 import { t } from '../../i18n/uk'
 import {
@@ -18,10 +21,15 @@ import {
   type ViewId
 } from '../../stores/appStore'
 import { Button, ConfirmDialog, Dropdown, fmtNum } from '../common/primitives'
+import { CartelSkull } from './CartelSkull'
+
+const TG_CHANNEL = 'https://t.me/+e_g6IwDlVhg4OGJi'
+const TG_CHAT = 'https://t.me/+Jj06Fbj8-8oyZDQ6'
 
 const NAV: { view: ViewId; label: string; icon: React.JSX.Element }[] = [
   { view: 'keys', label: t.keys, icon: <KeyRound size={16} /> },
   { view: 'voices', label: t.voices, icon: <AudioLines size={16} /> },
+  { view: 'clone', label: t.cloneVoiceTab, icon: <Mic size={16} /> },
   { view: 'stats', label: t.stats, icon: <BarChart3 size={16} /> },
   { view: 'settings', label: t.settings, icon: <SettingsIcon size={16} /> }
 ]
@@ -69,6 +77,19 @@ export function Sidebar(): React.JSX.Element {
       <div className="sidebar__brand">
         <span className="sidebar__brand-dot" />
         Cartelsia
+      </div>
+      <div className="skull-block">
+        <CartelSkull size={104} />
+        <div className="tg-buttons">
+          <button className="tg-btn" onClick={() => window.open(TG_CHANNEL)}>
+            <Send size={13} />
+            {t.tgChannel}
+          </button>
+          <button className="tg-btn" onClick={() => window.open(TG_CHAT)}>
+            <MessagesSquare size={13} />
+            {t.tgChat}
+          </button>
+        </div>
       </div>
       <div className="sidebar__new">
         <Button

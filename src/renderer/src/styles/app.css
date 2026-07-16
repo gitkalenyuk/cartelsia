@@ -1323,6 +1323,124 @@ textarea,
   border-radius: var(--radius-full);
 }
 
+/* ============ Скелет YT CARTEL ============ */
+.skull-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px 12px;
+}
+.skull-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.skull-glow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 120%;
+  aspect-ratio: 1;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 62%);
+  opacity: 0.35;
+  filter: blur(10px);
+  animation: skullGlow 6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes skullGlow {
+  0%, 100% { opacity: 0.3; filter: blur(10px) hue-rotate(0deg); }
+  25% { opacity: 0.5; filter: blur(12px) hue-rotate(40deg); }
+  50% { opacity: 0.35; filter: blur(10px) hue-rotate(-25deg); }
+  75% { opacity: 0.5; filter: blur(13px) hue-rotate(20deg); }
+}
+.skull-svg {
+  position: relative;
+  z-index: 1;
+  animation: skullBob 3.2s ease-in-out infinite;
+  transform-origin: 50% 80%;
+}
+@keyframes skullBob {
+  0%, 100% { transform: rotate(-2deg) translateY(0); }
+  30% { transform: rotate(2.5deg) translateY(-2px); }
+  55% { transform: rotate(-1.5deg) translateY(1px); }
+  80% { transform: rotate(2deg) translateY(-1px); }
+}
+.skull-head {
+  animation: skullHead 3.2s ease-in-out infinite;
+  transform-origin: 100px 120px;
+}
+@keyframes skullHead {
+  0%, 55%, 100% { transform: rotate(0deg); }
+  62% { transform: rotate(-3deg) translateY(-2px); }
+  70% { transform: rotate(2deg); }
+  78% { transform: rotate(-2deg) translateY(-1px); }
+  86% { transform: rotate(0deg); }
+}
+/* сміх: щелепа стрибає серіями */
+.skull-jaw {
+  animation: skullJaw 3.2s ease-in-out infinite;
+  transform-origin: 100px 170px;
+}
+@keyframes skullJaw {
+  0%, 55%, 100% { transform: translateY(0); }
+  60% { transform: translateY(5px); }
+  64% { transform: translateY(1px); }
+  68% { transform: translateY(6px); }
+  72% { transform: translateY(1px); }
+  76% { transform: translateY(5px); }
+  80% { transform: translateY(1px); }
+  84% { transform: translateY(4px); }
+  90% { transform: translateY(0); }
+}
+.skull-glint {
+  animation: skullGlint 3.2s linear infinite;
+}
+@keyframes skullGlint {
+  0%, 40%, 100% { opacity: 0.25; }
+  46% { opacity: 1; }
+  52% { opacity: 0.25; }
+}
+.skull-caption {
+  font: 800 12px/1 var(--font-sans);
+  letter-spacing: 3px;
+  color: #ff4d42;
+  text-shadow: 0 0 8px rgba(255, 77, 66, 0.55), 0 1px 0 #111;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+.tg-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.tg-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font: 500 var(--fs-sm) var(--font-sans);
+  cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.tg-btn:hover {
+  border-color: #2aabee66;
+  color: #2aabee;
+  background: rgba(42, 171, 238, 0.08);
+}
+
 /* ============ Спінер ============ */
 .spinner {
   width: 14px;

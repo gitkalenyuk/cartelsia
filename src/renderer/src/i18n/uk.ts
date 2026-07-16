@@ -173,6 +173,8 @@ export const t = {
   localizing: 'Локалізація…',
   deleteCloneTitle: 'Видалити клон?',
   voicesNotFound: 'Голоси не знайдено — спробуйте змінити фільтри',
+  onlyLanguage: (lang: string) => `Тільки ${lang}`,
+  generatingSample: 'Генерую семпл…',
   voiceCloned: 'Голос клоновано',
   voiceLocalized: 'Голос локалізовано',
   cloneDeleted: 'Клон видалено',
@@ -224,8 +226,47 @@ export const t = {
   // Онбордінг
   onboard1: 'Додайте ключі',
   onboard2: 'Оберіть голос',
-  onboard3: 'Вставте текст'
+  onboard3: 'Вставте текст',
+
+  // Телеграм
+  tgChannel: 'Наш канал',
+  tgChat: 'Чат спільноти',
+
+  // Вкладка «Клон голосу»
+  cloneVoiceTab: 'Клон голосу',
+  cloneTabTitle: 'Клонування голосу',
+  cloneHowTitle: 'Як додати свій клон-голос (безкоштовний спосіб)',
+  cloneHowStep1:
+    'Зареєструйте окремий акаунт на play.cartesia.ai і у веб-інтерфейсі створіть клон голосу (Voices → Clone Voice, кліп до 10 секунд).',
+  cloneHowStep2:
+    'У ТОМУ Ж акаунті створіть API-ключ (API Keys → Create). Клони привʼязані до акаунта — інші ключі їх не бачать.',
+  cloneHowStep3:
+    'Вставте цей ключ нижче як «клон-ключ». Він зберігається окремо і використовується ТІЛЬКИ для озвучення вашими клонами (у загальний пул не входить).',
+  cloneKeysTitle: 'Клон-ключі',
+  addCloneKey: 'Додати клон-ключ',
+  cloneKeyPlaceholder: 'sk_car_… (ключ акаунта з вашим клоном)',
+  scanClones: 'Сканувати клони на всіх ключах',
+  scanning: 'Сканую…',
+  scanResult: (n: number, k: number) => `Знайдено клонів: ${n} (перевірено ключів: ${k})`,
+  foundClones: 'Знайдені клони',
+  noClones: 'Клонів поки немає — додайте клон-ключ і натисніть «Сканувати»',
+  cloneViaApi: 'Клонувати через API (платний тариф)',
+  cloneApiNote:
+    'Пряме клонування через API Cartesia відкриває лише на платному тарифі (від $5/міс). На безкоштовних ключах використовуйте спосіб через сайт, описаний вище.',
+  useVoice: 'Використати голос'
 }
+
+export const LANGUAGE_FLAGS: Record<string, string> = {
+  uk: '🇺🇦', en: '🇬🇧', fr: '🇫🇷', de: '🇩🇪', es: '🇪🇸', pt: '🇵🇹', zh: '🇨🇳', ja: '🇯🇵',
+  hi: '🇮🇳', it: '🇮🇹', ko: '🇰🇷', nl: '🇳🇱', pl: '🇵🇱', ru: '🇷🇺', sv: '🇸🇪', tr: '🇹🇷',
+  tl: '🇵🇭', bg: '🇧🇬', ro: '🇷🇴', ar: '🇸🇦', cs: '🇨🇿', el: '🇬🇷', fi: '🇫🇮', hr: '🇭🇷',
+  ms: '🇲🇾', sk: '🇸🇰', da: '🇩🇰', ta: '🇮🇳', hu: '🇭🇺', no: '🇳🇴', vi: '🇻🇳', bn: '🇧🇩',
+  th: '🇹🇭', he: '🇮🇱', ka: '🇬🇪', id: '🇮🇩', te: '🇮🇳', gu: '🇮🇳', kn: '🇮🇳', ml: '🇮🇳',
+  mr: '🇮🇳', pa: '🇮🇳'
+}
+
+export const langLabel = (code: string): string =>
+  `${LANGUAGE_FLAGS[code] ?? '🌐'} ${LANGUAGE_NAMES[code] ?? code}`
 
 export const LANGUAGE_NAMES: Record<string, string> = {
   uk: 'Українська',

@@ -74,8 +74,10 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
   // ---------- Ключі ----------
   ipcMain.handle(IPC.KEYS_LIST, () => pool.listPublic())
 
-  ipcMain.handle(IPC.KEYS_ADD, (_e, payload: { keys: string[]; label?: string }) =>
-    pool.addKeys(payload.keys, payload.label)
+  ipcMain.handle(
+    IPC.KEYS_ADD,
+    (_e, payload: { keys: string[]; label?: string; role?: 'pool' | 'clone' }) =>
+      pool.addKeys(payload.keys, payload.label, payload.role ?? 'pool')
   )
 
   ipcMain.handle(IPC.KEYS_IMPORT_TXT, async () => {
@@ -266,6 +268,11 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
   ipcMain.handle(IPC.VOICES_FAVORITES_LIST, () => voices.listFavorites())
   ipcMain.handle(IPC.VOICES_FAVORITES_TOGGLE, (_e, p) => voices.toggleFavorite(p))
   ipcMain.handle(IPC.VOICES_CLONES_LIST, () => voices.listClones())
+  ipcMain.handle(
+    IPC.VOICES_GET_PREVIEW,
+    (_e, p: { voiceId: string; previewUrl?: string; language?: string }) => voices.getPreview(p)
+  )
+  ipcMain.handle(IPC.VOICES_SCAN_CLONES, () => voices.scanClones())
 
   // ---------- Налаштування / шляхи / статистика ----------
   ipcMain.handle(IPC.SETTINGS_GET, () => settings)

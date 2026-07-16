@@ -1,29 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
 import { AudioLines, Check, Pause, Play, Star } from 'lucide-react'
 import type { CartesiaVoice } from '@shared/types'
-import { t, LANGUAGE_NAMES } from '../../i18n/uk'
+import { t, langLabel } from '../../i18n/uk'
 import { useKeysStore, useVoicesLocalStore } from '../../stores/appStore'
-import { previewUrl, usePlayerStore } from '../../stores/playerStore'
+import { useSamplePlayer } from '../../audio/samplePlayer'
 
 /**
- * Пілюля вибору голосу: popover зі списком (вибране зверху, потім клони, потім бібліотека),
- * пошук, превʼю-програвання.
+ * Пілюля вибору голосу: popover зі списком (вибране → клони → бібліотека),
+ * пошук, фільтр за мовою композера (перемикач), семпл на КОЖНОМУ голосі
+ * (оригінальний або згенерований main-процесом).
  */
 export function VoicePicker(props: {
   value: string
   valueName?: string
+  filterLanguage?: string
   onChange: (voice: { id: string; name: string; owningKeyId?: string }) => void
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const [langOnly, setLangOnly] = useState(true)
   const [voices, setVoices] = useState<CartesiaVoice[]>([])
   const [loading, setLoading] = useState(false)
-  const [previewPlaying, setPreviewPlaying] = useState<string | null>(null)
   const ref = useRef<HTMLDivElement>(null)
   const favorites = useVoicesLocalStore((s) => s.favorites)
   const clones = useVoicesLocalStore((s) => s.clones)
   const keys = useKeysStore((s) => s.keys)
-  const previewAudio = useRef<HTMLAudioElement | null>(null)
+  const playingVoiceId = useSamplePlayer((s) => s.playingVoiceId)
+  const loadingVoiceId = useSamplePlayer((s) => s.loadingVoiceId)
+
+  const effectiveLang = langOnly && props.filterLanguage ? props.filterLanguage : undefined
 
   useEffect(() => {
     if (!open) return
@@ -35,53 +40,27 @@ export function VoicePicker(props: {
   }, [open])
 
   useEffect(() => {
-    if (!open || voices.length || !keys.length) return
-    setLoading(true)
-    window.cartelsia.voices
-      .list({ q: query || undefined })
-      .then((res) => setVoices(res.data))
-      .catch(() => setVoices([]))
-      .finally(() => setLoading(false))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open])
-
-  useEffect(() => {
-    if (!open) return
+    if (!open || !keys.length) return
     const timer = setTimeout(() => {
       setLoading(true)
       window.cartelsia.voices
-        .list({ q: query || undefined })
+        .list({ q: query || undefined, language: effectiveLang })
         .then((res) => setVoices(res.data))
-        .catch(() => undefined)
+        .catch(() => setVoices([]))
         .finally(() => setLoading(false))
-    }, 300)
+    }, 250)
     return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query])
-
-  const togglePreview = (voice: CartesiaVoice): void => {
-    if (!voice.previewUrl) return
-    if (previewPlaying === voice.id) {
-      previewAudio.current?.pause()
-      setPreviewPlaying(null)
-      return
-    }
-    usePlayerStore.getState().stop()
-    previewAudio.current?.pause()
-    const audio = new Audio(previewUrl(voice.previewUrl))
-    previewAudio.current = audio
-    audio.onended = () => setPreviewPlaying(null)
-    void audio.play().catch(() => setPreviewPlaying(null))
-    setPreviewPlaying(voice.id)
-  }
+  }, [open, query, effectiveLang, keys.length])
 
   const q = query.toLowerCase()
-  const matches = (name: string): boolean => !q || name.toLowerCase().includes(q)
+  const matches = (name: string, lang: string): boolean =>
+    (!q || name.toLowerCase().includes(q)) && (!effectiveLang || lang === effectiveLang)
   const favIds = new Set(favorites.map((f) => f.id))
   const cloneIds = new Set(clones.map((c) => c.id))
-  const favList = favorites.filter((f) => matches(f.name))
-  const cloneList = clones.filter((c) => matches(c.name))
-  const rest = voices.filter((v) => !favIds.has(v.id) && !cloneIds.has(v.id) && matches(v.name))
+  const favList = favorites.filter((f) => matches(f.name, f.language))
+  const cloneList = clones.filter((c) => matches(c.name, c.language))
+  const rest = voices.filter((v) => !favIds.has(v.id) && !cloneIds.has(v.id))
 
   const select = (id: string, name: string): void => {
     const owningKeyId = clones.find((c) => c.id === id)?.owningKeyId
@@ -93,32 +72,40 @@ export function VoicePicker(props: {
     id: string,
     name: string,
     lang: string,
-    prev?: string,
+    previewUrl?: string,
     badge?: string
   ): React.JSX.Element => (
-    <button key={id} className={`popover__item${id === props.value ? ' is-selected' : ''}`} onClick={() => select(id, name)}>
+    <div key={id} className={`popover__item${id === props.value ? ' is-selected' : ''}`}
+      style={{ cursor: 'pointer' }} onClick={() => select(id, name)}>
       {id === props.value ? <Check size={14} /> : <AudioLines size={14} />}
       <span className="grow">
         {name}
         <span className="muted text-sm" style={{ display: 'block' }}>
-          {LANGUAGE_NAMES[lang] ?? lang}
+          {langLabel(lang)}
           {badge ? ` · ${badge}` : ''}
         </span>
       </span>
       {favIds.has(id) ? <Star size={12} style={{ color: 'var(--warning)' }} /> : null}
-      {prev ? (
-        <span
-          className="iconbtn"
-          style={{ width: 24, height: 24 }}
-          onClick={(e) => {
-            e.stopPropagation()
-            togglePreview({ id, name, language: lang, previewUrl: prev, isOwner: false, isPublic: true })
-          }}
-        >
-          {previewPlaying === id ? <Pause size={13} /> : <Play size={13} />}
-        </span>
-      ) : null}
-    </button>
+      <span
+        className="iconbtn"
+        style={{ width: 24, height: 24 }}
+        title={t.listen}
+        onClick={(e) => {
+          e.stopPropagation()
+          void useSamplePlayer
+            .getState()
+            .toggle({ id, previewUrl }, effectiveLang ?? props.filterLanguage ?? lang)
+        }}
+      >
+        {loadingVoiceId === id ? (
+          <span className="spinner" style={{ width: 11, height: 11 }} />
+        ) : playingVoiceId === id ? (
+          <Pause size={13} />
+        ) : (
+          <Play size={13} />
+        )}
+      </span>
+    </div>
   )
 
   return (
@@ -129,7 +116,7 @@ export function VoicePicker(props: {
         <span className="pill__value">{props.valueName || t.noVoiceSelected}</span>
       </button>
       {open ? (
-        <div className="popover" style={{ minWidth: 300 }}>
+        <div className="popover" style={{ minWidth: 320 }}>
           <div className="popover__search">
             <input
               className="input"
@@ -138,6 +125,18 @@ export function VoicePicker(props: {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
+            {props.filterLanguage ? (
+              <label className="row" style={{ marginTop: 8, cursor: 'pointer', fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)' }}>
+                <span
+                  className={`toggle${langOnly ? ' is-on' : ''}`}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setLangOnly((v) => !v)
+                  }}
+                />
+                {t.onlyLanguage(langLabel(props.filterLanguage))}
+              </label>
+            ) : null}
           </div>
           <div className="popover__list" style={{ maxHeight: 340 }}>
             {favList.length ? (

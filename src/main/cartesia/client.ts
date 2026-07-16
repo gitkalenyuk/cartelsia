@@ -278,11 +278,11 @@ export class CartesiaClient {
     if (!res.ok && res.status !== 204) throw await toCartesiaError(res)
   }
 
-  /** Проксі превʼю голосу (CORS-обхід для renderer) */
-  async fetchPreview(url: string): Promise<{ data: Buffer; contentType: string }> {
+  /** Завантаження оригінального семплу голосу (потрібна авторизація — перевірено емпірично) */
+  async fetchPreview(key: string, url: string): Promise<{ data: Buffer; contentType: string }> {
     let res: Response
     try {
-      res = await this.fetchFn(url)
+      res = await this.fetchFn(url, { headers: this.headers(key, false) })
     } catch (err) {
       throw asNetworkError(err)
     }

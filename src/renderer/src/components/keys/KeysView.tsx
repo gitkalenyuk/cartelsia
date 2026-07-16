@@ -26,7 +26,9 @@ function daysUntil(iso: string): number {
 }
 
 export function KeysView(): React.JSX.Element {
-  const keys = useKeysStore((s) => s.keys)
+  const allKeys = useKeysStore((s) => s.keys)
+  // клон-ключі керуються на вкладці «Клон голосу»
+  const keys = allKeys.filter((k) => k.role !== 'clone')
   const [pasteValue, setPasteValue] = useState('')
   const [adding, setAdding] = useState(false)
   const [dragOver, setDragOver] = useState(false)

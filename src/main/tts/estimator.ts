@@ -16,7 +16,7 @@ export function estimate(
   const keys = pool
     .listPublic()
     .filter((k) => k.status === 'active')
-    .filter((k) => !pinnedKeyId || k.id === pinnedKeyId)
+    .filter((k) => (pinnedKeyId ? k.id === pinnedKeyId : k.role !== 'clone'))
     .map((k) => ({ id: k.id, label: k.label, remaining: k.remaining, used: 0, chunks: 0 }))
 
   const poolRemaining = keys.reduce((s, k) => s + k.remaining, 0)

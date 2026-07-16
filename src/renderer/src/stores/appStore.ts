@@ -11,7 +11,7 @@ import type {
   VoiceFavorite
 } from '@shared/types'
 
-export type ViewId = 'chat' | 'keys' | 'voices' | 'stats' | 'settings'
+export type ViewId = 'chat' | 'keys' | 'voices' | 'clone' | 'stats' | 'settings'
 
 interface UiState {
   view: ViewId
@@ -52,8 +52,11 @@ export const useKeysStore = create<KeysState>((set) => ({
   replaceAll: (keys) => set({ keys })
 }))
 
+/** Доступний залишок ЗАГАЛЬНОГО пулу (клон-ключі окремо — вони лише для своїх голосів) */
 export const totalRemaining = (keys: ApiKeyPublic[]): number =>
-  keys.filter((k) => k.status === 'active').reduce((s, k) => s + k.remaining, 0)
+  keys
+    .filter((k) => k.status === 'active' && k.role !== 'clone')
+    .reduce((s, k) => s + k.remaining, 0)
 
 // ---------- Чати ----------
 interface ChatsState {

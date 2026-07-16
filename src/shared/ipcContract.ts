@@ -36,6 +36,8 @@ export const IPC = {
   VOICES_FAVORITES_LIST: 'voices:favorites:list',
   VOICES_FAVORITES_TOGGLE: 'voices:favorites:toggle',
   VOICES_CLONES_LIST: 'voices:clones:list',
+  VOICES_GET_PREVIEW: 'voices:getPreview',
+  VOICES_SCAN_CLONES: 'voices:scanClones',
   // налаштування / статистика / субтитри
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',

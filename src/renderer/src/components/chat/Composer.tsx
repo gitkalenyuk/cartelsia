@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react'
 import { Cpu, Globe, SlidersHorizontal, Smile, Sparkles } from 'lucide-react'
 import type { GenerationSettings, PreflightEstimate } from '@shared/types'
 import { EMOTIONS_PRIMARY, SUPPORTED_LANGUAGES } from '@shared/types'
-import { t, EMOTION_NAMES, LANGUAGE_NAMES } from '../../i18n/uk'
+import { t, EMOTION_NAMES, langLabel } from '../../i18n/uk'
 import {
   toast,
   totalRemaining,
@@ -120,6 +120,7 @@ export function Composer(): React.JSX.Element {
         <VoicePicker
           value={effective.voiceId}
           valueName={effective.voiceName}
+          filterLanguage={effective.language}
           onChange={(v) =>
             setGen((g) => ({ ...g, voiceId: v.id, voiceName: v.name, voiceOwningKeyId: v.owningKeyId }))
           }
@@ -144,16 +145,16 @@ export function Composer(): React.JSX.Element {
               <Globe size={13} />
               {t.language}:{' '}
               <span className="pill__value">
-                {effective.language ? LANGUAGE_NAMES[effective.language] ?? effective.language : t.auto}
+                {effective.language ? langLabel(effective.language) : t.auto}
               </span>
             </button>
           }
           searchable
           options={[
-            { value: '', label: t.auto },
+            { value: '', label: `🌐 ${t.auto}` },
             ...SUPPORTED_LANGUAGES.map((code) => ({
               value: code,
-              label: LANGUAGE_NAMES[code] ?? code
+              label: langLabel(code)
             }))
           ]}
           value={effective.language ?? ''}
