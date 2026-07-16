@@ -1,0 +1,93 @@
+:root {
+  color-scheme: dark;
+
+  /* Фони — тепла темна палітра Claude */
+  --bg-app: #1a1915;
+  --bg-sidebar: #1f1e1b;
+  --bg-main: #262624;
+  --bg-surface: #2b2a27;
+  --bg-surface-2: #30302e;
+  --bg-hover: #33322e;
+  --bg-active: #3a3833;
+  --bg-overlay: rgba(20, 19, 16, 0.65);
+
+  /* Бордери */
+  --border-subtle: #33322d;
+  --border-default: #3e3d38;
+  --border-strong: #4d4b44;
+
+  /* Текст */
+  --text-primary: #f5f4ed;
+  --text-secondary: #b8b5a9;
+  --text-muted: #8a877c;
+  --text-faint: #6b6960;
+  --text-on-accent: #ffffff;
+
+  /* Акцент — теракота */
+  --accent: #d97757;
+  --accent-hover: #e08b6d;
+  --accent-active: #c96645;
+  --accent-muted: rgba(217, 119, 87, 0.14);
+  --accent-border: rgba(217, 119, 87, 0.4);
+
+  /* Статуси */
+  --success: #7fa66f;
+  --success-muted: rgba(127, 166, 111, 0.14);
+  --warning: #d4a027;
+  --warning-muted: rgba(212, 160, 39, 0.16);
+  --danger: #e5695e;
+  --danger-muted: rgba(229, 105, 94, 0.14);
+  --info: #8aa9c9;
+  --info-muted: rgba(138, 169, 201, 0.14);
+
+  /* Палітра графіка (по ключах) */
+  --chart-1: #d97757;
+  --chart-2: #8aa9c9;
+  --chart-3: #7fa66f;
+  --chart-4: #d4a027;
+  --chart-5: #b58bc9;
+  --chart-6: #6fb8ad;
+
+  /* Радіуси */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
+
+  /* Відступи */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* Типографіка */
+  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'Cascadia Code', 'JetBrains Mono', Consolas, monospace;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 20px;
+  --fs-2xl: 28px;
+
+  /* Рух і тіні */
+  --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
+  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --focus-ring: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--accent-border);
+
+  /* Макет */
+  --sidebar-w: 264px;
+  --content-max-w: 780px;
+  --titlebar-h: 36px;
+}
