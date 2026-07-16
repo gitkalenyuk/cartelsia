@@ -193,46 +193,50 @@ export class Scheduler extends EventEmitter {
   private pump(job: JobState): void {
     if (job.state !== 'running') return
 
-    while (this.totalInFlight() < this.effectiveCap()) {
-      const chunk = job.chat.chunks.find((c) => c.status === 'pending')
-      if (!chunk) break
+    for (const chunk of job.chat.chunks) {
+      if (chunk.status !== 'pending' && chunk.status !== 'waiting-key') continue
 
-      const runtime = job.runtime.get(chunk.id)!
+      let runtime = job.runtime.get(chunk.id)
+      if (!runtime) {
+        runtime = { triedKeys: new Set() }
+        job.runtime.set(chunk.id, runtime)
+      }
       const cost = chunk.text.length
       const pinned = job.chat.settings.voiceOwningKeyId
 
-      const candidates = this.pool.candidatesFor(cost, pinned, runtime.triedKeys)
-      if (!candidates.length) {
-        // всі ключі перепробувані для цього чанка → дозволяємо повторне коло
-        const retriable = this.pool.candidatesFor(cost, pinned)
-        if (retriable.length && runtime.triedKeys.size) {
-          runtime.triedKeys.clear()
-          continue
-        }
-        if (this.pool.anyKeyCouldEver(cost, pinned)) {
-          if (chunk.status !== 'waiting-key') {
-            chunk.status = 'waiting-key'
-            this.notifyChunk(job, chunk)
-          }
-        } else {
-          chunk.status = 'blocked'
-          chunk.lastError = {
-            message: pinned
-              ? 'Ключ-власник клон-голосу не може вмістити цей фрагмент'
-              : 'Жоден ключ не вміщує цей фрагмент (завеликий для лімітів)'
+      // жоден активний ключ не вміщує → чекаємо розморозки або блокуємо назавжди
+      if (!this.pool.anyActiveKeyFits(cost, pinned)) {
+        const next: Chunk['status'] = this.pool.anyKeyCouldEver(cost, pinned)
+          ? 'waiting-key'
+          : 'blocked'
+        if (chunk.status !== next) {
+          chunk.status = next
+          if (next === 'blocked') {
+            chunk.lastError = {
+              message: pinned
+                ? 'Ключ-власник клон-голосу не може вмістити цей фрагмент'
+                : 'Жоден ключ не вміщує цей фрагмент (завеликий для лімітів)'
+            }
           }
           this.notifyChunk(job, chunk)
         }
-        // пробуємо наступні чанки — можливо, менші вмістяться
-        const nextPending = job.chat.chunks.find(
-          (c) => c.status === 'pending' && c.id !== chunk.id
-        )
-        if (!nextPending) break
         continue
       }
 
+      // ключ знайдеться — але чи є глобальна ємність?
+      if (this.totalInFlight() >= this.effectiveCap()) break
+
+      let candidates = this.pool.candidatesFor(cost, pinned, runtime.triedKeys)
+      if (!candidates.length && runtime.triedKeys.size) {
+        // всі ключі вже пробувались цим чанком → дозволяємо повторне коло
+        runtime.triedKeys.clear()
+        candidates = this.pool.candidatesFor(cost, pinned)
+      }
+      if (!candidates.length) continue // слоти зайняті — диспатч при звільненні
+
       const key = candidates[0]
       if (!this.pool.acquireSlot(key.id)) continue
+      if (chunk.status === 'waiting-key') chunk.status = 'pending'
       runtime.triedKeys.add(key.id)
       void this.dispatch(job, chunk, key.id)
     }

@@ -309,6 +309,16 @@ export class KeyPool extends EventEmitter {
       })
   }
 
+  /** Чи є АКТИВНИЙ ключ, що вміщує чанк (незалежно від зайнятості слотів) */
+  anyActiveKeyFits(cost: number, pinnedKeyId?: string): boolean {
+    return this.keys.some(
+      (k) =>
+        k.status === 'active' &&
+        this.remaining(k) >= cost &&
+        (!pinnedKeyId || k.id === pinnedKeyId)
+    )
+  }
+
   /** Чи зможе якийсь ключ КОЛИСЬ узяти чанк такої вартості (для waiting-key vs blocked) */
   anyKeyCouldEver(cost: number, pinnedKeyId?: string): boolean {
     return this.keys.some((k) => {
