@@ -1,0 +1,40 @@
+{
+  "name": "cartelsia",
+  "version": "1.0.0",
+  "description": "Cartelsia — озвучення тексту через Cartesia API з пулом ключів",
+  "main": "./out/main/index.js",
+  "author": "Cartelsia",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev --watch",
+    "start": "electron-vite preview",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "build": "electron-vite build",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:dir": "electron-vite build && electron-builder --win dir",
+    "test": "vitest run",
+    "smoke": "node scripts/smoke.mjs",
+    "e2e": "electron-vite build && playwright test --config e2e/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@breezystack/lamejs": "^1.2.7",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^43.1.1",
+    "electron-builder": "^26.15.3",
+    "electron-vite": "^5.0.0",
+    "lucide-react": "^1.24.0",
+    "playwright": "^1.61.1",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.10",
+    "zustand": "^5.0.14"
+  }
+}

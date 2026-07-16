@@ -1,0 +1,11 @@
+node_modules/
+out/
+dist/
+keys.local.json
+usage-ledger.txt
+data/
+output/
+*.log
+.DS_Store
+e2e/.artifacts/
+test-results/
