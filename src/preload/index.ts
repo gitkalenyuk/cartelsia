@@ -124,6 +124,41 @@ const api = {
     set: (patch: Partial<Settings>): Promise<Settings> =>
       ipcRenderer.invoke(IPC.SETTINGS_SET, { patch })
   },
+  email: {
+    testImap: (config?: Settings['imapConfig']): Promise<{ ok: boolean; error?: string }> =>
+      ipcRenderer.invoke(IPC.EMAIL_TEST_IMAP, { config }),
+    checkVerification: (
+      email: string,
+      sinceMs?: number
+    ): Promise<{ found: boolean; link?: string; code?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC.EMAIL_CHECK_VERIFICATION, { email, sinceMs }),
+    saveAccountFile: (
+      email: string,
+      pass: string,
+      key?: string
+    ): Promise<{ path: string }> =>
+      ipcRenderer.invoke(IPC.EMAIL_SAVE_ACCOUNT_FILE, { email, pass, key }),
+    runAutoReg: (
+      count: number,
+      catchAllDomain: string,
+      imapConfig: Settings['imapConfig'],
+      opts?: { captchaProvider?: string; captchaApiKey?: string; delayMs?: number }
+    ): Promise<{
+      ok: boolean
+      error?: string
+      started?: boolean
+      results?: { email: string; pass: string; success: boolean; key?: string; error?: string }[]
+    }> =>
+      ipcRenderer.invoke(IPC.AUTOREG_RUN, { count, catchAllDomain, imapConfig, ...opts }),
+    getAutoRegStatus: (): Promise<{ running: boolean; items: import('../shared/types').AutoregItem[] }> =>
+      ipcRenderer.invoke(IPC.AUTOREG_STATUS),
+    stopAutoReg: (): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke(IPC.AUTOREG_STOP),
+    runAutoRegContinue: (): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke(IPC.AUTOREG_CONTINUE),
+    runAutoRegCancel: (): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke(IPC.AUTOREG_CANCEL)
+  },
   paths: {
     get: (): Promise<AppPaths> => ipcRenderer.invoke(IPC.PATHS_GET)
   },

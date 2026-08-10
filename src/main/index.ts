@@ -10,6 +10,8 @@ import { ChatStore } from './persistence/chatStore'
 import { Scheduler } from './tts/scheduler'
 import { VoicesService } from './voices/voicesService'
 import { registerIpcHandlers } from './ipc/handlers'
+import { PlaywrightRegistrar } from './email/playwrightRegistrar'
+import { AutoregService } from './email/autoregService'
 
 registerMediaScheme()
 
@@ -74,9 +76,14 @@ if (!gotLock) {
     const chats = new ChatStore()
     const scheduler = new Scheduler(pool, client, chats)
     const voices = new VoicesService(dataDir(), client, pool)
+    const registrar = new PlaywrightRegistrar()
+    const autoregService = new AutoregService(registrar, pool)
 
     handleMediaProtocol(voices)
-    registerIpcHandlers({ pool, scheduler, chats, voices, ledger, client }, () => mainWindow)
+    registerIpcHandlers(
+      { pool, scheduler, chats, voices, ledger, client, registrar, autoregService },
+      () => mainWindow
+    )
     pool.startTicking()
 
     createWindow()

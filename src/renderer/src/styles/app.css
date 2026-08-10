@@ -1462,7 +1462,7 @@ textarea,
 .browser-panes {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   min-height: 0;
 }
 .bpane {

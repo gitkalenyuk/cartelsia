@@ -1,5 +1,5 @@
 import { BrowserWindow, dialog, ipcMain, shell, app } from 'electron'
-import { readFileSync, writeFileSync } from 'fs'
+import { readFileSync, writeFileSync, appendFileSync } from 'fs'
 import { join, basename } from 'path'
 import {
   DEFAULT_SETTINGS,
@@ -21,6 +21,9 @@ import { chunkText } from '../tts/chunker'
 import { estimate } from '../tts/estimator'
 import { buildSubtitles, SubtitleError } from '../subtitles/srt'
 import { showCompletionNotification } from '../notify'
+import { ImapClient } from '../email/imapClient'
+import { PlaywrightRegistrar } from '../email/playwrightRegistrar'
+import { AutoregService } from '../email/autoregService'
 
 export interface Services {
   pool: KeyPool
@@ -29,6 +32,8 @@ export interface Services {
   voices: VoicesService
   ledger: UsageLedger
   client: CartesiaClient
+  registrar: PlaywrightRegistrar
+  autoregService: AutoregService
 }
 
 let settings: Settings
@@ -49,7 +54,7 @@ export function loadSettings(): Settings {
 }
 
 export function registerIpcHandlers(services: Services, getWindow: () => BrowserWindow | null): void {
-  const { pool, scheduler, chats, voices, ledger, client } = services
+  const { pool, scheduler, chats, voices, ledger, client, registrar, autoregService } = services
   loadSettings()
   scheduler.setGlobalCap(settings.globalConcurrencyCap)
 
@@ -58,6 +63,28 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
   }
 
   pool.on('key-updated', (key) => broadcast({ type: 'key-updated', key }))
+
+  // Легасі: прямі captcha з registrar (для старих викликів registerOne напряму)
+  registrar.on('captcha', (payload: { email: string; message: string }) => {
+    // Якщо AutoregService активний — він сам прокине captcha через свій слухач
+    if (!autoregService.isRunning()) {
+      broadcast({ type: 'autoreg-captcha', email: payload.email, message: payload.message })
+    }
+  })
+
+  // Потокові події AutoregService
+  autoregService.on('progress', (payload: { items: unknown[]; current: number; total: number }) => {
+    broadcast({ type: 'autoreg-progress', items: payload.items as never, current: payload.current, total: payload.total })
+  })
+  autoregService.on('captcha', (payload: { email: string; message: string }) => {
+    broadcast({ type: 'autoreg-captcha', email: payload.email, message: payload.message })
+  })
+  autoregService.on('item-done', (payload: { item: unknown; index: number }) => {
+    broadcast({ type: 'autoreg-item-done', item: payload.item as never, index: payload.index })
+  })
+  autoregService.on('done', (payload: { items: unknown[] }) => {
+    broadcast({ type: 'autoreg-done', items: payload.items as never })
+  })
   scheduler.on('event', (event: MainEvent) => {
     broadcast(event)
     if (event.type === 'queue-finished' && settings.notifySystem) {
@@ -276,6 +303,104 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
 
   // ---------- Налаштування / шляхи / статистика ----------
   ipcMain.handle(IPC.SETTINGS_GET, () => settings)
+
+  ipcMain.handle(IPC.EMAIL_TEST_IMAP, (_e, p: { config?: typeof settings.imapConfig }) => {
+    const cfg = p.config ?? settings.imapConfig
+    if (!cfg || !cfg.host || !cfg.user || !cfg.pass) {
+      return { ok: false, error: 'IMAP налаштування не заповнені' }
+    }
+    return ImapClient.testConnection(cfg)
+  })
+
+  ipcMain.handle(IPC.EMAIL_CHECK_VERIFICATION, (_e, p: { email: string; sinceMs?: number }) => {
+    const cfg = settings.imapConfig
+    if (!cfg || !cfg.host || !cfg.user || !cfg.pass) {
+      return { found: false, error: 'IMAP не налаштовано в Налаштуваннях' }
+    }
+    return ImapClient.findVerificationLink(cfg, p.email, p.sinceMs)
+  })
+
+  ipcMain.handle(IPC.EMAIL_SAVE_ACCOUNT_FILE, (_e, p: { email: string; pass: string; key?: string }) => {
+    const now = new Date().toISOString().slice(0, 19).replace('T', ' ')
+    const line = `${now} | Email: ${p.email} | Pass: ${p.pass} | Key: ${p.key || 'no-key'}\n`
+    const path1 = join(dataDir(), 'accounts.txt')
+    const path2 = join(outputDir(), 'accounts.txt')
+    try { appendFileSync(path1, line, 'utf8') } catch (_) {}
+    try { appendFileSync(path2, line, 'utf8') } catch (_) {}
+    return { path: path1 }
+  })
+
+  ipcMain.handle(
+    IPC.AUTOREG_RUN,
+    async (
+      _e,
+      p: {
+        count: number
+        catchAllDomain: string
+        imapConfig: typeof settings.imapConfig
+        captchaProvider?: 'manual' | '2captcha' | 'capsolver'
+        captchaApiKey?: string
+        delayMs?: number
+      }
+    ) => {
+      const cfg = p.imapConfig ?? settings.imapConfig
+      if (!cfg || !cfg.host || !cfg.user || !cfg.pass) {
+        return { ok: false, error: 'IMAP не налаштовано' }
+      }
+      if (autoregService.isRunning()) {
+        return { ok: false, error: 'Автореєстрація вже запущена' }
+      }
+      const win = getWindow()
+      // Неблокуючий: запускаємо у фоні, одразу повертаємо ok
+      const opts = {
+        count: p.count,
+        catchAllDomain: p.catchAllDomain,
+        imapConfig: cfg,
+        captchaProvider: (p.captchaProvider ?? settings.autoreg?.captchaProvider ?? 'manual') as never,
+        captchaApiKey: p.captchaApiKey ?? settings.autoreg?.captchaApiKey,
+        delayMs: p.delayMs ?? settings.autoreg?.delayMs
+      }
+      // Запускаємо без await — прогрес іде через MainEvent
+      autoregService.run(opts, win).catch((err) => {
+        console.error('[autoreg] service run failed:', err)
+        broadcast({ type: 'autoreg-done', items: autoregService.getItems() as never })
+      })
+      return { ok: true, started: true }
+    }
+  )
+
+  // Легасі синхронний шлях (для тестів / скриптів): чекає завершення
+  ipcMain.handle('autoreg:runSync' as never, async (
+    _e: unknown,
+    p: { count: number; catchAllDomain: string; imapConfig: typeof settings.imapConfig }
+  ) => {
+    const cfg = (p as { imapConfig: typeof settings.imapConfig }).imapConfig ?? settings.imapConfig
+    if (!cfg || !cfg.host || !cfg.user || !cfg.pass) return { ok: false, error: 'IMAP не налаштовано' }
+    const win = getWindow()
+    const items = await autoregService.run({ count: p.count, catchAllDomain: p.catchAllDomain, imapConfig: cfg }, win)
+    const results = items.map((it) => ({ email: it.email, pass: it.pass, success: it.state === 'done' && !!it.key, key: it.key, error: it.error }))
+    return { ok: true, results }
+  })
+
+  ipcMain.handle(IPC.AUTOREG_CONTINUE, () => {
+    if (autoregService.isRunning()) autoregService.resumeCaptcha()
+    else registrar.resume()
+    return { ok: true }
+  })
+
+  ipcMain.handle(IPC.AUTOREG_CANCEL, () => {
+    registrar.cancelCaptcha()
+    return { ok: true }
+  })
+
+  ipcMain.handle(IPC.AUTOREG_STOP, () => {
+    autoregService.cancel()
+    return { ok: true }
+  })
+
+  ipcMain.handle(IPC.AUTOREG_STATUS, () => {
+    return { running: autoregService.isRunning(), items: autoregService.getItems() }
+  })
 
   ipcMain.handle(IPC.SETTINGS_SET, (_e, p: { patch: Partial<Settings> }) => {
     settings = {

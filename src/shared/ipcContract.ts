@@ -44,6 +44,15 @@ export const IPC = {
   PATHS_GET: 'paths:get',
   STATS_GET: 'stats:get',
   SUBTITLES_EXPORT: 'subtitles:export',
+  // imap / автореєстрація
+  EMAIL_TEST_IMAP: 'email:testImap',
+  EMAIL_CHECK_VERIFICATION: 'email:checkVerification',
+  EMAIL_SAVE_ACCOUNT_FILE: 'email:saveAccountFile',
+  AUTOREG_RUN: 'autoreg:run',
+  AUTOREG_CONTINUE: 'autoreg:continue',
+  AUTOREG_CANCEL: 'autoreg:cancel',
+  AUTOREG_STATUS: 'autoreg:status',
+  AUTOREG_STOP: 'autoreg:stop',
   // debug (тільки dev)
   DEBUG_SET_KEY_USAGE: 'debug:setKeyUsage',
   // події

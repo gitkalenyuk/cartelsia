@@ -211,18 +211,59 @@ export interface StatsSummary {
 }
 
 // ---------- Налаштування додатку ----------
+export interface ImapConfig {
+  host: string
+  port: number
+  user: string
+  pass: string
+  tls: boolean
+}
+
+export type CaptchaProvider = 'manual' | '2captcha' | 'capsolver'
+
+export interface AutoregSettings {
+  captchaProvider?: CaptchaProvider // default 'manual'
+  captchaApiKey?: string
+  delayMs?: number // пауза між акаунтами (мс), default ~2500-5500
+  batchSize?: number // розмір пачки, undefined = без пачок
+  chromiumMode?: 'bundled' | 'download' // bundled=все в .exe, download=докачка при першому запуску
+}
+
 export interface Settings {
   defaults: GenerationSettings
   globalConcurrencyCap?: number // undefined → авто (2 × активні ключі)
   notifySystem: boolean
   notifySound: boolean
   outputDirOverride?: string
+  catchAllDomain?: string
+  imapConfig?: ImapConfig
+  autoreg?: AutoregSettings
 }
 
 export interface AppPaths {
   dataDir: string
   outputDir: string
   portable: boolean
+}
+
+// ---------- Автореєстрація ----------
+export type AutoregState =
+  | 'queued'
+  | 'form'
+  | 'waiting-mail'
+  | 'verifying'
+  | 'creating-key'
+  | 'done'
+  | 'failed'
+  | 'cancelled'
+
+export interface AutoregItem {
+  id: string
+  email: string
+  pass: string
+  state: AutoregState
+  key?: string
+  error?: string
 }
 
 // ---------- Події main → renderer ----------
@@ -255,6 +296,10 @@ export type MainEvent =
   | { type: 'queue-finished'; chatId: string; ok: number; failed: number; chars: number }
   | { type: 'merge-requested'; chatId: string }
   | { type: 'chat-updated'; chat: Chat }
+  | { type: 'autoreg-captcha'; email: string; message: string }
+  | { type: 'autoreg-progress'; items: AutoregItem[]; current: number; total: number }
+  | { type: 'autoreg-done'; items: AutoregItem[] }
+  | { type: 'autoreg-item-done'; item: AutoregItem; index: number }
 
 // ---------- Дефолти ----------
 export const DEFAULT_KEY_LIMIT = 20000

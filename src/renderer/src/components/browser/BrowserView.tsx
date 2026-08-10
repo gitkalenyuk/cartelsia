@@ -1,222 +1,338 @@
-import { createElement, useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
-  ArrowLeft,
-  ArrowRight,
-  ExternalLink,
-  KeyRound,
-  Mail,
-  RotateCw,
-  Sparkles
+  UserPlus,
+  Loader2,
+  CheckCircle2,
+  AlertTriangle,
+  ExternalLink as ExtIcon,
+  Copy,
+  Square,
+  KeyRound
 } from 'lucide-react'
-import { extractCartesiaKeys } from '@shared/keyUtils'
 import { t } from '../../i18n/uk'
-import { toast, useKeysStore } from '../../stores/appStore'
-import { IconButton, Toggle } from '../common/primitives'
+import { toast, useKeysStore, useSettingsStore } from '../../stores/appStore'
+import type { AutoregItem } from '@shared/types'
 
-// Стандартний Chrome-UA — Google інколи блокує вхід у «нестандартних» вбудованих браузерах
-const UA =
-  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
-const PARTITION = 'persist:cartelsia-web'
-
-interface Webview extends HTMLElement {
-  loadURL(url: string): Promise<void>
-  reload(): void
-  goBack(): void
-  goForward(): void
-  getURL(): string
-  executeJavaScript(code: string): Promise<unknown>
-}
-
-function normalizeUrl(input: string): string {
-  const v = input.trim()
-  if (!v) return v
-  if (/^[a-z]+:\/\//i.test(v) || v.startsWith('data:')) return v
-  if (/^[\w-]+(\.[\w-]+)+/.test(v)) return `https://${v}`
-  return `https://www.google.com/search?q=${encodeURIComponent(v)}`
-}
-
-function Pane(props: {
-  initialUrl: string
-  presets: { label: string; url: string; icon: React.ReactNode; external?: boolean }[]
-  grab?: boolean
-  blankOverlay?: React.ReactNode
-  testId: string
-}): React.JSX.Element {
-  const ref = useRef<Webview | null>(null)
-  const [url, setUrl] = useState(props.initialUrl)
-  const [editing, setEditing] = useState(props.initialUrl)
-  const [loading, setLoading] = useState(false)
-  const [asClone, setAsClone] = useState(false)
-
-  useEffect(() => {
-    const wv = ref.current
-    if (!wv) return
-    const onNav = (e: Event): void => {
-      const u = (e as unknown as { url?: string }).url
-      if (u) {
-        setUrl(u)
-        setEditing(u)
-      }
-    }
-    const onStart = (): void => setLoading(true)
-    const onStop = (): void => setLoading(false)
-    wv.addEventListener('did-navigate', onNav)
-    wv.addEventListener('did-navigate-in-page', onNav)
-    wv.addEventListener('did-start-loading', onStart)
-    wv.addEventListener('did-stop-loading', onStop)
-    // OAuth-попапи вантажимо в тій же панелі
-    const onNew = (e: Event): void => {
-      const u = (e as unknown as { url?: string }).url
-      if (u) void ref.current?.loadURL(u)
-    }
-    wv.addEventListener('new-window', onNew)
-    return () => {
-      wv.removeEventListener('did-navigate', onNav)
-      wv.removeEventListener('did-navigate-in-page', onNav)
-      wv.removeEventListener('did-start-loading', onStart)
-      wv.removeEventListener('did-stop-loading', onStop)
-      wv.removeEventListener('new-window', onNew)
-    }
-  }, [])
-
-  const go = (u: string): void => {
-    const norm = normalizeUrl(u)
-    setEditing(norm)
-    void ref.current?.loadURL(norm)
+function stateLabel(state: AutoregItem['state'], hasKey: boolean): string {
+  switch (state) {
+    case 'queued': return t.autoRegisterStateQueued
+    case 'form': return t.autoRegisterStateForm
+    case 'waiting-mail': return t.autoRegisterStateWaitingMail
+    case 'verifying': return t.autoRegisterStateVerifying
+    case 'creating-key': return t.autoRegisterStateCreatingKey
+    case 'done': return hasKey ? t.autoRegisterStateDone : t.autoRegisterStateDoneNoKey
+    case 'failed': return t.autoRegisterStateFailed
+    case 'cancelled': return t.autoRegisterStateCancelled
+    default: return state
   }
-
-  const grabKey = async (): Promise<void> => {
-    const wv = ref.current
-    if (!wv) return
-    try {
-      const body = (await wv.executeJavaScript(
-        'document.body ? document.body.innerText : ""'
-      )) as string
-      const fields = (await wv.executeJavaScript(
-        'Array.from(document.querySelectorAll("input,textarea,code,pre")).map(function(e){return e.value||e.textContent||""}).join("\\n")'
-      )) as string
-      const keys = extractCartesiaKeys(`${body}\n${fields}`)
-      if (!keys.length) {
-        toast('info', t.browserNoKey)
-        return
-      }
-      const res = await window.cartelsia.keys.add(keys, undefined, asClone ? 'clone' : 'pool')
-      await useKeysStore.getState().load()
-      if (res.added.length) toast('success', t.browserGrabbed(res.added.length))
-      else toast('info', t.browserNoKey)
-    } catch (err) {
-      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
-    }
-  }
-
-  return (
-    <div className="bpane" data-testid={props.testId}>
-      <div className="bpane__bar">
-        <IconButton icon={<ArrowLeft size={15} />} label={t.browserBack} onClick={() => ref.current?.goBack()} />
-        <IconButton icon={<ArrowRight size={15} />} label={t.browserForward} onClick={() => ref.current?.goForward()} />
-        <IconButton
-          icon={<RotateCw size={14} className={loading ? 'spin' : ''} />}
-          label={t.browserReload}
-          onClick={() => ref.current?.reload()}
-        />
-        <input
-          className="input bpane__url"
-          value={editing}
-          onChange={(e) => setEditing(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && go(editing)}
-          spellCheck={false}
-        />
-        {props.presets.map((p) => (
-          <button
-            key={p.label}
-            className="pill"
-            onClick={() => (p.external ? window.open(p.url) : go(p.url))}
-            title={p.url}
-          >
-            {p.icon}
-            {p.label}
-          </button>
-        ))}
-        <IconButton
-          icon={<ExternalLink size={14} />}
-          label={t.browserOpenExternal}
-          onClick={() => {
-            if (url && url !== 'about:blank') window.open(url)
-          }}
-        />
-      </div>
-      {props.grab ? (
-        <div className="bpane__grab">
-          <button className="btn btn--primary btn--sm" onClick={() => void grabKey()} data-testid="grab-key">
-            <KeyRound size={13} />
-            {t.browserGrabKey}
-          </button>
-          <label className="row text-sm muted" style={{ cursor: 'pointer', gap: 6 }}>
-            <Toggle checked={asClone} onChange={setAsClone} />
-            {t.browserAsClone}
-          </label>
-        </div>
-      ) : null}
-      <div className="bpane__viewport">
-        {createElement('webview', {
-          ref: (el: HTMLElement | null) => {
-            ref.current = el as Webview | null
-          },
-          src: props.initialUrl,
-          partition: PARTITION,
-          allowpopups: 'true',
-          useragent: UA,
-          style: { width: '100%', height: '100%', border: 'none' }
-        } as Record<string, unknown>)}
-        {props.blankOverlay && (url === 'about:blank' || url === '') ? (
-          <div className="bpane__overlay">{props.blankOverlay}</div>
-        ) : null}
-      </div>
-    </div>
-  )
 }
 
-const MAIL_URL = 'https://mail.google.com'
-const CARTESIA_URL = 'https://play.cartesia.ai/keys'
+function stateBadgeClass(state: AutoregItem['state'], hasKey: boolean): string {
+  switch (state) {
+    case 'done': return hasKey ? 'badge--success' : 'badge--warning'
+    case 'failed': return 'badge--danger'
+    case 'cancelled': return 'badge--neutral'
+    case 'queued': return 'badge--neutral'
+    default: return 'badge--accent'
+  }
+}
 
 export function BrowserView(): React.JSX.Element {
-  // у тестах не вантажимо важкі зовнішні сайти (швидке закриття)
-  const e2e = window.cartelsia.env?.e2e
-  const mailOverlay = (
-    <div className="bpane__blocked">
-      <Mail size={30} style={{ color: 'var(--text-faint)' }} />
-      <div className="empty__title">{t.browserMailBlockedTitle}</div>
-      <div className="empty__hint">{t.browserMailBlockedBody}</div>
-      <button className="btn btn--primary" onClick={() => window.open(MAIL_URL)} data-testid="open-mail">
-        <ExternalLink size={14} />
-        {t.browserOpenMail}
-      </button>
-    </div>
-  )
+  const settings = useSettingsStore((s) => s.settings)
+  const [targetCount, setTargetCount] = useState(2)
+  const [running, setRunning] = useState(false)
+  const [stopping, setStopping] = useState(false)
+  const [items, setItems] = useState<AutoregItem[]>([])
+  const [current, setCurrent] = useState(0)
+  const [total, setTotal] = useState(0)
+  const [captchaEmail, setCaptchaEmail] = useState<string | null>(null)
+  const [captchaMessage, setCaptchaMessage] = useState('')
+
+  // Підписка на потокові події з main
+  useEffect(() => {
+    // Відновити стан якщо джоб уже запущений (наприклад після перемикання вкладок)
+    void window.cartelsia.email.getAutoRegStatus().then((s) => {
+      if (s.running) {
+        setRunning(true)
+        setItems(s.items)
+      } else if (s.items.length) {
+        setItems(s.items)
+      }
+    })
+
+    const off = window.cartelsia.onEvent((event) => {
+      if (event.type === 'autoreg-progress') {
+        setItems(event.items as AutoregItem[])
+        setCurrent(event.current)
+        setTotal(event.total)
+        setRunning(true)
+      } else if (event.type === 'autoreg-item-done') {
+        const it = event.item as AutoregItem
+        if (it.key) void useKeysStore.getState().load()
+      } else if (event.type === 'autoreg-done') {
+        setItems(event.items as AutoregItem[])
+        setRunning(false)
+        setStopping(false)
+        const done = (event.items as AutoregItem[]).filter((x) => x.state === 'done' && x.key).length
+        const totalDone = (event.items as AutoregItem[]).length
+        if (done > 0) toast('success', t.autoRegisterDone(done))
+        else if (totalDone > 0) toast('info', `Завершено: ${done}/${totalDone} з ключами`)
+        void useKeysStore.getState().load()
+      } else if (event.type === 'autoreg-captcha') {
+        setCaptchaEmail(event.email)
+        setCaptchaMessage(event.message)
+      }
+    })
+    return off
+  }, [])
+
+  const continueCaptcha = useCallback(async () => {
+    await window.cartelsia.email.runAutoRegContinue()
+    setCaptchaEmail(null)
+    setCaptchaMessage('')
+  }, [])
+
+  const cancelCaptcha = useCallback(async () => {
+    await window.cartelsia.email.runAutoRegCancel()
+    setCaptchaEmail(null)
+    setCaptchaMessage('')
+  }, [])
+
+  const startAutoRegistration = async (): Promise<void> => {
+    if (!settings?.catchAllDomain) {
+      toast('info', 'Спочатку вкажіть ваш Catch-All домен у Налаштуваннях')
+      return
+    }
+    const target = Math.max(1, Math.min(50, targetCount))
+    setRunning(true)
+    setStopping(false)
+    setCaptchaEmail(null)
+    setItems([])
+    setCurrent(0)
+    setTotal(target)
+
+    const delayMs = settings.autoreg?.delayMs ?? undefined
+    const captchaProvider = (settings.autoreg?.captchaProvider ?? 'manual') as never
+    const captchaApiKey = settings.autoreg?.captchaApiKey
+
+    const res = await window.cartelsia.email.runAutoReg(
+      target,
+      settings.catchAllDomain,
+      settings.imapConfig,
+      { captchaProvider, captchaApiKey, delayMs }
+    )
+    if (!res.ok) {
+      setRunning(false)
+      toast('danger', res.error || 'Не вдалося запустити автореєстрацію')
+    }
+    // Успіх — прогрес прийде через autoreg-progress / autoreg-done
+  }
+
+  const handleStop = async (): Promise<void> => {
+    setStopping(true)
+    await window.cartelsia.email.stopAutoReg()
+  }
+
+  const handleCopy = async (text: string): Promise<void> => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast('success', t.autoRegisterCopied)
+    } catch {
+      toast('danger', 'Не вдалося скопіювати')
+    }
+  }
+
+  const openInSystemChrome = (): void => {
+    window.cartelsia.audio.reveal('C:\\Windows\\SystemApps').catch(() => {})
+    window.open('https://play.cartesia.ai/sign-in/create', '_blank')
+  }
+
+  const doneWithKey = items.filter((x) => x.state === 'done' && x.key).length
+
   return (
-    <div className="browser-view">
-      <div className="browser-hint">
-        <Sparkles size={14} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-        <div>
-          {t.browserHint}
-          <div className="muted text-sm" style={{ marginTop: 4 }}>
-            {t.browserGoogleNote}
+    <div className="auto-reg">
+      <div className="auto-reg__header" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <UserPlus size={20} style={{ color: 'var(--accent)' }} />
+        <h1 className="view-title" style={{ margin: 0 }}>{t.autoRegisterTitle}</h1>
+      </div>
+
+      <div className="card auto-reg__config" style={{ marginTop: 16 }}>
+        <p className="muted text-sm" style={{ marginTop: 0 }}>
+          Cartelsia відкриває окреме вікно <strong>Chromium</strong> через Playwright (без вбудованого webview, який блокується Cloudflare).
+          У реальному браузері капча Turnstile проходить нормально — підтвердіть її вручну або увімкніть автосолвінг у Налаштуваннях.
+          Усі ключі автоматично додаються в пул і записуються у файл <span className="mono">data/accounts.txt</span>.
+        </p>
+
+        <div className="row" style={{ gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
+          <div className="row" style={{ gap: 6, alignItems: 'center' }}>
+            <span className="text-sm muted">{t.autoRegisterCountLabel}</span>
+            <input
+              className="input tnum"
+              style={{ width: 80 }}
+              type="number"
+              min={1}
+              max={50}
+              value={targetCount}
+              onChange={(e) => setTargetCount(Math.max(1, Number(e.target.value) || 1))}
+              disabled={running}
+              data-testid="auto-reg-count"
+            />
+            <span className="muted text-sm" style={{ fontSize: 11 }}>{t.autoregCountHint}</span>
+          </div>
+
+          {!running ? (
+            <button
+              className="btn btn--primary btn--sm"
+              onClick={() => void startAutoRegistration()}
+              data-testid="auto-reg-start"
+            >
+              <UserPlus size={13} />
+              {t.autoRegisterStart(targetCount)}
+            </button>
+          ) : (
+            <button
+              className="btn btn--danger btn--sm"
+              onClick={() => void handleStop()}
+              disabled={stopping}
+              data-testid="auto-reg-stop"
+            >
+              {stopping ? <Loader2 size={13} className="spin" /> : <Square size={13} />}
+              {stopping ? t.autoRegisterStopping : t.autoRegisterStop}
+            </button>
+          )}
+
+          <button
+            className="btn btn--secondary btn--sm"
+            onClick={openInSystemChrome}
+            data-testid="open-system-chrome"
+          >
+            <ExtIcon size={13} />
+            {t.browserOpenExternal}
+          </button>
+        </div>
+
+        <div className="muted text-sm" style={{ marginTop: 10, fontSize: 12 }}>
+          <strong>Domain:</strong> <span className="mono">{settings?.catchAllDomain || '(не вказано)'}</span>{' '}
+          · <strong>IMAP:</strong>{' '}
+          <span className="mono">
+            {settings?.imapConfig?.host
+              ? `${settings.imapConfig.user}@${settings.imapConfig.host}`
+              : '(не налаштовано)'}
+          </span>
+          {settings?.autoreg?.captchaProvider && settings.autoreg.captchaProvider !== 'manual' && (
+            <> · <strong>Captcha:</strong> <span className="mono">{settings.autoreg.captchaProvider}</span></>
+          )}
+        </div>
+
+        {running && total > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <div className="progress" style={{ height: 6 }}>
+              <div className="progress__fill" style={{ width: `${Math.round((current / total) * 100)}%` }} />
+            </div>
+            <div className="muted text-sm" style={{ marginTop: 4, fontSize: 12 }}>
+              {t.autoRegisterProgress(current, total)}
+              {doneWithKey > 0 && <> · <span style={{ color: 'var(--success)' }}><KeyRound size={11} style={{ display: 'inline', verticalAlign: -1 }} /> +{doneWithKey} ключів у пулі</span></>}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {captchaEmail && (
+        <div
+          className="card"
+          style={{ marginTop: 16, border: '1px solid var(--accent-border)', background: 'var(--accent-muted)' }}
+          data-testid="captcha-banner"
+        >
+          <div className="row" style={{ gap: 10, alignItems: 'flex-start' }}>
+            <AlertTriangle size={18} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 2 }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 600 }}>{t.autoRegisterCaptchaTitle(captchaEmail)}</div>
+              <div className="muted text-sm" style={{ marginTop: 4 }}>{captchaMessage || t.autoRegisterCaptchaBody}</div>
+              <div className="row" style={{ gap: 8, marginTop: 12 }}>
+                <button className="btn btn--primary btn--sm" onClick={() => void continueCaptcha()} data-testid="captcha-continue">
+                  <CheckCircle2 size={13} />{t.autoRegisterCaptchaContinue}
+                </button>
+                <button className="btn btn--secondary btn--sm" onClick={() => void cancelCaptcha()} data-testid="captcha-cancel">
+                  {t.autoRegisterCaptchaCancel}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="browser-panes">
-        <Pane
-          testId="pane-mail"
-          initialUrl="about:blank"
-          blankOverlay={mailOverlay}
-          presets={[{ label: t.browserGmail, url: MAIL_URL, icon: <Mail size={13} />, external: true }]}
-        />
-        <Pane
-          testId="pane-cartesia"
-          initialUrl={e2e ? 'about:blank' : CARTESIA_URL}
-          grab
-          presets={[{ label: t.browserCartesia, url: CARTESIA_URL, icon: <KeyRound size={13} /> }]}
-        />
+      )}
+
+      <div className="card" style={{ marginTop: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+          <h2 style={{ margin: 0, fontSize: 14 }}>Результати</h2>
+          {items.length > 0 && (
+            <span className="muted text-sm">{items.length} · {doneWithKey} з ключем</span>
+          )}
+        </div>
+
+        {items.length === 0 ? (
+          <div className="empty" style={{ padding: '20px 12px' }}>
+            <KeyRound size={22} style={{ opacity: 0.4 }} />
+            <div className="muted text-sm">{t.autoRegisterNoItems}</div>
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table className="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{t.autoRegisterTableEmail}</th>
+                  <th>{t.autoRegisterTableStatus}</th>
+                  <th>{t.autoRegisterTableKey}</th>
+                  <th>{t.autoRegisterTableError}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it, idx) => (
+                  <tr key={it.id} className={it.state === 'failed' ? 'is-dimmed' : undefined}>
+                    <td className="mono text-sm muted">{idx + 1}</td>
+                    <td>
+                      <span className="mono text-sm" style={{ fontSize: 12 }}>{it.email}</span>
+                      <button className="iconbtn" style={{ width: 22, height: 22, marginLeft: 4, verticalAlign: 'middle' }} onClick={() => void handleCopy(it.email)} title="Копіювати пошту">
+                        <Copy size={12} />
+                      </button>
+                    </td>
+                    <td>
+                      <span className={`badge ${stateBadgeClass(it.state, !!it.key)}`}>
+                        {(it.state === 'form' || it.state === 'waiting-mail' || it.state === 'verifying' || it.state === 'creating-key') && <Loader2 size={10} className="spin" />}
+                        {it.state === 'done' && !!it.key && <CheckCircle2 size={10} />}
+                        {it.state === 'failed' && <AlertTriangle size={10} />}
+                        {stateLabel(it.state, !!it.key)}
+                      </span>
+                    </td>
+                    <td>
+                      {it.key ? (
+                        <span className="mono text-sm" style={{ fontSize: 12 }}>
+                          {it.key.slice(0, 14)}…{it.key.slice(-4)}
+                          <button className="iconbtn" style={{ width: 22, height: 22, marginLeft: 4, verticalAlign: 'middle' }} onClick={() => void handleCopy(it.key!)} title="Копіювати ключ">
+                            <Copy size={12} />
+                          </button>
+                        </span>
+                      ) : (
+                        <span className="muted text-sm">—</span>
+                      )}
+                    </td>
+                    <td className="text-sm" style={{ maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: it.state === 'failed' ? 'var(--danger)' : undefined }} title={it.error}>
+                      {it.error || <span className="muted">—</span>}
+                    </td>
+                    <td>
+                      <div className="row" style={{ gap: 2 }}>
+                        <button className="iconbtn" title="Копіювати пароль" onClick={() => void handleCopy(it.pass)}>
+                          <Copy size={12} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   )

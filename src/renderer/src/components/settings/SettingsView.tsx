@@ -1,6 +1,7 @@
-import { Folder } from 'lucide-react'
+import { useState } from 'react'
+import { Folder, MailCheck } from 'lucide-react'
 import { t } from '../../i18n/uk'
-import { useSettingsStore } from '../../stores/appStore'
+import { toast, useSettingsStore } from '../../stores/appStore'
 import { Button, Dropdown, Slider, Toggle } from '../common/primitives'
 import { VoicePicker } from '../chat/VoicePicker'
 
@@ -24,6 +25,7 @@ export function SettingsView(): React.JSX.Element {
   const settings = useSettingsStore((s) => s.settings)
   const paths = useSettingsStore((s) => s.paths)
   const update = useSettingsStore((s) => s.update)
+  const [testingImap, setTestingImap] = useState(false)
 
   if (!settings)
     return (
@@ -31,6 +33,22 @@ export function SettingsView(): React.JSX.Element {
         <span className="spinner" />
       </div>
     )
+
+  const handleTestImap = async (): Promise<void> => {
+    setTestingImap(true)
+    try {
+      const res = await window.cartelsia.email.testImap(settings.imapConfig)
+      if (res.ok) {
+        toast('success', t.imapOk)
+      } else {
+        toast('danger', t.imapFailed(res.error || 'Помилка'))
+      }
+    } catch (err) {
+      toast('danger', t.imapFailed(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setTestingImap(false)
+    }
+  }
 
   const d = settings.defaults
   const formatLabel =
@@ -180,6 +198,186 @@ export function SettingsView(): React.JSX.Element {
           >
             {t.open}
           </Button>
+        </Row>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section__title">{t.sectionCatchAll}</div>
+        <Row label={t.catchAllDomain} desc={t.catchAllDomainDesc}>
+          <input
+            className="input"
+            style={{ width: 220 }}
+            placeholder="my-domain.com"
+            value={settings.catchAllDomain ?? ''}
+            onChange={(e) => void update({ catchAllDomain: e.target.value.trim() })}
+          />
+        </Row>
+        <Row label={t.imapHost}>
+          <input
+            className="input"
+            style={{ width: 220 }}
+            placeholder="imap.gmail.com"
+            value={settings.imapConfig?.host ?? ''}
+            onChange={(e) =>
+              void update({
+                imapConfig: {
+                  host: e.target.value.trim(),
+                  port: settings.imapConfig?.port ?? 993,
+                  user: settings.imapConfig?.user ?? '',
+                  pass: settings.imapConfig?.pass ?? '',
+                  tls: true
+                }
+              })
+            }
+          />
+        </Row>
+        <Row label={t.imapPort}>
+          <input
+            className="input tnum"
+            style={{ width: 100 }}
+            type="number"
+            placeholder="993"
+            value={settings.imapConfig?.port ?? 993}
+            onChange={(e) =>
+              void update({
+                imapConfig: {
+                  host: settings.imapConfig?.host ?? 'imap.gmail.com',
+                  port: Number(e.target.value) || 993,
+                  user: settings.imapConfig?.user ?? '',
+                  pass: settings.imapConfig?.pass ?? '',
+                  tls: true
+                }
+              })
+            }
+          />
+        </Row>
+        <Row label={t.imapUser}>
+          <input
+            className="input"
+            style={{ width: 220 }}
+            placeholder="user@gmail.com"
+            value={settings.imapConfig?.user ?? ''}
+            onChange={(e) =>
+              void update({
+                imapConfig: {
+                  host: settings.imapConfig?.host ?? 'imap.gmail.com',
+                  port: settings.imapConfig?.port ?? 993,
+                  user: e.target.value.trim(),
+                  pass: settings.imapConfig?.pass ?? '',
+                  tls: true
+                }
+              })
+            }
+          />
+        </Row>
+        <Row
+          label={t.imapPass}
+          desc="Для Gmail потрібен Пароль додатку (App Password), створений на myaccount.google.com/apppasswords"
+        >
+          <input
+            className="input"
+            type="password"
+            style={{ width: 220 }}
+            placeholder="16-значний App Password"
+            value={settings.imapConfig?.pass ?? ''}
+            onChange={(e) =>
+              void update({
+                imapConfig: {
+                  host: settings.imapConfig?.host ?? 'imap.gmail.com',
+                  port: settings.imapConfig?.port ?? 993,
+                  user: settings.imapConfig?.user ?? '',
+                  pass: e.target.value,
+                  tls: true
+                }
+              })
+            }
+          />
+        </Row>
+        <Row label="">
+          <Button
+            size="sm"
+            icon={<MailCheck size={13} />}
+            disabled={testingImap}
+            onClick={() => void handleTestImap()}
+          >
+            {testingImap ? 'Перевіряю…' : t.testImap}
+          </Button>
+        </Row>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section__title">{t.sectionAutoregOptions}</div>
+        <Row label={t.autoregCaptchaProvider} desc={t.autoregCaptchaProviderDesc}>
+          <Dropdown
+            trigger={
+              <button className="pill">
+                {settings.autoreg?.captchaProvider === '2captcha'
+                  ? '2captcha'
+                  : settings.autoreg?.captchaProvider === 'capsolver'
+                    ? 'CapSolver'
+                    : 'Ручна'}
+              </button>
+            }
+            down
+            right
+            options={[
+              { value: 'manual', label: 'Ручна (Chromium + Готово)' },
+              { value: '2captcha', label: '2captcha (авто)' },
+              { value: 'capsolver', label: 'CapSolver (авто)' }
+            ]}
+            value={settings.autoreg?.captchaProvider ?? 'manual'}
+            onSelect={(v) =>
+              void update({ autoreg: { ...settings.autoreg, captchaProvider: v as never } })
+            }
+          />
+        </Row>
+        {(settings.autoreg?.captchaProvider === '2captcha' ||
+          settings.autoreg?.captchaProvider === 'capsolver') && (
+          <Row label={t.autoregCaptchaApiKey}>
+            <input
+              className="input"
+              type="password"
+              style={{ width: 220 }}
+              placeholder="API key капча-сервісу"
+              value={settings.autoreg?.captchaApiKey ?? ''}
+              onChange={(e) => void update({ autoreg: { ...settings.autoreg, captchaApiKey: e.target.value } })}
+            />
+          </Row>
+        )}
+        <Row label={t.autoregDelayMs} desc={t.autoregDelayMsDesc}>
+          <input
+            className="input tnum"
+            style={{ width: 100 }}
+            type="number"
+            min={0}
+            max={30000}
+            step={500}
+            placeholder="3000"
+            value={settings.autoreg?.delayMs ?? ''}
+            onChange={(e) =>
+              void update({ autoreg: { ...settings.autoreg, delayMs: Number(e.target.value) || undefined } })
+            }
+          />
+          <span className="muted text-sm">мс</span>
+        </Row>
+        <Row label={t.autoregChromiumMode} desc={t.autoregChromiumModeDesc}>
+          <Dropdown
+            trigger={
+              <button className="pill">
+                {settings.autoreg?.chromiumMode === 'bundled' ? t.autoregChromiumBundled : t.autoregChromiumDownload}
+              </button>
+            }
+            down
+            right
+            options={[
+              { value: 'download', label: t.autoregChromiumDownload },
+              { value: 'bundled', label: t.autoregChromiumBundled }
+            ]}
+            value={settings.autoreg?.chromiumMode ?? 'download'}
+            onSelect={(v) =>
+              void update({ autoreg: { ...settings.autoreg, chromiumMode: v as never } })
+            }
+          />
         </Row>
       </div>
 

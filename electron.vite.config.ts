@@ -5,6 +5,11 @@ import { resolve } from 'path'
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
+    build: {
+      rollupOptions: {
+        external: ['playwright', 'playwright-core', 'kerberos']
+      }
+    },
     resolve: {
       alias: {
         '@shared': resolve(__dirname, 'src/shared')
@@ -13,6 +18,11 @@ export default defineConfig({
   },
   preload: {
     plugins: [externalizeDepsPlugin()],
+    build: {
+      rollupOptions: {
+        external: ['playwright', 'playwright-core', 'kerberos']
+      }
+    },
     resolve: {
       alias: {
         '@shared': resolve(__dirname, 'src/shared')
