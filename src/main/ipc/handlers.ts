@@ -23,7 +23,9 @@ import { buildSubtitles, SubtitleError } from '../subtitles/srt'
 import { showCompletionNotification } from '../notify'
 import { ImapClient } from '../email/imapClient'
 import { PlaywrightRegistrar } from '../email/playwrightRegistrar'
+import { ClerkApiRegistrar } from '../email/clerkApiRegistrar'
 import { AutoregService } from '../email/autoregService'
+import { ProxyManager } from '../proxy/proxyManager'
 
 export interface Services {
   pool: KeyPool
@@ -33,7 +35,9 @@ export interface Services {
   ledger: UsageLedger
   client: CartesiaClient
   registrar: PlaywrightRegistrar
+  clerkApiRegistrar: ClerkApiRegistrar
   autoregService: AutoregService
+  proxyManager: ProxyManager
 }
 
 let settings: Settings
@@ -54,8 +58,11 @@ export function loadSettings(): Settings {
 }
 
 export function registerIpcHandlers(services: Services, getWindow: () => BrowserWindow | null): void {
-  const { pool, scheduler, chats, voices, ledger, client, registrar, autoregService } = services
+  const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager } = services
   loadSettings()
+  // Рушій реєстрації за settings.autoreg.engine (default 'playwright')
+  const activeRegistrar = () =>
+    settings.autoreg?.engine === 'clerk-api' ? clerkApiRegistrar : registrar
   scheduler.setGlobalCap(settings.globalConcurrencyCap)
 
   const broadcast = (event: MainEvent): void => {
@@ -341,6 +348,7 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
         captchaProvider?: 'manual' | '2captcha' | 'capsolver'
         captchaApiKey?: string
         delayMs?: number
+        concurrency?: number
       }
     ) => {
       const cfg = p.imapConfig ?? settings.imapConfig
@@ -352,13 +360,15 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
       }
       const win = getWindow()
       // Неблокуючий: запускаємо у фоні, одразу повертаємо ok
+      autoregService.setRegistrar(activeRegistrar())
       const opts = {
         count: p.count,
         catchAllDomain: p.catchAllDomain,
         imapConfig: cfg,
         captchaProvider: (p.captchaProvider ?? settings.autoreg?.captchaProvider ?? 'manual') as never,
         captchaApiKey: p.captchaApiKey ?? settings.autoreg?.captchaApiKey,
-        delayMs: p.delayMs ?? settings.autoreg?.delayMs
+        delayMs: p.delayMs ?? settings.autoreg?.delayMs,
+        concurrency: p.concurrency ?? settings.autoreg?.concurrency ?? 1
       }
       // Запускаємо без await — прогрес іде через MainEvent
       autoregService.run(opts, win).catch((err) => {
@@ -377,19 +387,20 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     const cfg = (p as { imapConfig: typeof settings.imapConfig }).imapConfig ?? settings.imapConfig
     if (!cfg || !cfg.host || !cfg.user || !cfg.pass) return { ok: false, error: 'IMAP не налаштовано' }
     const win = getWindow()
-    const items = await autoregService.run({ count: p.count, catchAllDomain: p.catchAllDomain, imapConfig: cfg }, win)
+    autoregService.setRegistrar(activeRegistrar())
+    const items = await autoregService.run({ count: p.count, catchAllDomain: p.catchAllDomain, imapConfig: cfg, concurrency: settings.autoreg?.concurrency ?? 1 }, win)
     const results = items.map((it) => ({ email: it.email, pass: it.pass, success: it.state === 'done' && !!it.key, key: it.key, error: it.error }))
     return { ok: true, results }
   })
 
   ipcMain.handle(IPC.AUTOREG_CONTINUE, () => {
     if (autoregService.isRunning()) autoregService.resumeCaptcha()
-    else registrar.resume()
+    else activeRegistrar().resume()
     return { ok: true }
   })
 
   ipcMain.handle(IPC.AUTOREG_CANCEL, () => {
-    registrar.cancelCaptcha()
+    activeRegistrar().cancelCaptcha()
     return { ok: true }
   })
 
@@ -471,6 +482,25 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     if (res.canceled || !res.filePath) return { path: null }
     writeFileSync(res.filePath, content, 'utf8')
     return { path: res.filePath }
+  })
+
+  // ---------- Проксі ----------
+  ipcMain.handle(IPC.PROXY_GRAB, async (_e, p: { url: string }) => {
+    const list = await proxyManager.fetchFromUrl(p.url)
+    proxyManager.addProxies(list)
+    return { grabbed: list.length, proxies: proxyManager.list() }
+  })
+
+  ipcMain.handle(IPC.PROXY_CHECK, async () => {
+    await proxyManager.checkAll()
+    return { proxies: proxyManager.list() }
+  })
+
+  ipcMain.handle(IPC.PROXY_LIST, () => proxyManager.list())
+
+  ipcMain.handle(IPC.PROXY_REMOVE, (_e, p: { url: string }) => {
+    proxyManager.remove(p.url)
+    return { proxies: proxyManager.list() }
   })
 
   // ---------- Debug (тільки dev / e2e) ----------

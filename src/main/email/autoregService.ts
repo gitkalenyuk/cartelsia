@@ -3,10 +3,23 @@ import { appendFileSync } from 'fs'
 import { join } from 'path'
 import { BrowserWindow } from 'electron'
 import { ImapClient } from './imapClient'
-import type { PlaywrightRegistrar, RegisterResult } from './playwrightRegistrar'
+import { ImapOtpPoller } from './imapOtpPoller'
+import type { RegisterResult } from './playwrightRegistrar'
+import type { CheckVerificationResult } from './imapClient'
 import type { KeyPool } from '../keys/keyPool'
 import type { ImapConfig, CaptchaProvider } from '../../shared/types'
 import { dataDir, outputDir } from '../paths'
+import {
+  clearState,
+  emptyState,
+  readState,
+  resumableItems,
+  summarize,
+  writeState,
+  type AutoregResumeItem,
+  type AutoregResumePhase,
+  type AutoregResumeState,
+} from './autoregState'
 
 export type AutoregState =
   | 'queued'
@@ -33,6 +46,7 @@ export interface AutoregOptions {
   imapConfig: ImapConfig
   captchaProvider?: CaptchaProvider
   captchaApiKey?: string
+  concurrency?: number // кількість паралельних потоків, 1 = підряд (default)
   delayMs?: number // пауза між акаунтами (ms), 0 = без паузи
   batchSize?: number // якщо задано — пачка з паузою, інакше всі підряд
 }
@@ -62,17 +76,42 @@ function appendAccountsLine(email: string, pass: string, key?: string, err?: str
   try { appendFileSync(join(outputDir(), 'accounts.txt'), line, 'utf8') } catch {}
 }
 
+/** Публічний інтерфейс рушія реєстрації (PlaywrightRegistrar і BrowserlessRegistrar структурно сумісні). */
+export interface RegistrarEngine {
+  registerOne(
+    email: string,
+    pass: string,
+    checkEmailFn: () => Promise<CheckVerificationResult>,
+    win: BrowserWindow | null,
+    timeoutMs?: number,
+    captchaTimeoutMs?: number
+  ): Promise<RegisterResult>
+  close(): Promise<void>
+  resume(): void
+  cancelCaptcha(): void
+  on(event: 'captcha', listener: (payload: { email: string; message: string }) => void): unknown
+  off(event: 'captcha', listener: (payload: { email: string; message: string }) => void): unknown
+}
+
 export class AutoregService extends EventEmitter {
   private items: AutoregItem[] = []
   private running = false
   private cancelled = false
   private currentIndex = -1
+  /** Персист resume-стану з run(); доступний для interrupt(). */
+  private persistTimer: NodeJS.Timeout | null = null
+  private flushPersist: (() => void) | null = null
 
   constructor(
-    private registrar: PlaywrightRegistrar,
+    private registrar: RegistrarEngine,
     private pool: KeyPool
   ) {
     super()
+  }
+
+  /** Гаряча заміна рушія (playwright / browserless) перед запуском. */
+  setRegistrar(r: RegistrarEngine): void {
+    this.registrar = r
   }
 
   isRunning(): boolean {
@@ -88,12 +127,38 @@ export class AutoregService extends EventEmitter {
     this.registrar.cancelCaptcha()
   }
 
+  /**
+   * Зовнішнє переривання (app quit / uncaughtException / unhandledRejection):
+   * in-flight items → 'failed' з причиною + синхронний persist без дебаусу —
+   * стан завжди resume-бельний, «заморожений form» не лишається.
+   * 'queued' лишається 'queued': resume=true продовжить з них без втрат.
+   */
+  interrupt(reason: string): void {
+    if (!this.running) return
+    const inFlight: AutoregState[] = ['form', 'waiting-mail', 'verifying', 'creating-key']
+    let changed = false
+    for (const it of this.items) {
+      if (inFlight.includes(it.state)) {
+        it.state = 'failed'
+        it.error = 'перервано: ' + reason
+        changed = true
+      }
+    }
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer)
+      this.persistTimer = null
+    }
+    if (changed) this.flushPersist?.()
+    this.running = false
+    console.log('[autoreg] interrupt("' + reason + '"): in-flight → failed, queued лишається для resume')
+  }
+
   resumeCaptcha(): void {
     this.registrar.resume()
   }
 
   /** Потоковий запуск: емітить 'progress' після кожної фази, 'done' в кінці. */
-  async run(opts: AutoregOptions, win: BrowserWindow | null): Promise<AutoregItem[]> {
+  async run(opts: AutoregOptions & { resume?: boolean }, win: BrowserWindow | null): Promise<AutoregItem[]> {
     if (this.running) throw new Error('Автореєстрація вже запущена')
     this.running = true
     this.cancelled = false
@@ -101,6 +166,8 @@ export class AutoregService extends EventEmitter {
 
     const captchaProvider = opts.captchaProvider ?? 'manual'
     const delayMs = opts.delayMs ?? 2500 + Math.floor(Math.random() * 3000)
+    // Спільний IMAP OTP-полер: одне з'єднання на всі потоки (Gmail чутливий до скупчення LOGIN)
+    const poller = new ImapOtpPoller(opts.imapConfig)
 
     // Префлайт IMAP
     const preflight = await ImapClient.testConnection(opts.imapConfig)
@@ -109,15 +176,68 @@ export class AutoregService extends EventEmitter {
       throw new Error(`IMAP не підключено: ${preflight.error || 'невідома помилка'}`)
     }
 
-    // Ініціалізуємо items
-    this.items = Array.from({ length: opts.count }, () => {
-      const email = genEmail(opts.catchAllDomain)
-      const pass = genPass()
-      return { id: crypto.randomUUID(), email, pass, state: 'queued' as AutoregState }
-    })
+    // Резюм: якщо data/autoreg-state.json існує з тим самим доменом — пропускаємо вже done акаунти
+    let resumeState: AutoregResumeState | null = null
+    if (opts.resume) {
+      const existing = readState(dataDir())
+      if (existing && existing.catchAllDomain === opts.catchAllDomain) {
+        const remain = resumableItems(existing)
+        if (remain.length > 0 || existing.items.length >= opts.count) {
+          console.log('[autoreg] resume: продовжуємо з ' + remain.length + ' залишку')
+          this.items = existing.items.map((it) => ({
+            id: crypto.randomUUID(),
+            email: it.email,
+            pass: it.pass,
+            state: (it.phase === 'done' ? 'done' : 'queued') as AutoregState,
+            key: it.key,
+            error: it.error ?? undefined,
+          }))
+          resumeState = existing
+        }
+      }
+    }
+
+    // Якщо резюму немає (або домен інший) — ініціалізуємо з нуля
+    if (!resumeState) {
+      this.items = Array.from({ length: opts.count }, () => {
+        const email = genEmail(opts.catchAllDomain)
+        const pass = genPass()
+        return { id: crypto.randomUUID(), email, pass, state: 'queued' as AutoregState }
+      })
+      writeState(dataDir(), emptyState(opts.catchAllDomain))
+    }
 
     const emitProgress = (): void => {
       this.emit('progress', { items: [...this.items], current: this.currentIndex, total: this.items.length })
+      // Персит state на диск після кожної зміни — щоб крах не втратив прогрес
+      persistResume()
+    }
+    this.persistTimer = null
+    this.flushPersist = (): void => {
+      const items: AutoregResumeItem[] = this.items.map((it) => ({
+        email: it.email,
+        pass: it.pass,
+        phase: (it.state === 'cancelled' ? 'queued' : it.state) as AutoregResumePhase,
+        key: it.key,
+        attempts: 0,
+        error: it.error ?? null,
+      }))
+      try {
+        writeState(dataDir(), {
+          ...emptyState(opts.catchAllDomain),
+          items,
+        })
+      } catch {
+        /* resume best-effort — не ламаємо основний flow */
+      }
+    }
+    const persistResume = (): void => {
+      // Дебаунс: пишемо не частіше ніж раз на 500мс
+      if (this.persistTimer) return
+      this.persistTimer = setTimeout(() => {
+        this.persistTimer = null
+        this.flushPersist?.()
+      }, 500)
     }
 
     // Проброс капчі назовні
@@ -132,14 +252,27 @@ export class AutoregService extends EventEmitter {
     }
     this.registrar.on('captcha', onCaptcha)
 
-    try {
-      for (let i = 0; i < this.items.length; i++) {
+    // Мультипотік: N воркерів тягнуть черговий queued-акаунт (concurrency=1 — те саме, що раніш серійно).
+    const workers = Math.max(1, Math.min(20, Math.floor(opts.concurrency ?? 1)))
+    if (workers > 1) console.log('[autoreg] concurrency=' + workers + ' потоків')
+    let next = 0
+    const workerLoop = async (): Promise<void> => {
+      while (true) {
         if (this.cancelled) {
-          for (let j = i; j < this.items.length; j++) {
-            if (this.items[j].state === 'queued') this.items[j].state = 'cancelled'
+          let marked = false
+          for (const it of this.items) {
+            if (it.state === 'queued') { it.state = 'cancelled'; marked = true }
           }
+          if (marked) emitProgress()
+          return
+        }
+        const i = next++
+        if (i >= this.items.length) return
+
+        // Резюм: done-акаунти не реєструємо повторно
+        if (this.items[i].state === 'done') {
           emitProgress()
-          break
+          continue
         }
 
         this.currentIndex = i
@@ -152,7 +285,7 @@ export class AutoregService extends EventEmitter {
           result = await this.registrar.registerOne(
             item.email,
             item.pass,
-            () => ImapClient.findVerificationLink(opts.imapConfig, item.email, Date.now() - 60_000),
+            () => poller.waitForVerification(item.email),
             win
           )
         } catch (err) {
@@ -185,16 +318,33 @@ export class AutoregService extends EventEmitter {
         this.emit('item-done', { item: { ...item }, index: i })
         emitProgress()
 
-        // Пауза між акаунтами (крім останнього)
-        if (i < this.items.length - 1 && !this.cancelled) {
+        // Пауза після акаунта (якщо залишилось і не скасовано) — розтягує старти потоків
+        if (next < this.items.length && !this.cancelled) {
           const pause = delayMs + Math.floor(Math.random() * 1000)
-          console.log(`[autoreg] пауза ${pause}мс перед наступним акаунтом`)
+          console.log(`[autoreg] пауза ${pause}мс (потік #${i + 1})`)
           await new Promise((r) => setTimeout(r, pause))
         }
       }
+    }
+    try {
+      await Promise.all(
+        Array.from({ length: Math.min(workers, this.items.length) }, () => workerLoop())
+      )
     } finally {
+      poller.close()
+      if (this.persistTimer) { clearTimeout(this.persistTimer); this.persistTimer = null }
+      // Фінальний синхронний запис: стан на диску навіть якщо процес вийде
+      // одразу після 'done'
+      this.flushPersist?.()
+      this.flushPersist = null
       this.registrar.off('captcha', onCaptcha)
       try { await this.registrar.close() } catch {}
+      // Якщо всі акаунти done — підчищаємо state (наступного разу йдемо з нуля).
+      // Інакше лишаємо файл — користувач зможе resume=true продовжити.
+      const allDone = this.items.length > 0 && this.items.every((it) => it.state === 'done')
+      if (allDone) {
+        try { clearState(dataDir()) } catch {}
+      }
       this.running = false
       this.emit('done', { items: [...this.items] })
     }

@@ -11,11 +11,25 @@ import { Scheduler } from './tts/scheduler'
 import { VoicesService } from './voices/voicesService'
 import { registerIpcHandlers } from './ipc/handlers'
 import { PlaywrightRegistrar } from './email/playwrightRegistrar'
+import { ClerkApiRegistrar } from './email/clerkApiRegistrar'
 import { AutoregService } from './email/autoregService'
+import { ProxyManager } from './proxy/proxyManager'
+import { setupMainLogging } from './logging'
 
 registerMediaScheme()
 
 let mainWindow: BrowserWindow | null = null
+let autoregRef: AutoregService | null = null
+
+// Інцидент 25.08.2026: один uncaughtException у main = мовчазний exit(1),
+// батч з 28 акаунтів замер назавжди, причини не було де шукати.
+// Тож ловимо обидва, логуємо (→ dataDir/main.log) і тримаємо процес живим.
+process.on('uncaughtException', (err): void => {
+  console.error('[main] uncaughtException (процес продовжує жити):', err)
+})
+process.on('unhandledRejection', (reason): void => {
+  console.error('[main] unhandledRejection (процес продовжує жити):', reason)
+})
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -69,6 +83,9 @@ if (!gotLock) {
   void app.whenReady().then(() => {
     app.setAppUserModelId('com.cartelsia.app')
 
+    // Файловий лог — першим: у production у console немає термінала
+    setupMainLogging(dataDir())
+
     // сервіси
     const client = new CartesiaClient()
     const ledger = new UsageLedger(dataDir())
@@ -77,11 +94,14 @@ if (!gotLock) {
     const scheduler = new Scheduler(pool, client, chats)
     const voices = new VoicesService(dataDir(), client, pool)
     const registrar = new PlaywrightRegistrar()
-    const autoregService = new AutoregService(registrar, pool)
+    const clerkApiRegistrar = new ClerkApiRegistrar()
+    const autoregService = new AutoregService(clerkApiRegistrar, pool)
+    const proxyManager = new ProxyManager()
+    autoregRef = autoregService
 
     handleMediaProtocol(voices)
     registerIpcHandlers(
-      { pool, scheduler, chats, voices, ledger, client, registrar, autoregService },
+      { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager },
       () => mainWindow
     )
     pool.startTicking()
@@ -96,6 +116,12 @@ if (!gotLock) {
   app.on('before-quit', () => flushAll())
 
   app.on('window-all-closed', () => {
+    // Батч посеред виконання — залишаємось у фоновому режимі, інакше
+    // стан залишиться замороженим (в той самий патерн, що вбив інцидент).
+    if (autoregRef?.isRunning()) {
+      console.log('[main] window-all-closed, але автозареєстрація активна — не виходжуємо')
+      return
+    }
     if (process.platform !== 'darwin') app.quit()
   })
 }

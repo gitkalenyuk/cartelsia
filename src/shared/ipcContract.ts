@@ -53,6 +53,11 @@ export const IPC = {
   AUTOREG_CANCEL: 'autoreg:cancel',
   AUTOREG_STATUS: 'autoreg:status',
   AUTOREG_STOP: 'autoreg:stop',
+  // proxy
+  PROXY_GRAB: 'proxy:grab',
+  PROXY_CHECK: 'proxy:check',
+  PROXY_LIST: 'proxy:list',
+  PROXY_REMOVE: 'proxy:remove',
   // debug (тільки dev)
   DEBUG_SET_KEY_USAGE: 'debug:setKeyUsage',
   // події

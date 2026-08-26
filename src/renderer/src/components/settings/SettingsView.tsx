@@ -307,6 +307,48 @@ export function SettingsView(): React.JSX.Element {
 
       <div className="settings-section">
         <div className="settings-section__title">{t.sectionAutoregOptions}</div>
+        <Row label={t.autoregEngine} desc={t.autoregEngineDesc}>
+          <Dropdown
+            trigger={
+              <button className="pill">
+                {settings.autoreg?.engine === 'browserless'
+                  ? t.autoregEngineBrowserless
+                  : t.autoregEnginePlaywright}
+              </button>
+            }
+            down
+            right
+            options={[
+              { value: 'playwright', label: t.autoregEnginePlaywright },
+              { value: 'browserless', label: t.autoregEngineBrowserless }
+            ]}
+            value={settings.autoreg?.engine ?? 'playwright'}
+            onSelect={(v) =>
+              void update({ autoreg: { ...settings.autoreg, engine: v as never } })
+            }
+          />
+        </Row>
+        <Row label={t.autoregThreads} desc={t.autoregThreadsDesc}>
+          <input
+            className="input tnum"
+            style={{ width: 80 }}
+            type="number"
+            min={1}
+            max={20}
+            step={1}
+            placeholder="1"
+            value={settings.autoreg?.concurrency ?? ''}
+            onChange={(e) =>
+              void update({
+                autoreg: {
+                  ...settings.autoreg,
+                  concurrency: Math.max(1, Math.min(20, Number(e.target.value))) || undefined
+                }
+              })
+            }
+          />
+          <span className="muted text-sm">{t.autoregThreadsUnit}</span>
+        </Row>
         <Row label={t.autoregCaptchaProvider} desc={t.autoregCaptchaProviderDesc}>
           <Dropdown
             trigger={

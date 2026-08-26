@@ -142,7 +142,7 @@ const api = {
       count: number,
       catchAllDomain: string,
       imapConfig: Settings['imapConfig'],
-      opts?: { captchaProvider?: string; captchaApiKey?: string; delayMs?: number }
+      opts?: { captchaProvider?: string; captchaApiKey?: string; delayMs?: number; concurrency?: number }
     ): Promise<{
       ok: boolean
       error?: string

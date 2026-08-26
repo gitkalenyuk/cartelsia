@@ -62,8 +62,10 @@ export function BrowserView(): React.JSX.Element {
 
     const off = window.cartelsia.onEvent((event) => {
       if (event.type === 'autoreg-progress') {
-        setItems(event.items as AutoregItem[])
-        setCurrent(event.current)
+        const arr = event.items as AutoregItem[]
+        setItems(arr)
+        // В паралельному режимі current = «останній старт» не має сенсу — показуємо завершених
+        setCurrent(arr.filter((x) => x.state === 'done' || x.state === 'failed' || x.state === 'cancelled').length)
         setTotal(event.total)
         setRunning(true)
       } else if (event.type === 'autoreg-item-done') {
@@ -114,12 +116,13 @@ export function BrowserView(): React.JSX.Element {
     const delayMs = settings.autoreg?.delayMs ?? undefined
     const captchaProvider = (settings.autoreg?.captchaProvider ?? 'manual') as never
     const captchaApiKey = settings.autoreg?.captchaApiKey
+    const concurrency = Math.max(1, Math.min(20, settings.autoreg?.concurrency ?? 1))
 
     const res = await window.cartelsia.email.runAutoReg(
       target,
       settings.catchAllDomain,
       settings.imapConfig,
-      { captchaProvider, captchaApiKey, delayMs }
+      { captchaProvider, captchaApiKey, delayMs, concurrency }
     )
     if (!res.ok) {
       setRunning(false)
@@ -221,6 +224,12 @@ export function BrowserView(): React.JSX.Element {
           </span>
           {settings?.autoreg?.captchaProvider && settings.autoreg.captchaProvider !== 'manual' && (
             <> · <strong>Captcha:</strong> <span className="mono">{settings.autoreg.captchaProvider}</span></>
+          )}
+          {settings?.autoreg?.engine === 'browserless' && (
+            <> · <strong>Engine:</strong> <span className="mono">browserless</span></>
+          )}
+          {(settings?.autoreg?.concurrency ?? 1) > 1 && (
+            <> · <strong>Threads:</strong> <span className="mono">{settings?.autoreg?.concurrency}</span></>
           )}
         </div>
 

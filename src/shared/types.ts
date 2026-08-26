@@ -221,12 +221,21 @@ export interface ImapConfig {
 
 export type CaptchaProvider = 'manual' | '2captcha' | 'capsolver'
 
+export type AutoregEngine = 'playwright' | 'browserless' | 'clerk-api'
+
 export interface AutoregSettings {
+  engine?: AutoregEngine // default 'playwright'; browserless — fetch-цикл без UI
+  concurrency?: number // одночасних потоків, 1 = підряд (default), max 20
   captchaProvider?: CaptchaProvider // default 'manual'
   captchaApiKey?: string
   delayMs?: number // пауза між акаунтами (мс), default ~2500-5500
   batchSize?: number // розмір пачки, undefined = без пачок
   chromiumMode?: 'bundled' | 'download' // bundled=все в .exe, download=докачка при першому запуску
+}
+
+export interface ProxySettings {
+  grabUrl?: string
+  proxies?: string[]
 }
 
 export interface Settings {
@@ -238,6 +247,7 @@ export interface Settings {
   catchAllDomain?: string
   imapConfig?: ImapConfig
   autoreg?: AutoregSettings
+  proxy?: ProxySettings
 }
 
 export interface AppPaths {
