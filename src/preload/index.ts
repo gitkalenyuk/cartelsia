@@ -159,6 +159,16 @@ const api = {
     runAutoRegCancel: (): Promise<{ ok: boolean }> =>
       ipcRenderer.invoke(IPC.AUTOREG_CANCEL)
   },
+  proxy: {
+    grab: (url: string): Promise<{ grabbed: number; proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_GRAB, { url }),
+    check: (): Promise<{ proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_CHECK),
+    list: (): Promise<any[]> =>
+      ipcRenderer.invoke(IPC.PROXY_LIST),
+    remove: (url: string): Promise<{ proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_REMOVE, { url })
+  },
   paths: {
     get: (): Promise<AppPaths> => ipcRenderer.invoke(IPC.PATHS_GET)
   },

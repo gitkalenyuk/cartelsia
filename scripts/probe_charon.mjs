@@ -1,0 +1,7 @@
+const res = await fetch('https://charon.protect.clerk.com/ins_2dkzDoDZRl1ShmWomHR110Rr5EY/proof-of-transfer/v1.js',{headers:{'User-Agent':'Mozilla/5.0'}})
+const b = await res.text()
+console.log('status='+res.status, 'LEN='+b.length)
+const fs = await import('fs')
+fs.writeFileSync('C:/Users/J0hnD03/AppData/Local/Temp/charon_v1.js', b)
+console.log('HEAD:')
+console.log(b.slice(0, 4000))

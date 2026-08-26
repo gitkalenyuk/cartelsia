@@ -233,7 +233,19 @@ export interface AutoregSettings {
   chromiumMode?: 'bundled' | 'download' // bundled=все в .exe, download=докачка при першому запуску
 }
 
+export interface ProxyEntry {
+  url: string
+  status: 'unchecked' | 'working' | 'dead'
+  lastChecked?: string
+  latencyMs?: number
+}
+
 export interface ProxySettings {
+  grabUrl?: string
+  proxies?: string[]
+}
+
+export interface Settings {
   grabUrl?: string
   proxies?: string[]
 }

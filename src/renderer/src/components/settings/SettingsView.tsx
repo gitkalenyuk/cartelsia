@@ -26,6 +26,8 @@ export function SettingsView(): React.JSX.Element {
   const paths = useSettingsStore((s) => s.paths)
   const update = useSettingsStore((s) => s.update)
   const [testingImap, setTestingImap] = useState(false)
+  const [grabbing, setGrabbing] = useState(false)
+  const [proxyList, setProxyList] = useState<{ url: string; status: string; latencyMs?: number }[]>([])
 
   if (!settings)
     return (
@@ -318,10 +320,7 @@ export function SettingsView(): React.JSX.Element {
             }
             down
             right
-            options={[
-              { value: 'playwright', label: t.autoregEnginePlaywright },
-              { value: 'browserless', label: t.autoregEngineBrowserless }
-            ]}
+            options={[{ value: 'playwright', label: t.autoregEnginePlaywright },{ value: 'browserless', label: t.autoregEngineBrowserless },{ value: 'clerk-api', label: 'Clerk API (fast)' }]}
             value={settings.autoreg?.engine ?? 'playwright'}
             onSelect={(v) =>
               void update({ autoreg: { ...settings.autoreg, engine: v as never } })
