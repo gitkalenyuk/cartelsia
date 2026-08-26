@@ -52,6 +52,29 @@ export function SettingsView(): React.JSX.Element {
     }
   }
 
+  const handleGrabProxies = async (): Promise<void> => {
+    const url = settings.proxy?.grabUrl
+    if (!url) { toast('info', 'Спочатку вкажіть URL для грабінга проксі'); return }
+    setGrabbing(true)
+    try {
+      const res = await window.cartelsia.proxy.grab(url)
+      toast('success', 'Зграблено ' + res.grabbed + ' проксі')
+      const checkRes = await window.cartelsia.proxy.check()
+      setProxyList(checkRes.proxies.map((p: any) => ({ url: p.url, status: p.status, latencyMs: p.latencyMs })))
+      const working = checkRes.proxies.filter((p: any) => p.status === 'working').length
+      toast('success', 'Працюють: ' + working + '/' + checkRes.proxies.length)
+    } catch (err) {
+      toast('danger', err instanceof Error ? err.message : String(err))
+    } finally {
+      setGrabbing(false)
+    }
+  }
+
+  const handleRemoveProxy = async (url: string): Promise<void> => {
+    const res = await window.cartelsia.proxy.remove(url)
+    setProxyList(res.proxies.map((p: any) => ({ url: p.url, status: p.status, latencyMs: p.latencyMs })))
+  }
+
   const d = settings.defaults
   const formatLabel =
     d.output.container === 'wav'
@@ -310,22 +333,7 @@ export function SettingsView(): React.JSX.Element {
       <div className="settings-section">
         <div className="settings-section__title">{t.sectionAutoregOptions}</div>
         <Row label={t.autoregEngine} desc={t.autoregEngineDesc}>
-          <Dropdown
-            trigger={
-              <button className="pill">
-                {settings.autoreg?.engine === 'browserless'
-                  ? t.autoregEngineBrowserless
-                  : t.autoregEnginePlaywright}
-              </button>
-            }
-            down
-            right
-            options={[{ value: 'playwright', label: t.autoregEnginePlaywright },{ value: 'browserless', label: t.autoregEngineBrowserless },{ value: 'clerk-api', label: 'Clerk API (fast)' }]}
-            value={settings.autoreg?.engine ?? 'playwright'}
-            onSelect={(v) =>
-              void update({ autoreg: { ...settings.autoreg, engine: v as never } })
-            }
-          />
+          <button className="pill" disabled style={{ opacity: 0.7 }}>Clerk API (fast)</button>
         </Row>
         <Row label={t.autoregThreads} desc={t.autoregThreadsDesc}>
           <input
@@ -348,43 +356,6 @@ export function SettingsView(): React.JSX.Element {
           />
           <span className="muted text-sm">{t.autoregThreadsUnit}</span>
         </Row>
-        <Row label={t.autoregCaptchaProvider} desc={t.autoregCaptchaProviderDesc}>
-          <Dropdown
-            trigger={
-              <button className="pill">
-                {settings.autoreg?.captchaProvider === '2captcha'
-                  ? '2captcha'
-                  : settings.autoreg?.captchaProvider === 'capsolver'
-                    ? 'CapSolver'
-                    : 'Ручна'}
-              </button>
-            }
-            down
-            right
-            options={[
-              { value: 'manual', label: 'Ручна (Chromium + Готово)' },
-              { value: '2captcha', label: '2captcha (авто)' },
-              { value: 'capsolver', label: 'CapSolver (авто)' }
-            ]}
-            value={settings.autoreg?.captchaProvider ?? 'manual'}
-            onSelect={(v) =>
-              void update({ autoreg: { ...settings.autoreg, captchaProvider: v as never } })
-            }
-          />
-        </Row>
-        {(settings.autoreg?.captchaProvider === '2captcha' ||
-          settings.autoreg?.captchaProvider === 'capsolver') && (
-          <Row label={t.autoregCaptchaApiKey}>
-            <input
-              className="input"
-              type="password"
-              style={{ width: 220 }}
-              placeholder="API key капча-сервісу"
-              value={settings.autoreg?.captchaApiKey ?? ''}
-              onChange={(e) => void update({ autoreg: { ...settings.autoreg, captchaApiKey: e.target.value } })}
-            />
-          </Row>
-        )}
         <Row label={t.autoregDelayMs} desc={t.autoregDelayMsDesc}>
           <input
             className="input tnum"
@@ -401,25 +372,47 @@ export function SettingsView(): React.JSX.Element {
           />
           <span className="muted text-sm">мс</span>
         </Row>
-        <Row label={t.autoregChromiumMode} desc={t.autoregChromiumModeDesc}>
-          <Dropdown
-            trigger={
-              <button className="pill">
-                {settings.autoreg?.chromiumMode === 'bundled' ? t.autoregChromiumBundled : t.autoregChromiumDownload}
-              </button>
-            }
-            down
-            right
-            options={[
-              { value: 'download', label: t.autoregChromiumDownload },
-              { value: 'bundled', label: t.autoregChromiumBundled }
-            ]}
-            value={settings.autoreg?.chromiumMode ?? 'download'}
-            onSelect={(v) =>
-              void update({ autoreg: { ...settings.autoreg, chromiumMode: v as never } })
-            }
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section__title">Проксі</div>
+        <Row label="URL для грабінга" desc="Посилання на сторінку зі списком проксі (plain text / html)">
+          <input
+            className="input"
+            style={{ width: 280 }}
+            placeholder="https://example.com/proxy-list"
+            value={settings.proxy?.grabUrl ?? ''}
+            onChange={(e) => void update({ proxy: { ...settings.proxy, grabUrl: e.target.value.trim() } })}
           />
         </Row>
+        <Row label="">
+          <button
+            className="btn btn--primary btn--sm"
+            onClick={() => void handleGrabProxies()}
+            disabled={grabbing}
+          >
+            {grabbing ? 'Граблю…' : 'Grab + Check'}
+          </button>
+        </Row>
+        {proxyList.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            <table className="table">
+              <thead>
+                <tr><th>URL</th><th>Статус</th><th>Lat</th><th></th></tr>
+              </thead>
+              <tbody>
+                {proxyList.map((p) => (
+                  <tr key={p.url}>
+                    <td className="mono text-sm" style={{ fontSize: 11, maxWidth: 240, overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.url}</td>
+                    <td><span className={'badge ' + (p.status === 'working' ? 'badge--success' : p.status === 'dead' ? 'badge--danger' : 'badge--neutral')}>{p.status}</span></td>
+                    <td className="text-sm muted">{p.latencyMs ? p.latencyMs + 'мс' : '—'}</td>
+                    <td><button className="iconbtn" onClick={() => void handleRemoveProxy(p.url)} title="Видалити">✕</button></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       <div className="settings-section">
