@@ -6,6 +6,7 @@ import {
   useChatsStore,
   useKeysStore,
   useSettingsStore,
+  useSharedVoicesStore,
   useVoicesLocalStore
 } from './stores/appStore'
 import '@fontsource/inter/400.css'
@@ -22,6 +23,7 @@ void useSettingsStore.getState().load()
 void useKeysStore.getState().load()
 void useChatsStore.getState().loadList()
 void useVoicesLocalStore.getState().load()
+void useSharedVoicesStore.getState().load()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

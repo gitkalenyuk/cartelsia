@@ -10,6 +10,8 @@ import { ChatStore } from './persistence/chatStore'
 import { Scheduler } from './tts/scheduler'
 import { VoicesService } from './voices/voicesService'
 import { MasterVoiceService } from './voices/masterVoiceService'
+import { SharedVoiceRegistry } from './voices/sharedVoiceRegistry'
+import { TtsCache } from './tts/ttsCache'
 import { registerIpcHandlers } from './ipc/handlers'
 import { PlaywrightRegistrar } from './email/playwrightRegistrar'
 import { ClerkApiRegistrar } from './email/clerkApiRegistrar'
@@ -109,7 +111,13 @@ if (!gotLock) {
     const ledger = new UsageLedger(dataDir())
     const pool = new KeyPool(dataDir(), client, ledger)
     const chats = new ChatStore()
-    const scheduler = new Scheduler(pool, client, chats)
+    // спільні голоси (2.1): реєстр має бути готовий ДО scheduler'а (пребатч-гейт ревокації)
+    const sharedRegistry = new SharedVoiceRegistry(dataDir(), client, () => {
+      const pick = pool.listPublic().find((k) => k.status === 'active' && k.role !== 'clone')
+      return pick ? pool.getRaw(pick.id)?.key : undefined
+    })
+    const ttsCache = new TtsCache(join(dataDir(), 'tts-cache'))
+    const scheduler = new Scheduler(pool, client, chats, sharedRegistry, ttsCache)
     const voices = new VoicesService(dataDir(), client, pool)
     // мастер-клонування (2.0.1): геттер settings прийде з handlers через SERVICES-розширення
     const masterVoices = new MasterVoiceService(
@@ -125,7 +133,7 @@ if (!gotLock) {
 
     handleMediaProtocol(voices)
     registerIpcHandlers(
-      { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices },
+      { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices, sharedRegistry },
       () => mainWindow
     )
     pool.startTicking()

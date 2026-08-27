@@ -12,6 +12,8 @@ import {
 import type { CartesiaClient } from '../cartesia/client'
 import type { KeyPool } from '../keys/keyPool'
 import type { ChatStore } from '../persistence/chatStore'
+import type { SharedVoiceRegistry } from '../voices/sharedVoiceRegistry'
+import type { TtsCache } from './ttsCache'
 import { CartesiaError } from '../cartesia/errors'
 import { pcmDurationSec, wrapWav } from '../audio/wav'
 
@@ -42,7 +44,11 @@ export class Scheduler extends EventEmitter {
   constructor(
     private pool: KeyPool,
     private client: CartesiaClient,
-    private store: ChatStore
+    private store: ChatStore,
+    /** 2.1: реєстр спільних голосів для пребатч-гейта ревокації (опційно) */
+    private sharedRegistry?: SharedVoiceRegistry,
+    /** 2.1: кеш TTS — повторна генерація того самого тексту не б'є по API */
+    private ttsCache?: TtsCache
   ) {
     super()
     this.pool.on('keys-available', () => {
@@ -85,6 +91,48 @@ export class Scheduler extends EventEmitter {
   }
 
   start(chat: Chat): void {
+    // 2.1: пребатч-гейт — спільний голос відкликано? → ABORT із чітким повідомленням.
+    // Ніколи не підмінюємо голос: відео з чужим голосом гірше за впалий рендер.
+    if (this.sharedRegistry && chat.settings.sharedVoiceAlias) {
+      void this.sharedRegistry
+        .verifyForChat([chat.settings.sharedVoiceAlias])
+        .then(({ revoked }) => {
+          if (!revoked.length) {
+            this.beginJob(chat)
+            return
+          }
+          const r = revoked[0]
+          chat.status = 'cancelled'
+          for (const c of chat.chunks) {
+            if (c.status === 'pending' || c.status === 'waiting-key') {
+              c.status = 'failed'
+              c.lastError = {
+                message: `Спільний голос «${r.alias}» недоступний: ${r.detail ?? 'відкликаний власником'}`
+              }
+            }
+          }
+          this.store.save(chat, true)
+          this.emitEvent({ type: 'shared-voice-revoked', alias: r.alias, chatId: chat.id })
+          this.emitEvent({
+            type: 'queue-state',
+            snapshot: {
+              chatId: chat.id,
+              state: 'done',
+              total: chat.chunks.length,
+              done: 0,
+              failed: chat.chunks.length,
+              charsUsed: 0,
+              charsTotal: chat.chunks.reduce((s, c) => s + c.text.length, 0)
+            }
+          })
+        })
+        .catch(() => this.beginJob(chat)) // мережева помилка перевірки не блокує запуск
+      return
+    }
+    this.beginJob(chat)
+  }
+
+  private beginJob(chat: Chat): void {
     let job = this.jobs.get(chat.id)
     if (!job) {
       job = { chat, state: 'running', runtime: new Map(), charsUsed: 0 }
@@ -305,6 +353,47 @@ export class Scheduler extends EventEmitter {
       let durationSec: number | undefined
       let timestamps: Chunk['versions'][number]['timestamps']
 
+      // 2.1: кеш TTS — хіт повертаємо без API і без списання кредитів.
+      // Субтитр-режим не кешуємо: там потрібні свіжі word timestamps.
+      const cacheable = !settings.subtitleMode && !!this.ttsCache
+      if (cacheable) {
+        const hit = this.ttsCache!.get(settings.voiceId, settings.modelId, settings.language, chunk.text)
+        if (hit) {
+          audio = hit
+          format = 'wav'
+          durationSec = pcmDurationSec(Math.max(0, hit.length - 44), {
+            sampleRate: 44100,
+            channels: 1,
+            bitsPerSample: 16
+          })
+          const version: Omit<ChunkVersion, 'file'> = {
+            id: crypto.randomUUID(),
+            createdAt: new Date().toISOString(),
+            keyId,
+            keyLabel: `${rawKey.label} · кеш`,
+            settings: {
+              modelId: settings.modelId,
+              voiceId: settings.voiceId,
+              voiceName: settings.voiceName,
+              language: settings.language,
+              speed: settings.speed,
+              volume: settings.volume,
+              emotion: settings.emotion,
+              subtitleMode: settings.subtitleMode
+            },
+            textSnapshot: chunk.text,
+            format,
+            durationSec
+          }
+          this.store.addVersion(job.chat, chunk, audio, version)
+          chunk.status = 'done'
+          chunk.runningKeyLabel = undefined
+          chunk.lastError = undefined
+          this.notifyChunk(job, chunk)
+          return // слот звільнить finally
+        }
+      }
+
       if (settings.subtitleMode) {
         const res = await this.client.ttsSseWithTimestamps(rawKey.key, chunk.text, settings)
         const wavOpts = { sampleRate: res.sampleRate, channels: 1, bitsPerSample: 16 as const }
@@ -349,6 +438,10 @@ export class Scheduler extends EventEmitter {
         timestamps
       }
       this.store.addVersion(job.chat, chunk, audio, version)
+      // 2.1: успішну генерацію кладемо в кеш (субтитр-режим не кешується)
+      if (!settings.subtitleMode && this.ttsCache) {
+        this.ttsCache.put(settings.voiceId, settings.modelId, settings.language, chunk.text, audio)
+      }
       this.pool.recordUsage(keyId, cost, { chatId: job.chat.id, chunkId: chunk.id })
       job.charsUsed += cost
       chunk.status = 'done'

@@ -1,20 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   AudioLines,
+  Check,
   Crown,
   Globe,
   KeyRound,
+  Link2,
   Mic,
   Pause,
   Play,
   Plus,
   RefreshCcw,
+  Share2,
   Trash2,
   Upload
 } from 'lucide-react'
 import { SUPPORTED_LANGUAGES } from '@shared/types'
+import type { SharedVoiceEntry } from '@shared/types'
 import { t, langLabel } from '../../i18n/uk'
-import { toast, useKeysStore, useSettingsStore, useVoicesLocalStore } from '../../stores/appStore'
+import { toast, useKeysStore, useSettingsStore, useSharedVoicesStore, useVoicesLocalStore } from '../../stores/appStore'
 import { useSamplePlayer } from '../../audio/samplePlayer'
 import { startRecording, type RecorderHandle } from '../../audio/recorder'
 import {
@@ -90,6 +94,9 @@ export function CloneVoiceView(): React.JSX.Element {
   return (
     <div>
       <h1 className="view-title">{t.cloneTabTitle}</h1>
+
+      {/* Спільні голоси (2.1): будь-який voice_id з увімкненим Share */}
+      <SharedVoicesSection />
 
       {/* Master-клонування (Pro-акаунт) */}
       <MasterCloneSection />
@@ -267,6 +274,191 @@ export function CloneVoiceView(): React.JSX.Element {
           void window.cartelsia.keys.remove(id).then(() => {
             void useKeysStore.getState().load()
             toast('info', t.keyDeleted)
+          })
+        }}
+      />
+    </div>
+  )
+}
+
+// ---------- Спільні голоси (2.1): голос за ID = доступний усім ключами ----------
+
+function SharedVoicesSection(): React.JSX.Element {
+  const shared = useSharedVoicesStore((s) => s.entries)
+  const [voiceId, setVoiceId] = useState('')
+  const [alias, setAlias] = useState('')
+  const [adding, setAdding] = useState(false)
+  const [checking, setChecking] = useState(false)
+  const [deleteAlias, setDeleteAlias] = useState<string | null>(null)
+  const playingVoiceId = useSamplePlayer((s) => s.playingVoiceId)
+  const loadingVoiceId = useSamplePlayer((s) => s.loadingVoiceId)
+
+  const add = async (): Promise<void> => {
+    if (!voiceId.trim() || !alias.trim()) return
+    setAdding(true)
+    try {
+      const res = await window.cartelsia.shared.add(voiceId.trim(), alias.trim())
+      if (res.error) {
+        toast('danger', res.error)
+        return
+      }
+      if (res.entry) {
+        toast('success', t.sharedAdded(res.entry.alias, res.entry.remoteName))
+        setVoiceId('')
+        setAlias('')
+        await useSharedVoicesStore.getState().load()
+      }
+    } catch (err) {
+      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const checkAll = async (): Promise<void> => {
+    setChecking(true)
+    try {
+      const results = await window.cartelsia.shared.check()
+      await useSharedVoicesStore.getState().load()
+      const revokedNow = results.filter((r) => r.status === 'revoked')
+      if (revokedNow.length) {
+        for (const r of revokedNow) toast('danger', t.sharedRevoked(r.alias))
+      } else {
+        toast('success', t.sharedCheckOk(results.length))
+      }
+    } catch (err) {
+      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setChecking(false)
+    }
+  }
+
+  const useSharedVoice = (entry: SharedVoiceEntry): void => {
+    void useSettingsStore.getState().update({
+      defaults: {
+        ...useSettingsStore.getState().settings!.defaults,
+        voiceId: entry.voiceId,
+        voiceName: entry.remoteName,
+        sharedVoiceAlias: entry.alias
+      }
+    })
+    toast('success', `${t.defaultVoice}: ${entry.remoteName}`)
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 16, borderColor: 'var(--accent-border)' }}>
+      <div className="row" style={{ marginBottom: 10 }}>
+        <div className="settings-section__title" style={{ margin: 0 }}>
+          <Share2 size={14} style={{ verticalAlign: -2, marginRight: 6, color: 'var(--accent)' }} />
+          {t.sharedTitle}
+          <Hint text={t.sharedHint} />
+        </div>
+        <span className="grow" />
+        <Button icon={checking ? undefined : <RefreshCcw size={14} />} loading={checking} disabled={!shared.length} onClick={() => void checkAll()}>
+          {t.sharedCheck}
+        </Button>
+      </div>
+
+      <div className="muted text-sm" style={{ marginBottom: 12 }} data-selectable>
+        {t.sharedIntro}
+      </div>
+
+      <div className="row">
+        <input
+          className="input mono grow"
+          style={{ minWidth: 220 }}
+          placeholder="afe1bd4e-954e-48cc-8225-22c0… (Voice ID)"
+          value={voiceId}
+          onChange={(e) => setVoiceId(e.target.value)}
+          data-testid="shared-voice-id"
+        />
+        <input
+          className="input"
+          style={{ width: 170 }}
+          placeholder={t.sharedAliasPlaceholder}
+          value={alias}
+          onChange={(e) => setAlias(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && void add()}
+          data-testid="shared-alias"
+        />
+        <Button variant="primary" icon={<Plus size={14} />} loading={adding} disabled={!voiceId.trim() || !alias.trim()} onClick={() => void add()} testId="shared-add">
+          {t.sharedAdd}
+        </Button>
+      </div>
+
+      {shared.length ? (
+        <table className="table" style={{ marginTop: 12 }}>
+          <thead>
+            <tr>
+              <th>{t.sharedColAlias}</th>
+              <th>{t.sharedColName}</th>
+              <th>{t.language}</th>
+              <th>{t.sharedColStatus}</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {shared.map((s) => (
+              <tr key={s.alias}>
+                <td className="mono text-sm">{s.alias}</td>
+                <td className="text-sm">{s.remoteName}{s.isPro ? ' 👑' : ''}</td>
+                <td className="text-sm">{langLabel(s.language)}</td>
+                <td>
+                  <Badge tone={s.status === 'ok' ? 'success' : s.status === 'revoked' ? 'danger' : 'warning'} dot>
+                    {s.status === 'ok' ? t.sharedStatusOk : s.status === 'revoked' ? t.sharedStatusRevoked : t.sharedStatusUnreachable}
+                  </Badge>
+                  {!s.isOwner ? (
+                    <span style={{ marginLeft: 6, display: 'inline-block' }}>
+                      <Badge tone="neutral">{t.sharedExternal}</Badge>
+                    </span>
+                  ) : null}
+                </td>
+                <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  <button
+                    className={`playbtn playbtn--sm playbtn--ghost`}
+                    title={t.listen}
+                    onClick={() => void useSamplePlayer.getState().toggle({ id: s.voiceId }, s.language)}
+                  >
+                    {loadingVoiceId === s.voiceId ? (
+                      <span className="spinner" style={{ width: 11, height: 11 }} />
+                    ) : playingVoiceId === s.voiceId ? (
+                      <Pause size={13} />
+                    ) : (
+                      <Play size={13} style={{ marginLeft: 1 }} />
+                    )}
+                  </button>
+                  <span style={{ marginLeft: 6, display: 'inline-block' }}>
+                    <Button size="sm" variant="secondary" onClick={() => useSharedVoice(s)}>
+                      {t.useVoice}
+                    </Button>
+                  </span>
+                  <button className="iconbtn is-danger" title={t.delete} style={{ marginLeft: 6 }} onClick={() => setDeleteAlias(s.alias)}>
+                    <Trash2 size={14} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <div className="muted text-sm" style={{ marginTop: 10 }}>
+          {t.sharedEmpty}
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!deleteAlias}
+        title={t.sharedRemoveTitle}
+        body={<span>{t.sharedRemoveBody(deleteAlias ?? '')}</span>}
+        confirmLabel={t.delete}
+        danger
+        onCancel={() => setDeleteAlias(null)}
+        onConfirm={() => {
+          const al = deleteAlias!
+          setDeleteAlias(null)
+          void window.cartelsia.shared.remove(al).then(() => {
+            void useSharedVoicesStore.getState().load()
+            toast('info', t.sharedRemoved(al))
           })
         }}
       />

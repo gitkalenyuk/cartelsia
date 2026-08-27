@@ -122,7 +122,14 @@ export function Composer(): React.JSX.Element {
           valueName={effective.voiceName}
           filterLanguage={effective.language}
           onChange={(v) =>
-            setGen((g) => ({ ...g, voiceId: v.id, voiceName: v.name, voiceOwningKeyId: v.owningKeyId }))
+            setGen((g) => ({
+              ...g,
+              voiceId: v.id,
+              voiceName: v.name,
+              voiceOwningKeyId: v.owningKeyId,
+              // 2.1: спільний голос → пребатч-гейт ревокації в scheduler'і
+              sharedVoiceAlias: v.sharedVoiceAlias
+            }))
           }
         />
         <Dropdown

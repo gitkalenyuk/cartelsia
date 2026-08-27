@@ -43,6 +43,11 @@ export const IPC = {
   MASTER_CLONE: 'master:clone',
   MASTER_TOGGLE_PUBLIC: 'master:togglePublic',
   MASTER_LIST: 'master:list',
+  // спільні голоси (2.1)
+  SHARED_LIST: 'shared:list',
+  SHARED_ADD: 'shared:add',
+  SHARED_REMOVE: 'shared:remove',
+  SHARED_CHECK: 'shared:check',
   // налаштування / статистика / субтитри
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',

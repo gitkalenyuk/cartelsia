@@ -43,6 +43,7 @@
       <div class="cardx"><div class="ic">🛟</div><h3>Rescue-прохід</h3><p>Акаунти «без ключа» автоматично проходять повторний /keys через збережену сесію. Жоден акк не втрачається.</p></div>
       <div class="cardx"><div class="ic">🌐</div><h3>Проксі з розумом</h3><p>Імпорт ip:port:user:pass, перевірка, ротація. Проксі, що дала 2 фейли підряд, видаляється сама.</p></div>
       <div class="cardx"><div class="ic">👑</div><h3>Master-клонування <span style="color:var(--accent);font-size:12px">2.0.1</span></h3><p>Pro-акаунт ($5/міс) стає фабрикою голосів: клон по API з будь-якого кліпу ≤10 с, авто-публікація — і клон озвучується всім пулом безкоштовних ключів.</p></div>
+      <div class="cardx"><div class="ic">🌐</div><h3>Спільні голоси + кеш <span style="color:var(--accent);font-size:12px">2.1.0</span></h3><p>Додайте будь-який публічний голос за Voice ID — озвучуйте ним усім пулом free-ключів. Кредити списуються з вашого ключа, не власника. Кеш TTS: повтори безкоштовні.</p></div>
       <div class="cardx"><div class="ic">🎨</div><h3>Редизайн 2.0</h3><p>Inter + JetBrains Mono, градієнти, анімації, живий лог кожної реєстрації, тултіпи ? на всіх параметрах.</p></div>
     </div>
   </section>
@@ -96,6 +97,27 @@
     </ol>
     <div class="okbox">💡 Кілька субдоменів = кілька незалежних партій: reg1.mydomain.com і reg2.mydomain.com. Основний домен ніколи не світиться в реєстраціях.</div>
 
+    <h2 style="font-size:22px; margin-top:36px">🌐 Спільні голоси за Voice ID (2.1.0)</h2>
+    <p class="lead">Будь-який публічний («Shared») голос Cartesia можна додати за Voice ID — і озвучувати ним УСІМ пулом безкоштовних ключів. Кредити списуються з вашого ключа, не з акаунта власника (перевірено наживо).</p>
+
+    <h3 style="margin:18px 0 10px">Як зробити свій клон спільним і юзати його free-ключами</h3>
+    <div class="flow">
+      <div class="step"><div class="n">1</div><div class="body"><b>Створіть клон на сайті</b><div><a href="https://play.cartesia.ai" target="_blank" rel="noopener">play.cartesia.ai</a> → Voices → <b>Clone voice</b>: аудіо до 10 секунд (файл або мікрофон). Безкоштовно.</div></div></div>
+      <div class="step"><div class="n">2</div><div class="body"><b>Увімкніть Share → Shared</b><div>У картці клона натисніть <b>Share</b>, оберіть <b>Shared</b> — «Anyone with the voice ID can use it». Це те саме, що PATCH access=public по API.</div></div></div>
+      <div class="step"><div class="n">3</div><div class="body"><b>Скопіюйте Voice ID</b><div>У тому ж діалозі Share є поле <b>ID</b> — рядок виду afe1bd4e-954e-48cc-8225-22c0… Це ключ доступу до голосу.</div></div></div>
+      <div class="step"><div class="n">4</div><div class="body"><b>Додайте в Cartelsia</b><div>Вкладка «Клон голосу» → блок <b>🌐 Спільні голоси</b> → вставте ID + придумайте аліас (наприклад don-pedro) → «Додати». Cartelsia перевірить голос через API і збереже ярлик у data/shared_voices.json.</div></div></div>
+      <div class="step"><div class="n">5</div><div class="body"><b>Озвучуйте всім пулом</b><div>Голос зʼявиться в композері (секція «Спільні голоси»). Обери його — і генерація піде звичайними БЕЗКОШТОВНИМИ ключами: 100 тис. символів розподіляться по всіх free-ключах по ~20 тис., але озвучаться ОДНИМ голосом. Кредити власника не горять.</div></div></div>
+    </div>
+
+    <table class="t" style="margin-top:18px">
+      <tr><th>Механізм</th><th>Як працює</th></tr>
+      <tr><td>Хто платить кредити</td><td>Той, чиїм ключем робиться запит TTS. Власнику публічного voice_id — нічого. Перевірено живим викликом чужим free-ключем</td></tr>
+      <tr><td>Чому «ярлик», а не копія</td><td>API Cartesia НЕ вміє копіювати/імпортувати чужі голоси (офіційно підтверджено). Cartelsia зберігає alias → voice_id локально; нічого в Cartesia не пишеться</td></tr>
+      <tr><td>Захист від ревокації</td><td>Власник може вимкнути Shared будь-якої миті. Перед КОЖНИМ прогоном голос re-verifiкується (GET /voices/{id}); відкликаний → прогін ЧЕСНО зупиняється з назвою аліаса, НІКОЛИ не мовчки озвучує іншим голосом</td></tr>
+      <tr><td>Кеш TTS</td><td>sha256(voice+model+language+text) → data/tts-cache/. Переозвучка того самого тексту = 0 кредитів, миттєво. Атомарний запис (tmp→rename) переживає crash</td></tr>
+      <tr><td>PVC-голоси 👑</td><td>Pro Voice Clones мають обмеження моделей (fine_tunes[].public_model_id); невідповідна модель → voice_model_mismatch із чітким повідомленням</td></tr>
+    </table>
+
     <h2 style="font-size:22px; margin-top:36px">👑 Master-клонування голосів (2.0.1)</h2>
     <p class="lead">Один Pro-акаунт ($5/міс) = необмежені голосові клони для ВСІХ ваших безкоштовних ключів. Клони живуть на мастер-акаунті, але після публікації доступні будь-якому ключу.</p>
     <div class="flow">
@@ -121,6 +143,9 @@
       <tr><td>src/main/email/autoregService.ts</td><td>Пул воркерів до 25, черга акаунтів, rescue-етап після прогону, запис api_keys.txt</td></tr>
       <tr><td>src/main/proxy/proxyManager.ts</td><td>Парсинг 4 форматів проксі, чек, ротація робочих</td></tr>
       <tr><td>src/main/voices/masterVoiceService.ts</td><td>Master-клонування (2.0.1): дедуп SHA-256, семафор паралельності, ensurePublic, retry 429/5xx</td></tr>
+      <tr><td>src/main/voices/sharedVoiceRegistry.ts</td><td>Спільні голоси (2.1): реєстр alias→voice_id, пребатч-гейт ревокації, check/add/remove</td></tr>
+      <tr><td>data/shared_voices.json</td><td>Локальні ярлики спільних голосів; кредити TTS з вашого ключа, не власника</td></tr>
+      <tr><td>data/tts-cache/</td><td>Кеш генерацій sha256(voice+model+language+text) → .wav — повтори безкоштовні</td></tr>
       <tr><td>src/main/audio/preprocess.ts</td><td>ffmpeg-препроцесинг кліпу (silence trim + loudnorm + mono 44.1k) і sha256Hex</td></tr>
       <tr><td>data/master_voices.json</td><td>Реєстр master-клонів: audio_sha256 → voice_id (дедуплікація між запусками)</td></tr>
       <tr><td>src/renderer/src/components/browser/AutoregView.tsx</td><td>UI: вкладки Автореєстрація / Проксі, живий лог, тултіпи</td></tr>

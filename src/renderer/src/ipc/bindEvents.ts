@@ -62,6 +62,10 @@ export function bindMainEvents(): void {
       case 'chat-updated':
         useChatsStore.getState().setChat(event.chat)
         break
+      case 'shared-voice-revoked':
+        toast('danger', t.sharedVoiceRevokedAbort(event.alias))
+        void useChatsStore.getState().loadChat(event.chatId)
+        break
     }
   })
 }

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { AudioLines, Check, Pause, Play, Star } from 'lucide-react'
+import { AudioLines, Check, Pause, Play, Share2, Star } from 'lucide-react'
 import type { CartesiaVoice } from '@shared/types'
 import { t, langLabel } from '../../i18n/uk'
-import { useKeysStore, useVoicesLocalStore } from '../../stores/appStore'
+import { useKeysStore, useSharedVoicesStore, useVoicesLocalStore } from '../../stores/appStore'
 import { useSamplePlayer } from '../../audio/samplePlayer'
 
 /**
@@ -14,7 +14,7 @@ export function VoicePicker(props: {
   value: string
   valueName?: string
   filterLanguage?: string
-  onChange: (voice: { id: string; name: string; owningKeyId?: string }) => void
+  onChange: (voice: { id: string; name: string; owningKeyId?: string; sharedVoiceAlias?: string }) => void
 }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -24,6 +24,7 @@ export function VoicePicker(props: {
   const ref = useRef<HTMLDivElement>(null)
   const favorites = useVoicesLocalStore((s) => s.favorites)
   const clones = useVoicesLocalStore((s) => s.clones)
+  const shared = useSharedVoicesStore((s) => s.entries)
   const keys = useKeysStore((s) => s.keys)
   const playingVoiceId = useSamplePlayer((s) => s.playingVoiceId)
   const loadingVoiceId = useSamplePlayer((s) => s.loadingVoiceId)
@@ -60,13 +61,23 @@ export function VoicePicker(props: {
   const cloneIds = new Set(clones.map((c) => c.id))
   const favList = favorites.filter((f) => matches(f.name, f.language))
   const cloneList = clones.filter((c) => matches(c.name, c.language))
-  const rest = voices.filter((v) => !favIds.has(v.id) && !cloneIds.has(v.id))
+  // Спільні голоси (2.1): ok-записи доступні будь-яким ключем
+  const sharedList = shared.filter(
+    (s) =>
+      s.status !== 'revoked' &&
+      (!q || s.alias.toLowerCase().includes(q) || matches(s.remoteName, s.language)) &&
+      (!effectiveLang || s.language === effectiveLang)
+  )
+  const sharedIds = new Set(shared.map((s) => s.voiceId))
+  const rest = voices.filter((v) => !favIds.has(v.id) && !cloneIds.has(v.id) && !sharedIds.has(v.id))
 
   const select = (id: string, name: string): void => {
     const clone = clones.find((c) => c.id === id)
-    // Master-клони публічні — пінгувати ключ-власник не потрібно (2.0.1)
-    const owningKeyId = clone?.viaMaster ? undefined : clone?.owningKeyId
-    props.onChange({ id, name, owningKeyId })
+    const sharedEntry = shared.find((s) => s.voiceId === id)
+    // Публічні голоси (master-клони, спільні) — без пінгування ключа-власника (2.0.1/2.1)
+    const owningKeyId =
+      clone?.viaMaster || sharedEntry ? undefined : clone?.owningKeyId
+    props.onChange({ id, name, owningKeyId, sharedVoiceAlias: sharedEntry?.alias })
     setOpen(false)
   }
 
@@ -157,6 +168,15 @@ export function VoicePicker(props: {
                 c.viaMaster ? `${t.masterBadge} · ${c.owningKeyLabel}` : `${t.cloneBadge} · ${c.owningKeyLabel}`
               )
             )}
+            {sharedList.length ? (
+              <div className="sidebar__section" style={{ padding: '4px 10px' }}>
+                <Share2 size={11} style={{ verticalAlign: -1, marginRight: 4 }} />
+                {t.sharedTitle}
+              </div>
+            ) : null}
+            {sharedList.map((s) =>
+              renderRow(s.voiceId, s.remoteName, s.language, undefined, `@${s.alias}`)
+            )}
             {rest.length ? (
               <div className="sidebar__section" style={{ padding: '4px 10px' }}>{t.voices}</div>
             ) : null}
@@ -166,7 +186,7 @@ export function VoicePicker(props: {
                 <span className="spinner" />
               </div>
             ) : null}
-            {!loading && !favList.length && !cloneList.length && !rest.length ? (
+            {!loading && !favList.length && !cloneList.length && !sharedList.length && !rest.length ? (
               <div className="muted text-sm" style={{ padding: 10 }}>
                 {keys.length ? t.voicesNotFound : t.addKeysHint}
               </div>

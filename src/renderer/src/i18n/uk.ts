@@ -401,7 +401,30 @@ export const t = {
   masterBadge: 'Master',
   masterPublicBadge: 'Публічний',
   masterPrivateBadge: 'Приватний',
-  masterToggle: 'Публікувати / сховати'
+  masterToggle: 'Публікувати / сховати',
+
+  // ── Спільні голоси (2.1) ──
+  sharedTitle: 'Спільні голоси (за ID)',
+  sharedHint: 'Голос із увімкненим Share (кнопка «Shared» на play.cartesia.ai) можна ВИКОРИСТОВУВАТИ будь-яким ключем просто за ID — кредити списуються з вашого ключа, не з акаунта власника. Додайте ID сюди під зрозумілим імʼям — і голос назавжди у вашій бібліотеці',
+  sharedIntro: 'Вставте Voice ID з діалогу Share → Shared на play.cartesia.ai. Голос НЕ копіюється в Cartesia (такого API немає) — зберігається локальний ярлик, але озвучувати ним можна ЛЮБИМ вашим ключем: і free-ключами пулу, і клон-ключами',
+  sharedAliasPlaceholder: 'Аліас: don-pedro',
+  sharedAdd: 'Додати',
+  sharedCheck: 'Перевірити всі',
+  sharedColAlias: 'Аліас',
+  sharedColName: 'Назва в Cartesia',
+  sharedColStatus: 'Статус',
+  sharedStatusOk: 'Доступний',
+  sharedStatusRevoked: 'Відкликаний',
+  sharedStatusUnreachable: 'Недосяжний',
+  sharedExternal: 'чужий',
+  sharedEmpty: 'Ще нічого не додано. Скопіюйте Voice ID з play.cartesia.ai → Voices → Share',
+  sharedAdded: (alias: string, name: string) => `«${name}» збережено як «${alias}» — тепер озвучується будь-яким ключем`,
+  sharedRevoked: (alias: string) => `Спільний голос «${alias}» відкликано — власник закрив доступ`,
+  sharedCheckOk: (n: number) => `Перевірено ${n}: усі спільні голоси доступні`,
+  sharedRemoved: (alias: string) => `«${alias}» видалено з реєстру`,
+  sharedRemoveTitle: 'Видалити зі спільних?',
+  sharedRemoveBody: (alias: string) => `Ярлик «${alias}» буде видалено з бібліотеки. Сам голос на Cartesia не постраждає (ми його не створювали)`,
+  sharedVoiceRevokedAbort: (alias: string) => `Прогін зупинено: спільний голос «${alias}» став недоступним (власник вимкнув Share). Оберіть інший голос або попросіть власника увімкнути Shared знову`
 }
 
 export const LANGUAGE_FLAGS: Record<string, string> = {

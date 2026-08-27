@@ -48,6 +48,8 @@ export interface GenerationSettings {
   voiceId: string
   voiceName?: string
   voiceOwningKeyId?: string // для клон-голосів: чанки йдуть тільки через цей ключ
+  /** 2.1: голос із реєстру спільних — перевіряється перед прогоном, пінгування ключа не потрібно */
+  sharedVoiceAlias?: string
   language?: string // 'uk' і т.д.; undefined → автовизначення
   speed?: number // [0.6, 1.5]
   volume?: number // [0.5, 2.0]
@@ -187,6 +189,37 @@ export interface ClonedVoiceMeta {
   viaMaster?: boolean
   /** 2.0.1: голос зроблено публічним (доступний іншим ключам) */
   isPublic?: boolean
+}
+
+// ---------- Спільні голоси (2.1): реєстр voice_id доступних будь-яким ключем ----------
+
+/** Запис локального реєстру спільних голосів — ніколи не пишеться в Cartesia */
+export interface SharedVoiceEntry {
+  alias: string // user-chosen, [a-z0-9-], 2-40, unique
+  voiceId: string // Cartesia UUID
+  remoteName: string // name reported by Cartesia
+  language: string // native language, напр. "uk"
+  accent?: string
+  isOwner: boolean // false для чужих shared голосів
+  access: 'public' | 'private'
+  isPro: boolean // PVC-голос: обмеження моделей
+  compatibleModels?: string[] // fine_tunes[].public_model_id, тільки для PVC
+  addedAt: string
+  lastVerified: string
+  status: 'ok' | 'revoked' | 'unreachable'
+}
+
+export interface SharedAddResult {
+  entry?: SharedVoiceEntry
+  error?: string
+}
+
+/** Статус перевірки одного alias (для voices check) */
+export interface SharedCheckResult {
+  alias: string
+  voiceId: string
+  status: 'ok' | 'revoked' | 'unreachable'
+  detail?: string
 }
 
 // ---------- Master-клонування (2.0.1) ----------
@@ -359,6 +392,8 @@ export type MainEvent =
   | { type: 'autoreg-log'; line: string }
   // 2.0.1 master-клонування
   | { type: 'master-log'; line: string }
+  // 2.1 спільні голоси
+  | { type: 'shared-voice-revoked'; alias: string; chatId: string }
 
 // ---------- Дефолти ----------
 export const DEFAULT_KEY_LIMIT = 20000

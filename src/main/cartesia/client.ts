@@ -42,6 +42,33 @@ export interface RawVoiceFull extends RawVoice {
   fine_tune_public_model_id?: string
 }
 
+/** PVC-факти, які getVoice додає поверх CartesiaVoice (2.1) */
+export interface VoiceProFacts {
+  /** Pro Voice Clone: має обмеження сумісних моделей */
+  isPro?: boolean
+  /** fine_tunes[].public_model_id — моделі, з якими цей голос працює */
+  compatibleModels?: string[]
+}
+
+function extractCompatibleModels(fineTune: RawVoice['fine_tune']): string[] | undefined {
+  if (!fineTune) return undefined
+  // API віддає або масив обʼєктів {public_model_id}, або словник — приймаємо обидва
+  if (Array.isArray(fineTune)) {
+    const ids = fineTune
+      .map((f) => (typeof f === 'string' ? f : (f as { public_model_id?: string }).public_model_id))
+      .filter((x): x is string => !!x)
+    return ids.length ? ids : undefined
+  }
+  if (typeof fineTune === 'object') {
+    const values = Object.values(fineTune)
+    const ids = values
+      .map((f) => (typeof f === 'string' ? f : (f as { public_model_id?: string }).public_model_id))
+      .filter((x): x is string => !!x)
+    return ids.length ? ids : undefined
+  }
+  return undefined
+}
+
 function mapVoice(v: RawVoice): CartesiaVoice {
   return {
     id: v.id,
@@ -261,7 +288,7 @@ export class CartesiaClient {
   }
 
   /** GET /voices/{id} — один голос (для перевірки існування та доступу) */
-  async getVoice(key: string, voiceId: string): Promise<CartesiaVoice> {
+  async getVoice(key: string, voiceId: string): Promise<CartesiaVoice & VoiceProFacts> {
     let res: Response
     try {
       res = await this.fetchFn(`${this.base}/voices/${voiceId}`, {
@@ -271,7 +298,13 @@ export class CartesiaClient {
       throw asNetworkError(err)
     }
     if (!res.ok) throw await toCartesiaError(res)
-    return mapVoice((await res.json()) as RawVoice)
+    const raw = (await res.json()) as RawVoice
+    return {
+      ...mapVoice(raw),
+      // PVC-факти: Pro Voice Clone має обмеження моделей; сумісні перелічені у fine_tunes
+      isPro: Array.isArray(raw.fine_tune) ? raw.fine_tune.length > 0 : !!raw.fine_tune && Object.keys(raw.fine_tune).length > 0,
+      compatibleModels: extractCompatibleModels(raw.fine_tune)
+    }
   }
 
   /** PATCH /voices/{id} — оновлення голосу (назва, опис, access) */

@@ -18,6 +18,7 @@ import type { KeyPool } from '../keys/keyPool'
 import type { Scheduler } from '../tts/scheduler'
 import type { VoicesService } from '../voices/voicesService'
 import type { MasterVoiceService } from '../voices/masterVoiceService'
+import type { SharedVoiceRegistry } from '../voices/sharedVoiceRegistry'
 import type { CartesiaClient } from '../cartesia/client'
 import { chunkText } from '../tts/chunker'
 import { estimate } from '../tts/estimator'
@@ -43,6 +44,7 @@ export interface Services {
   autoregService: AutoregService
   proxyManager: ProxyManager
   masterVoices?: MasterVoiceService
+  sharedRegistry?: SharedVoiceRegistry
 }
 
 let settings: Settings
@@ -67,7 +69,7 @@ export function loadSettings(): Settings {
 }
 
 export function registerIpcHandlers(services: Services, getWindow: () => BrowserWindow | null): void {
-  const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices } = services
+  const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices, sharedRegistry } = services
   loadSettings()
   // MasterVoiceService отримує живі налаштування (masterApiKey змінюється без рестарту)
   setSettingsProvider(() => settings)
@@ -379,6 +381,27 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
   ipcMain.handle(IPC.MASTER_LIST, (_e, p: { existingClones?: ClonedVoiceMeta[] } = {}) => {
     if (!masterVoices) throw new Error('Master-сервіс недоступний')
     return masterVoices.listAsMeta(p.existingClones ?? [])
+  })
+
+  // ---------- Спільні голоси (2.1) ----------
+  ipcMain.handle(IPC.SHARED_LIST, () => {
+    if (!sharedRegistry) throw new Error('Реєстр спільних голосів недоступний')
+    return sharedRegistry.list()
+  })
+
+  ipcMain.handle(IPC.SHARED_ADD, (_e, p: { voiceId: string; alias: string }) => {
+    if (!sharedRegistry) throw new Error('Реєстр спільних голосів недоступний')
+    return sharedRegistry.add(p.voiceId, p.alias)
+  })
+
+  ipcMain.handle(IPC.SHARED_REMOVE, (_e, p: { alias: string }) => {
+    if (!sharedRegistry) throw new Error('Реєстр спільних голосів недоступний')
+    return sharedRegistry.remove(p.alias)
+  })
+
+  ipcMain.handle(IPC.SHARED_CHECK, (_e, p: { alias?: string }) => {
+    if (!sharedRegistry) throw new Error('Реєстр спільних голосів недоступний')
+    return sharedRegistry.check(p.alias)
   })
 
   // ---------- Налаштування / шляхи / статистика ----------

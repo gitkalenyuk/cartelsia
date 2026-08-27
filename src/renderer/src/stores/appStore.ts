@@ -169,6 +169,22 @@ export const useVoicesLocalStore = create<VoicesLocalState>((set) => ({
   setClones: (clones) => set({ clones })
 }))
 
+// ---------- Спільні голоси (2.1): локальний реєстр alias → voice_id ----------
+interface SharedVoicesState {
+  entries: import('@shared/types').SharedVoiceEntry[]
+  load: () => Promise<void>
+  setEntries: (e: import('@shared/types').SharedVoiceEntry[]) => void
+}
+
+export const useSharedVoicesStore = create<SharedVoicesState>((set) => ({
+  entries: [],
+  load: async () => {
+    const entries = await window.cartelsia.shared.list()
+    set({ entries })
+  },
+  setEntries: (entries) => set({ entries })
+}))
+
 // ---------- Тости ----------
 export interface Toast {
   id: number

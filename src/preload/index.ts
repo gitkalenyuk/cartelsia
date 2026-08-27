@@ -137,6 +137,16 @@ const api = {
     list: (existingClones?: import('../shared/types').ClonedVoiceMeta[]): Promise<ClonedVoiceMeta[]> =>
       ipcRenderer.invoke(IPC.MASTER_LIST, { existingClones })
   },
+  shared: {
+    list: (): Promise<import('../shared/types').SharedVoiceEntry[]> =>
+      ipcRenderer.invoke(IPC.SHARED_LIST),
+    add: (voiceId: string, alias: string): Promise<import('../shared/types').SharedAddResult> =>
+      ipcRenderer.invoke(IPC.SHARED_ADD, { voiceId, alias }),
+    remove: (alias: string): Promise<boolean> =>
+      ipcRenderer.invoke(IPC.SHARED_REMOVE, { alias }),
+    check: (alias?: string): Promise<import('../shared/types').SharedCheckResult[]> =>
+      ipcRenderer.invoke(IPC.SHARED_CHECK, { alias })
+  },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke(IPC.SETTINGS_GET),
     set: (patch: Partial<Settings>): Promise<Settings> =>
