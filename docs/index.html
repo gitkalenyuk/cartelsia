@@ -42,6 +42,7 @@
       <div class="cardx"><div class="ic">🔑</div><h3>Ключі одразу</h3><p>Ключ забирається в тому ж сеансі, що й реєстрація. Пишеться в api_keys.txt і одразу падає в пул.</p></div>
       <div class="cardx"><div class="ic">🛟</div><h3>Rescue-прохід</h3><p>Акаунти «без ключа» автоматично проходять повторний /keys через збережену сесію. Жоден акк не втрачається.</p></div>
       <div class="cardx"><div class="ic">🌐</div><h3>Проксі з розумом</h3><p>Імпорт ip:port:user:pass, перевірка, ротація. Проксі, що дала 2 фейли підряд, видаляється сама.</p></div>
+      <div class="cardx"><div class="ic">👑</div><h3>Master-клонування <span style="color:var(--accent);font-size:12px">2.0.1</span></h3><p>Pro-акаунт ($5/міс) стає фабрикою голосів: клон по API з будь-якого кліпу ≤10 с, авто-публікація — і клон озвучується всім пулом безкоштовних ключів.</p></div>
       <div class="cardx"><div class="ic">🎨</div><h3>Редизайн 2.0</h3><p>Inter + JetBrains Mono, градієнти, анімації, живий лог кожної реєстрації, тултіпи ? на всіх параметрах.</p></div>
     </div>
   </section>
@@ -95,6 +96,23 @@
     </ol>
     <div class="okbox">💡 Кілька субдоменів = кілька незалежних партій: reg1.mydomain.com і reg2.mydomain.com. Основний домен ніколи не світиться в реєстраціях.</div>
 
+    <h2 style="font-size:22px; margin-top:36px">👑 Master-клонування голосів (2.0.1)</h2>
+    <p class="lead">Один Pro-акаунт ($5/міс) = необмежені голосові клони для ВСІХ ваших безкоштовних ключів. Клони живуть на мастер-акаунті, але після публікації доступні будь-якому ключу.</p>
+    <div class="flow">
+      <div class="step"><div class="n">1</div><div class="body"><b>Додайте Master API-ключ</b><div>Налаштування → Master-акаунт → вставте ключ Pro-акаунта → «Перевірити». Він зберігається окремо від пулу і не витрачається на звичайні генерації.</div></div></div>
+      <div class="step"><div class="n">2</div><div class="body"><b>Створіть клон</b><div>Клон голосу → Master-секція → аудіо файлом або запис із мікрофона (до 10 с). ffmpeg сам обрізає тишу та нормалізує гучність.</div></div></div>
+      <div class="step"><div class="n">3</div><div class="body"><b>Голос публікується автоматично</b><div>PATCH access=public одразу після клонування — інакше чужі (free) ключі його не побачать. Можна вимкнути в Налаштуваннях.</div></div></div>
+      <div class="step"><div class="n">4</div><div class="body"><b>Озвучуйте free-ключами</b><div>Публічний master-клон вибирається у VoicePicker як звичайний голос — генерація йде через будь-який активний ключ пулу, без списання з Pro.</div></div></div>
+    </div>
+    <table class="t" style="margin-top:18px">
+      <tr><th>Механізм</th><th>Як працює</th></tr>
+      <tr><td>ffmpeg-препроцесинг</td><td>Обрізання тиші (−45 dB), loudnorm I=−16/TP=−1.5/LRA=11, mono 44.1 kHz s16, жорсткий cap 10 с</td></tr>
+      <tr><td>Дедуплікація</td><td>SHA-256 обробленого аудіо = первинний ключ реєстру data/master_voices.json: те саме аудіо ніколи не клонується двічі</td></tr>
+      <tr><td>Автоповтори</td><td>429/5xx повторюються ×5 (exponential backoff + jitter), інші 4xx показуються одразу; ліміт паралельності Free 2 / Pro 3 / Startup 5 / Scale 15</td></tr>
+      <tr><td>Crash-safety</td><td>Реєстр пишеться ДО публікації; синхронізація GET /voices?is_owner=true підтягує голоси, якщо локальний файл загублено</td></tr>
+    </table>
+    <div class="okbox">💡 Потрібен ffmpeg у PATH або поруч із exe — лише для клонування. TTS і автореєстрація працюють без нього. Без Pro-акаунта всі функції 2.0 далі працюють як раніше.</div>
+
     <h2 style="font-size:22px; margin-top:36px">🔧 Що відповідає за що (архітектура)</h2>
     <table class="t">
       <tr><th>Файл / Компонент</th><th>Роль</th></tr>
@@ -102,6 +120,9 @@
       <tr><td>src/main/email/imapDirectOtp.ts</td><td>OTP: свіже IMAP TLS+LOGIN на кожен запит + UID SEARCH HEADER To + видалення листа після читання</td></tr>
       <tr><td>src/main/email/autoregService.ts</td><td>Пул воркерів до 25, черга акаунтів, rescue-етап після прогону, запис api_keys.txt</td></tr>
       <tr><td>src/main/proxy/proxyManager.ts</td><td>Парсинг 4 форматів проксі, чек, ротація робочих</td></tr>
+      <tr><td>src/main/voices/masterVoiceService.ts</td><td>Master-клонування (2.0.1): дедуп SHA-256, семафор паралельності, ensurePublic, retry 429/5xx</td></tr>
+      <tr><td>src/main/audio/preprocess.ts</td><td>ffmpeg-препроцесинг кліпу (silence trim + loudnorm + mono 44.1k) і sha256Hex</td></tr>
+      <tr><td>data/master_voices.json</td><td>Реєстр master-клонів: audio_sha256 → voice_id (дедуплікація між запусками)</td></tr>
       <tr><td>src/renderer/src/components/browser/AutoregView.tsx</td><td>UI: вкладки Автореєстрація / Проксі, живий лог, тултіпи</td></tr>
       <tr><td>data/settings.json</td><td>Налаштування (домен, IMAP, потоки). engine має бути browser-signup</td></tr>
       <tr><td>data/api_keys.txt · output/api_keys.txt</td><td>Тільки sk_car_... ключі, по одному на рядок</td></tr>
