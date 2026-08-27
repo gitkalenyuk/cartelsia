@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import { Folder, MailCheck } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { BadgeCheck, Folder, MailCheck } from 'lucide-react'
 import { t } from '../../i18n/uk'
 import { toast, useSettingsStore } from '../../stores/appStore'
-import { Button, Dropdown, Slider, Toggle } from '../common/primitives'
+import { Button, Dropdown, Hint, Slider, Toggle } from '../common/primitives'
 import { VoicePicker } from '../chat/VoicePicker'
 
 function Row(props: {
-  label: string
-  desc?: string
+  label: string | React.ReactNode
+  desc?: string | React.ReactNode
   children: React.ReactNode
 }): React.JSX.Element {
   return (
@@ -26,6 +26,33 @@ export function SettingsView(): React.JSX.Element {
   const paths = useSettingsStore((s) => s.paths)
   const update = useSettingsStore((s) => s.update)
   const [testingImap, setTestingImap] = useState(false)
+  const [masterStatus, setMasterStatus] = useState<import('@shared/types').MasterStatus | null>(null)
+  const [checkingMaster, setCheckingMaster] = useState(false)
+
+  // статус мастер-ключа підвантажується при вході і після зміни ключа
+  useEffect(() => {
+    if (settings?.masterApiKey === undefined) return
+    let cancelled = false
+    void window.cartelsia.master.status().then((st) => {
+      if (!cancelled) setMasterStatus(st)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [settings?.masterApiKey])
+
+  const checkMasterNow = async (): Promise<void> => {
+    setCheckingMaster(true)
+    try {
+      const st = await window.cartelsia.master.status()
+      setMasterStatus(st)
+      if (st.configured && st.valid) toast('success', t.masterKeyOk)
+      else if (st.configured) toast('danger', t.masterKeyBad(st.error ?? ''))
+      else toast('info', t.masterKeyEmpty)
+    } finally {
+      setCheckingMaster(false)
+    }
+  }
 
   if (!settings)
     return (
@@ -348,6 +375,73 @@ export function SettingsView(): React.JSX.Element {
             }
           />
           <span className="muted text-sm">мс</span>
+        </Row>
+      </div>
+
+      <div className="settings-section">
+        <div className="settings-section__title">{t.sectionMaster}</div>
+        <Row
+          label={
+            <>
+              {t.masterApiKey}{' '}
+              <Hint text={t.masterApiKeyHint} />
+            </>
+          }
+          desc={t.masterApiKeyDesc}
+        >
+          <input
+            className="input mono"
+            style={{ width: 300 }}
+            type="password"
+            placeholder="sk_car_… (Pro-акаунт)"
+            value={settings.masterApiKey ?? ''}
+            onChange={(e) => void update({ masterApiKey: e.target.value.trim() || undefined })}
+          />
+          <Button
+            size="sm"
+            icon={<BadgeCheck size={13} />}
+            disabled={checkingMaster}
+            onClick={() => void checkMasterNow()}
+          >
+            {checkingMaster ? t.masterChecking : t.masterCheck}
+          </Button>
+        </Row>
+        {masterStatus?.configured ? (
+          <Row label="">
+            <span
+              style={{
+                color: masterStatus.valid ? 'var(--accent)' : 'var(--danger, #e5484d)',
+                fontSize: 13
+              }}
+            >
+              {masterStatus.valid
+                ? `✓ ${t.masterValid}${masterStatus.plan && masterStatus.plan !== 'unknown' ? ` · ${masterStatus.plan}` : ''}`
+                : `✗ ${masterStatus.error ?? t.masterInvalid}`}
+            </span>
+          </Row>
+        ) : null}
+        <Row label={<>{t.masterAutoPublic} <Hint text={t.masterAutoPublicHint} /></>} desc={t.masterAutoPublicDesc}>
+          <Toggle
+            checked={settings.masterAutoPublic !== false}
+            onChange={(v) => void update({ masterAutoPublic: v })}
+          />
+        </Row>
+        <Row label={<>{t.masterConcurrency} <Hint text={t.masterConcurrencyHint} /></>} desc={t.masterConcurrencyDesc}>
+          <Dropdown
+            trigger={
+              <button className="pill">
+                {String(settings.masterConcurrency ?? 3)}
+              </button>
+            }
+            down
+            right
+            options={[2, 3, 5, 15].map((n) => ({
+              value: String(n),
+              label: `${n} — ${n === 2 ? 'Free' : n === 3 ? 'Pro ($5)' : n === 5 ? 'Startup' : 'Scale'}`
+            }))}
+            value={String(settings.masterConcurrency ?? 3)}
+            onSelect={(v) => void update({ masterConcurrency: Number(v) || undefined })}
+          />
         </Row>
       </div>
 

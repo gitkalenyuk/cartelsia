@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   AudioLines,
+  Crown,
   Globe,
   KeyRound,
   Mic,
@@ -21,6 +22,7 @@ import {
   Button,
   ConfirmDialog,
   Dropdown,
+  Hint,
   Modal,
   fmtNum
 } from '../common/primitives'
@@ -88,6 +90,9 @@ export function CloneVoiceView(): React.JSX.Element {
   return (
     <div>
       <h1 className="view-title">{t.cloneTabTitle}</h1>
+
+      {/* Master-клонування (Pro-акаунт) */}
+      <MasterCloneSection />
 
       {/* Інструкція */}
       <div className="card" style={{ marginBottom: 16 }}>
@@ -266,6 +271,371 @@ export function CloneVoiceView(): React.JSX.Element {
         }}
       />
     </div>
+  )
+}
+
+// ---------- Master-секція (2.0.1): клонування через Pro-акаунт ----------
+
+function useMasterStatus(): import('@shared/types').MasterStatus | null {
+  const [status, setStatus] = useState<import('@shared/types').MasterStatus | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    void window.cartelsia.master.status().then((st) => {
+      if (!cancelled) setStatus(st)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+  return status
+}
+
+function MasterCloneSection(): React.JSX.Element {
+  const settings = useSettingsStore((s) => s.settings)
+  const masterConfigured = !!settings?.masterApiKey
+  const status = useMasterStatus()
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const clones = useVoicesLocalStore((s) => s.clones)
+  const playingVoiceId = useSamplePlayer((s) => s.playingVoiceId)
+  const loadingVoiceId = useSamplePlayer((s) => s.loadingVoiceId)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  const masterClones = clones.filter((c) => c.viaMaster)
+
+  const togglePublic = async (voiceId: string): Promise<void> => {
+    setTogglingId(voiceId)
+    try {
+      await window.cartelsia.master.togglePublic(voiceId)
+      await useVoicesLocalStore.getState().load()
+      toast('success', t.masterNowPublic)
+    } catch (err) {
+      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  if (!masterConfigured) return <></>
+
+  return (
+    <div className="card" style={{ marginBottom: 16, borderColor: 'var(--accent-border)' }}>
+      <div className="row" style={{ marginBottom: 12 }}>
+        <div className="settings-section__title" style={{ margin: 0 }}>
+          <Crown size={14} style={{ verticalAlign: -2, marginRight: 6, color: 'var(--accent)' }} />
+          {t.masterCloneTitle}
+        </div>
+        <span className="grow" />
+        {status && (
+          <Badge tone={status.valid ? 'success' : 'danger'} dot>
+            {status.valid ? 'Master OK' : 'Master ✗'}
+          </Badge>
+        )}
+        <Button
+          variant="primary"
+          icon={<Plus size={14} />}
+          onClick={() => setDialogOpen(true)}
+          testId="master-clone-open"
+        >
+          {t.masterCloneSubmit}
+        </Button>
+      </div>
+
+      {masterClones.length ? (
+        <div className="voice-grid">
+          {masterClones.map((clone) => (
+            <div key={clone.id} className="voicecard">
+              <div className="voicecard__head">
+                <div
+                  className="voicecard__avatar"
+                  style={{ background: 'linear-gradient(135deg, var(--accent), #b8845f)' }}
+                >
+                  <Mic size={15} />
+                </div>
+                <span className="voicecard__name grow">{clone.name}</span>
+                <button
+                  className="iconbtn"
+                  title={`${t.masterToggle} — зараз ${clone.isPublic ? 'публічний' : 'приватний'}`}
+                  disabled={togglingId === clone.id}
+                  onClick={() => void togglePublic(clone.id)}
+                >
+                  {togglingId === clone.id ? (
+                    <span className="spinner" style={{ width: 12, height: 12 }} />
+                  ) : (
+                    <Globe size={13} style={{ opacity: clone.isPublic ? 1 : 0.35 }} />
+                  )}
+                </button>
+              </div>
+              <div className="voicecard__badges">
+                <Badge tone="neutral">{langLabel(clone.language)}</Badge>
+                <Badge tone="accent">{t.masterBadge}</Badge>
+                <Badge tone={clone.isPublic ? 'success' : 'warning'}>
+                  {clone.isPublic ? t.masterPublicBadge : t.masterPrivateBadge}
+                </Badge>
+              </div>
+              <div className="voicecard__footer">
+                <button
+                  className="playbtn playbtn--sm playbtn--ghost"
+                  title={t.listen}
+                  onClick={() =>
+                    void useSamplePlayer.getState().toggle({ id: clone.id }, clone.language)
+                  }
+                >
+                  {loadingVoiceId === clone.id ? (
+                    <span className="spinner" style={{ width: 11, height: 11 }} />
+                  ) : playingVoiceId === clone.id ? (
+                    <Pause size={13} />
+                  ) : (
+                    <Play size={13} style={{ marginLeft: 1 }} />
+                  )}
+                </button>
+                <span className="grow" />
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    void useSettingsStore.getState().update({
+                      defaults: {
+                        ...useSettingsStore.getState().settings!.defaults,
+                        voiceId: clone.id,
+                        voiceName: clone.name
+                      }
+                    })
+                    toast('success', `${t.defaultVoice}: ${clone.name}`)
+                  }}
+                >
+                  {t.useVoice}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="muted text-sm">{t.noClones}</div>
+      )}
+
+      <MasterCloneDialog open={dialogOpen} onClose={() => setDialogOpen(false)} />
+    </div>
+  )
+}
+
+function MasterCloneDialog(props: { open: boolean; onClose: () => void }): React.JSX.Element {
+  const settings = useSettingsStore((s) => s.settings)
+  const [tab, setTab] = useState<'file' | 'mic'>('file')
+  const [name, setName] = useState('')
+  const [language, setLanguage] = useState('uk')
+  const [description, setDescription] = useState('')
+  const [makePublic, setMakePublic] = useState(settings?.masterAutoPublic !== false)
+  const [clip, setClip] = useState<{ data: ArrayBuffer; mimeType: string; label: string } | null>(null)
+  const [busy, setBusy] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  const [recording, setRecording] = useState(false)
+  const [level, setLevel] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+  const [recordedUrl, setRecordedUrl] = useState<string | null>(null)
+  const handleRef = useRef<RecorderHandle | null>(null)
+
+  useEffect(() => {
+    if (props.open && settings) setMakePublic(settings.masterAutoPublic !== false)
+  }, [props.open, settings])
+
+  const reset = (): void => {
+    setName('')
+    setDescription('')
+    setClip(null)
+    setRecordedUrl(null)
+    setRecording(false)
+    handleRef.current?.cancel()
+  }
+
+  const record = async (): Promise<void> => {
+    if (recording) {
+      handleRef.current?.stop()
+      return
+    }
+    setRecordedUrl(null)
+    setClip(null)
+    setElapsed(0)
+    try {
+      handleRef.current = await startRecording({
+        maxSeconds: 10,
+        onLevel: setLevel,
+        onTick: setElapsed,
+        onDone: (blob) => {
+          setRecording(false)
+          void blob.arrayBuffer().then((data) => {
+            setClip({ data, mimeType: blob.type || 'audio/webm', label: 'Запис із мікрофона' })
+            setRecordedUrl(URL.createObjectURL(blob))
+          })
+        }
+      })
+      setRecording(true)
+    } catch (err) {
+      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
+    }
+  }
+
+  const submit = async (): Promise<void> => {
+    if (!clip || !name.trim()) return
+    setBusy(true)
+    try {
+      const res = await window.cartelsia.master.clone({
+        clip: clip.data,
+        mimeType: clip.mimeType,
+        name: name.trim(),
+        language,
+        description: description.trim() || undefined,
+        makePublic
+      })
+      await useVoicesLocalStore.getState().load()
+      toast('success', res.reused ? t.masterClonedReused : t.masterCloned(res.voice.name))
+      if (res.madePublic) toast('info', t.masterNowPublic)
+      reset()
+      props.onClose()
+    } catch (err) {
+      toast('danger', t.errorPrefix(err instanceof Error ? err.message : String(err)))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal
+      open={props.open}
+      title={t.masterCloneTitle}
+      onClose={() => {
+        reset()
+        props.onClose()
+      }}
+      footer={
+        <>
+          <Button
+            variant="ghost"
+            onClick={() => {
+              reset()
+              props.onClose()
+            }}
+          >
+            {t.cancel}
+          </Button>
+          <Button
+            variant="primary"
+            loading={busy}
+            disabled={!clip || !name.trim()}
+            onClick={() => void submit()}
+            testId="master-clone-submit"
+          >
+            {busy ? t.masterCloning : t.masterCloneSubmit}
+          </Button>
+        </>
+      }
+    >
+      <div className="row">
+        <button className="pill" onClick={() => setTab('file')}
+          style={tab === 'file' ? { borderColor: 'var(--accent-border)', color: 'var(--accent-hover)' } : undefined}>
+          <Upload size={13} /> {t.uploadFile}
+        </button>
+        <button className="pill" onClick={() => setTab('mic')}
+          style={tab === 'mic' ? { borderColor: 'var(--accent-border)', color: 'var(--accent-hover)' } : undefined}>
+          <Mic size={13} /> {t.recordMic}
+        </button>
+      </div>
+
+      {tab === 'file' ? (
+        <div
+          className="card"
+          style={{ textAlign: 'center', cursor: 'pointer', borderStyle: 'dashed' }}
+          onClick={() => fileRef.current?.click()}
+        >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".mp3,.wav,.ogg,.webm,.flac,.m4a,audio/*"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file)
+                void file.arrayBuffer().then((data) =>
+                  setClip({ data, mimeType: file.type || 'audio/mpeg', label: file.name })
+                )
+            }}
+          />
+          <Upload size={22} style={{ color: 'var(--text-faint)' }} />
+          <div className="muted" style={{ marginTop: 6 }}>
+            {clip && tab === 'file' ? clip.label : t.chooseAudioFile}
+          </div>
+        </div>
+      ) : (
+        <div className="recorder">
+          <button className={`recorder__btn${recording ? ' is-recording' : ''}`} onClick={() => void record()}>
+            <Mic size={26} />
+          </button>
+          {recording ? (
+            <>
+              <div className="recorder__meter">
+                {Array.from({ length: 12 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="recorder__bar"
+                    style={{ height: `${Math.max(10, level * 100 * (0.5 + Math.sin(i * 1.7) * 0.5))}%` }}
+                  />
+                ))}
+              </div>
+              <div className="recorder__time">{t.recording(Math.min(elapsed, 10))} / 10 с</div>
+            </>
+          ) : recordedUrl ? (
+            <div className="row">
+              <audio controls src={recordedUrl} style={{ height: 32 }} />
+              <Button size="sm" variant="ghost" onClick={() => void record()}>
+                {t.recordAgain}
+              </Button>
+            </div>
+          ) : (
+            <div className="muted text-sm">до 10 секунд</div>
+          )}
+        </div>
+      )}
+
+      <div>
+        <span className="field-label">{t.masterCloneName}</span>
+        <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
+      </div>
+      <div className="row" style={{ alignItems: 'flex-start' }}>
+        <div className="grow">
+          <span className="field-label">
+            {t.masterCloneLanguage}{' '}
+            <Hint text="Мова, якою говорить людина в кліпі. Повинна збігатися з реальною мовою аудіо" />
+          </span>
+          <Dropdown
+            trigger={<button className="pill"><Globe size={13} /> {langLabel(language)}</button>}
+            searchable
+            down
+            options={SUPPORTED_LANGUAGES.map((code) => ({ value: code, label: langLabel(code) }))}
+            value={language}
+            onSelect={setLanguage}
+          />
+        </div>
+        <div className="grow">
+          <span className="field-label">
+            {t.masterCloneMakePublic}{' '}
+            <Hint text={t.masterAutoPublicHint} />
+          </span>
+          <label className="row" style={{ gap: 8 }}>
+            <input
+              type="checkbox"
+              checked={makePublic}
+              onChange={(e) => setMakePublic(e.target.checked)}
+              data-testid="master-clone-public"
+            />
+            <span className="text-sm">{makePublic ? t.masterPublicBadge : t.masterPrivateBadge}</span>
+          </label>
+        </div>
+      </div>
+      <div>
+        <span className="field-label">{t.masterCloneDescription}</span>
+        <input className="input" value={description} onChange={(e) => setDescription(e.target.value)} />
+      </div>
+    </Modal>
   )
 }
 

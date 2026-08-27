@@ -38,6 +38,11 @@ export const IPC = {
   VOICES_CLONES_LIST: 'voices:clones:list',
   VOICES_GET_PREVIEW: 'voices:getPreview',
   VOICES_SCAN_CLONES: 'voices:scanClones',
+  // master-клонування (2.0.1)
+  MASTER_STATUS: 'master:status',
+  MASTER_CLONE: 'master:clone',
+  MASTER_TOGGLE_PUBLIC: 'master:togglePublic',
+  MASTER_LIST: 'master:list',
   // налаштування / статистика / субтитри
   SETTINGS_GET: 'settings:get',
   SETTINGS_SET: 'settings:set',

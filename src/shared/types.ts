@@ -183,6 +183,29 @@ export interface ClonedVoiceMeta {
   owningKeyLabel: string
   clonedAt: string
   localizedFrom?: string
+  /** 2.0.1: клон створено через Master Pro-ключ (власник — мастер-акаунт) */
+  viaMaster?: boolean
+  /** 2.0.1: голос зроблено публічним (доступний іншим ключам) */
+  isPublic?: boolean
+}
+
+// ---------- Master-клонування (2.0.1) ----------
+
+/** Статус master-ключа: чи заданий, валідний, тариф */
+export interface MasterStatus {
+  configured: boolean
+  valid?: boolean
+  plan?: 'free' | 'pro' | 'startup' | 'scale' | 'unknown'
+  error?: string
+}
+
+/** Результат master-клонування з дедуплікацією */
+export interface MasterCloneResult {
+  voice: CartesiaVoice
+  /** true — аудіо вже було заклоновано раніше, повернено існуючий голос */
+  reused: boolean
+  /** true — access перекладено на public після клонування */
+  madePublic: boolean
 }
 
 // ---------- Статистика ----------
@@ -262,6 +285,15 @@ export interface Settings {
   imapConfig?: ImapConfig
   autoreg?: AutoregSettings
   proxy?: ProxySettings
+  /** 2.0.1: API-ключ Master-акаунта з Pro-підпискою — для клонування голосів через API */
+  masterApiKey?: string
+  /** 2.0.1: автоматично робити нові мастер-клони публічними (щоб юзати з free-ключів) */
+  masterAutoPublic?: boolean
+  /**
+   * 2.0.1: ліміт паралельних запитів на майстер-ключі (Tarif: Free 2, Pro 3, Startup 5, Scale 15).
+   * undefined → 3 (Pro за замовчуванням)
+   */
+  masterConcurrency?: number
 }
 
 export interface AppPaths {
@@ -325,6 +357,8 @@ export type MainEvent =
   | { type: 'autoreg-done'; items: AutoregItem[] }
   | { type: 'autoreg-item-done'; item: AutoregItem; index: number }
   | { type: 'autoreg-log'; line: string }
+  // 2.0.1 master-клонування
+  | { type: 'master-log'; line: string }
 
 // ---------- Дефолти ----------
 export const DEFAULT_KEY_LIMIT = 20000

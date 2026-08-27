@@ -9,17 +9,35 @@ import { UsageLedger } from './persistence/usageLedger'
 import { ChatStore } from './persistence/chatStore'
 import { Scheduler } from './tts/scheduler'
 import { VoicesService } from './voices/voicesService'
+import { MasterVoiceService } from './voices/masterVoiceService'
 import { registerIpcHandlers } from './ipc/handlers'
 import { PlaywrightRegistrar } from './email/playwrightRegistrar'
 import { ClerkApiRegistrar } from './email/clerkApiRegistrar'
 import { AutoregService } from './email/autoregService'
 import { ProxyManager } from './proxy/proxyManager'
 import { setupMainLogging } from './logging'
+import { DEFAULT_SETTINGS } from '../shared/types'
 
 registerMediaScheme()
 
 let mainWindow: BrowserWindow | null = null
 let autoregRef: AutoregService | null = null
+
+let getSettingsSnapshotImpl: () => import('../shared/types').Settings = () => ({
+  ...DEFAULT_SETTINGS,
+  notifySystem: true,
+  notifySound: true
+})
+
+/** Живий знімок налаштувань (оновлюється handlers.loadSettings / SETTINGS_SET) */
+function getSettingsSnapshot(): import('../shared/types').Settings {
+  return getSettingsSnapshotImpl()
+}
+
+/** handlers викликають це, щоб index мав актуальні settings для MasterVoiceService */
+export function setSettingsProvider(fn: () => import('../shared/types').Settings): void {
+  getSettingsSnapshotImpl = fn
+}
 
 // Інцидент 25.08.2026: один uncaughtException у main = мовчазний exit(1),
 // батч з 28 акаунтів замер назавжди, причини не було де шукати.
@@ -93,6 +111,12 @@ if (!gotLock) {
     const chats = new ChatStore()
     const scheduler = new Scheduler(pool, client, chats)
     const voices = new VoicesService(dataDir(), client, pool)
+    // мастер-клонування (2.0.1): геттер settings прийде з handlers через SERVICES-розширення
+    const masterVoices = new MasterVoiceService(
+      dataDir(),
+      client,
+      () => getSettingsSnapshot()
+    )
     const registrar = new PlaywrightRegistrar()
     const clerkApiRegistrar = new ClerkApiRegistrar()
     const autoregService = new AutoregService(clerkApiRegistrar, pool)
@@ -101,7 +125,7 @@ if (!gotLock) {
 
     handleMediaProtocol(voices)
     registerIpcHandlers(
-      { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager },
+      { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices },
       () => mainWindow
     )
     pool.startTicking()

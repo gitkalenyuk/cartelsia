@@ -119,6 +119,24 @@ const api = {
       errors: { keyLabel: string; message: string }[]
     }> => ipcRenderer.invoke(IPC.VOICES_SCAN_CLONES)
   },
+  master: {
+    status: (): Promise<import('../shared/types').MasterStatus> =>
+      ipcRenderer.invoke(IPC.MASTER_STATUS),
+    clone: (opts: {
+      clip: ArrayBuffer
+      mimeType: string
+      name: string
+      language: string
+      description?: string
+      accent?: string
+      makePublic?: boolean
+    }): Promise<import('../shared/types').MasterCloneResult> =>
+      ipcRenderer.invoke(IPC.MASTER_CLONE, opts),
+    togglePublic: (voiceId: string): Promise<CartesiaVoice> =>
+      ipcRenderer.invoke(IPC.MASTER_TOGGLE_PUBLIC, { voiceId }),
+    list: (existingClones?: import('../shared/types').ClonedVoiceMeta[]): Promise<ClonedVoiceMeta[]> =>
+      ipcRenderer.invoke(IPC.MASTER_LIST, { existingClones })
+  },
   settings: {
     get: (): Promise<Settings> => ipcRenderer.invoke(IPC.SETTINGS_GET),
     set: (patch: Partial<Settings>): Promise<Settings> =>

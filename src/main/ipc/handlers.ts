@@ -4,6 +4,7 @@ import { join, basename } from 'path'
 import {
   DEFAULT_SETTINGS,
   type Chat,
+  type ClonedVoiceMeta,
   type GenerationSettings,
   type MainEvent,
   type Settings
@@ -16,6 +17,7 @@ import type { UsageLedger } from '../persistence/usageLedger'
 import type { KeyPool } from '../keys/keyPool'
 import type { Scheduler } from '../tts/scheduler'
 import type { VoicesService } from '../voices/voicesService'
+import type { MasterVoiceService } from '../voices/masterVoiceService'
 import type { CartesiaClient } from '../cartesia/client'
 import { chunkText } from '../tts/chunker'
 import { estimate } from '../tts/estimator'
@@ -27,6 +29,7 @@ import { ClerkApiRegistrar } from '../email/clerkApiRegistrar'
 import { AutoregService } from '../email/autoregService'
 import { BrowserSignupRegistrar } from '../email/browserSignupRegistrar'
 import { ProxyManager } from '../proxy/proxyManager'
+import { setSettingsProvider } from '../index'
 
 export interface Services {
   pool: KeyPool
@@ -39,6 +42,7 @@ export interface Services {
   clerkApiRegistrar: ClerkApiRegistrar
   autoregService: AutoregService
   proxyManager: ProxyManager
+  masterVoices?: MasterVoiceService
 }
 
 let settings: Settings
@@ -63,8 +67,13 @@ export function loadSettings(): Settings {
 }
 
 export function registerIpcHandlers(services: Services, getWindow: () => BrowserWindow | null): void {
-  const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager } = services
+  const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager, masterVoices } = services
   loadSettings()
+  // MasterVoiceService отримує живі налаштування (masterApiKey змінюється без рестарту)
+  setSettingsProvider(() => settings)
+  if (masterVoices) {
+    masterVoices.onLog = (line) => broadcast({ type: 'master-log', line })
+  }
   // Рушій реєстрації за settings.autoreg.engine (default 'browser-signup' у 2.0)
   // OTP — прямий IMAP (REGER-механізм): свіже з'єднання + HEADER To пошук на кожен запит.
   const imapForOtp = () => ({
@@ -331,6 +340,46 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     (_e, p: { voiceId: string; previewUrl?: string; language?: string }) => voices.getPreview(p)
   )
   ipcMain.handle(IPC.VOICES_SCAN_CLONES, () => voices.scanClones())
+
+  // ---------- Master-клонування (2.0.1) ----------
+  ipcMain.handle(IPC.MASTER_STATUS, async () => {
+    if (!masterVoices) return { configured: false }
+    return masterVoices.status()
+  })
+
+  ipcMain.handle(
+    IPC.MASTER_CLONE,
+    (_e, p: {
+      clip: ArrayBuffer
+      mimeType: string
+      name: string
+      language: string
+      description?: string
+      accent?: string
+      makePublic?: boolean
+    }) => {
+      if (!masterVoices) throw new Error('Master-сервіс недоступний')
+      return masterVoices.clone({
+        clip: Buffer.from(p.clip),
+        mimeType: p.mimeType,
+        name: p.name,
+        language: p.language,
+        description: p.description,
+        accent: p.accent,
+        makePublic: p.makePublic
+      })
+    }
+  )
+
+  ipcMain.handle(IPC.MASTER_TOGGLE_PUBLIC, (_e, p: { voiceId: string }) => {
+    if (!masterVoices) throw new Error('Master-сервіс недоступний')
+    return masterVoices.togglePublic(p.voiceId)
+  })
+
+  ipcMain.handle(IPC.MASTER_LIST, (_e, p: { existingClones?: ClonedVoiceMeta[] } = {}) => {
+    if (!masterVoices) throw new Error('Master-сервіс недоступний')
+    return masterVoices.listAsMeta(p.existingClones ?? [])
+  })
 
   // ---------- Налаштування / шляхи / статистика ----------
   ipcMain.handle(IPC.SETTINGS_GET, () => settings)

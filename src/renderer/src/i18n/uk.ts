@@ -365,7 +365,43 @@ export const t = {
   cloneViaApi: 'Клонувати через API (платний тариф)',
   cloneApiNote:
     'Пряме клонування через API Cartesia відкриває лише на платному тарифі (від $5/міс). На безкоштовних ключах використовуйте спосіб через сайт, описаний вище.',
-  useVoice: 'Використати голос'
+  useVoice: 'Використати голос',
+
+  // ── Master-клонування (2.0.1) ──
+  sectionMaster: 'Master-акаунт (клонування голосів)',
+  masterApiKey: 'Master API-ключ',
+  masterApiKeyHint: 'API-ключ акаунта з Pro-підпискою ($5/міс). Через нього створюються голосові клони по API. Ключ зберігається локально й НІКОЛИ не додається в загальний пул',
+  masterApiKeyDesc: 'Голоси клонуються цим ключем, а озвучуються потім безкоштовними ключами пулу',
+  masterCheck: 'Перевірити ключ',
+  masterChecking: 'Перевіряю…',
+  masterKeyOk: 'Master-ключ працює — клонування доступне',
+  masterKeyBad: (msg: string) => `Master-ключ не працює: ${msg}`,
+  masterKeyEmpty: 'Спочатку вставте Master API-ключ',
+  masterValid: 'Ключ валідний',
+  masterInvalid: 'Ключ невалідний або мережа недоступна',
+  masterAutoPublic: 'Авто-публікація клонів',
+  masterAutoPublicHint: 'Одразу після клонування голос робиться публічним (PATCH access=public). Це ОБОВ’ЯЗКОВО, щоб озвучувати його ключами, яким він не належить. Вимикайте, лише якщо хочете тримати клони приватними',
+  masterAutoPublicDesc: 'Публічний голос доступний усім вашим ключам — включно з безкоштовними з автореєстрації',
+  masterConcurrency: 'Ліміт паралельних запитів',
+  masterConcurrencyHint: 'Скільки одночасних запитів дозволено на Master-акаунт. Cartesia: Free = 2, Pro = 3, Startup = 5, Scale = 15. Перевищення → HTTP 429 (програма сама повторить)',
+  masterConcurrencyDesc: 'Для Pro ($5/міс) тримайте 3',
+  masterCloneTitle: 'Клонувати голос через Master-акаунт',
+  masterCloneName: 'Назва голосу',
+  masterCloneLanguage: 'Мова кліпу',
+  masterCloneDescription: 'Опис (необовʼязково)',
+  masterCloneClip: 'Аудіокліп до 10 секунд',
+  masterCloneMakePublic: 'Зробити голос публічним після клонування',
+  masterCloneSubmit: 'Створити клон',
+  masterCloning: 'Створюю клон…',
+  masterCloned: (name: string) => `Голос «${name}» створено та додано у бібліотеку`,
+  masterClonedReused: 'Таке аудіо вже було заклоновано раніше — повернено існуючий голос',
+  masterNowPublic: 'Голос опубліковано — доступний усім вашими ключами',
+  masterNoKey: 'Спочатку додайте Master API-ключ у Налаштуваннях',
+  masterLogTitle: 'Лог клонування',
+  masterBadge: 'Master',
+  masterPublicBadge: 'Публічний',
+  masterPrivateBadge: 'Приватний',
+  masterToggle: 'Публікувати / сховати'
 }
 
 export const LANGUAGE_FLAGS: Record<string, string> = {

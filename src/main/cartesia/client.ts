@@ -34,6 +34,12 @@ interface RawVoice {
   is_public?: boolean
   preview_file_url?: string
   created_at?: string
+  /** Pro-клони позначаються fine_tune; локалізація/швидкість на них не впливають */
+  fine_tune?: Record<string, unknown>
+}
+
+export interface RawVoiceFull extends RawVoice {
+  fine_tune_public_model_id?: string
 }
 
 function mapVoice(v: RawVoice): CartesiaVoice {
@@ -217,13 +223,28 @@ export class CartesiaClient {
   /** POST /voices/clone — instant clone з аудіокліпу ≤10 с */
   async cloneVoice(
     key: string,
-    opts: { clip: Buffer; mimeType: string; fileName: string; name: string; language: string; description?: string }
+    opts: {
+      clip: Buffer
+      mimeType: string
+      fileName: string
+      name: string
+      language: string
+      description?: string
+      /** Валідний accent slug з GET /accents */
+      accent?: string
+      /** private (default) | public — доступ до клону */
+      access?: 'private' | 'public'
+      tagline?: string
+    }
   ): Promise<CartesiaVoice> {
     const fd = new FormData()
     fd.append('clip', new Blob([new Uint8Array(opts.clip)], { type: opts.mimeType }), opts.fileName)
     fd.append('name', opts.name)
     fd.append('language', opts.language)
     if (opts.description) fd.append('description', opts.description)
+    if (opts.accent) fd.append('accent', opts.accent)
+    if (opts.access) fd.append('access', opts.access)
+    if (opts.tagline) fd.append('tagline', opts.tagline)
 
     let res: Response
     try {
@@ -237,6 +258,58 @@ export class CartesiaClient {
     }
     if (!res.ok) throw await toCartesiaError(res)
     return mapVoice((await res.json()) as RawVoice)
+  }
+
+  /** GET /voices/{id} — один голос (для перевірки існування та доступу) */
+  async getVoice(key: string, voiceId: string): Promise<CartesiaVoice> {
+    let res: Response
+    try {
+      res = await this.fetchFn(`${this.base}/voices/${voiceId}`, {
+        headers: this.headers(key, false)
+      })
+    } catch (err) {
+      throw asNetworkError(err)
+    }
+    if (!res.ok) throw await toCartesiaError(res)
+    return mapVoice((await res.json()) as RawVoice)
+  }
+
+  /** PATCH /voices/{id} — оновлення голосу (назва, опис, access) */
+  async updateVoice(
+    key: string,
+    voiceId: string,
+    patch: { name?: string; description?: string; access?: 'private' | 'public' }
+  ): Promise<CartesiaVoice> {
+    let res: Response
+    try {
+      res = await this.fetchFn(`${this.base}/voices/${voiceId}`, {
+        method: 'PATCH',
+        headers: this.headers(key),
+        body: JSON.stringify(patch)
+      })
+    } catch (err) {
+      throw asNetworkError(err)
+    }
+    if (!res.ok) throw await toCartesiaError(res)
+    return mapVoice((await res.json()) as RawVoice)
+  }
+
+  /** GET /accents — валідні значення для clone.accent */
+  async getAccents(key: string): Promise<string[]> {
+    let res: Response
+    try {
+      res = await this.fetchFn(`${this.base}/accents?limit=100`, {
+        headers: this.headers(key, false)
+      })
+    } catch (err) {
+      throw asNetworkError(err)
+    }
+    if (!res.ok) throw await toCartesiaError(res)
+    const body = (await res.json()) as { data?: Array<{ id?: string; name?: string }> | string[] }
+    if (Array.isArray(body)) return body as string[]
+    return (body.data ?? [])
+      .map((a) => (typeof a === 'string' ? a : a.id ?? a.name ?? ''))
+      .filter(Boolean)
   }
 
   /** POST /voices/localize — копія голосу іншою мовою */

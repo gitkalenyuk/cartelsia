@@ -63,7 +63,9 @@ export function VoicePicker(props: {
   const rest = voices.filter((v) => !favIds.has(v.id) && !cloneIds.has(v.id))
 
   const select = (id: string, name: string): void => {
-    const owningKeyId = clones.find((c) => c.id === id)?.owningKeyId
+    const clone = clones.find((c) => c.id === id)
+    // Master-клони публічні — пінгувати ключ-власник не потрібно (2.0.1)
+    const owningKeyId = clone?.viaMaster ? undefined : clone?.owningKeyId
     props.onChange({ id, name, owningKeyId })
     setOpen(false)
   }
@@ -147,7 +149,13 @@ export function VoicePicker(props: {
               <div className="sidebar__section" style={{ padding: '4px 10px' }}>{t.myClones}</div>
             ) : null}
             {cloneList.map((c) =>
-              renderRow(c.id, c.name, c.language, undefined, `${t.cloneBadge} · ${c.owningKeyLabel}`)
+              renderRow(
+                c.id,
+                c.name,
+                c.language,
+                undefined,
+                c.viaMaster ? `${t.masterBadge} · ${c.owningKeyLabel}` : `${t.cloneBadge} · ${c.owningKeyLabel}`
+              )
             )}
             {rest.length ? (
               <div className="sidebar__section" style={{ padding: '4px 10px' }}>{t.voices}</div>
