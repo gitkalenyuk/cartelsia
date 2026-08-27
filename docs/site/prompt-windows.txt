@@ -1,0 +1,49 @@
+Ти — досвідчений інженер збирачки Electron-додатків. Твоя задача: склонувати, встановити, зібрати і запустити проєкт Cartelsia 2.0 на WINDOWS. Виконуй кроки по порядку, після кожного перевіряй результат. Якщо крок впав — діагностуй і виправ сам, не питай мене дрібниці.
+
+ПРОЄКТ:
+Repo: https://github.com/gitkalenyuk/cartelsia.git (гілка master)
+Це Electron + React + TypeScript (electron-vite). Портативний exe для Windows.
+Кінцева ціль: зібраний dist/Cartelsia-2.0.0-portable.exe або запущений dev-режим.
+
+КРОКИ:
+
+1) Перевір передумови (встанови відсутнє):
+   - Node.js >= 20 (node -v). Немає → скачай LTS з https://nodejs.org через winget install OpenJS.NodeJS.LTS
+   - Git (git --version). Немає → winget install Git.Git
+   - npm зазвичай йде з Node.
+
+2) Склонуй і перейди в папку:
+   git clone https://github.com/gitkalenyuk/cartelsia.git
+   cd cartelsia
+
+3) Встанови залежності (може зайняти кілька хвилин):
+   npm install
+   Далі — окремо playwright-браузер (потрібен для автореєстрації):
+   npx playwright install chromium
+   Якщо npx playwright падає — спробуй npm exec playwright install chromium.
+
+4) Перевірка цілісності:
+   npm run typecheck    (має пройти без помилок)
+   npm test             (unit-тести мають бути зелені)
+
+5) Швидка перевірка що застосунок стартує (не пропускай!):
+   Запусти npm run dev у фон з таймаутом ~60 с; переконайся що головне вікно Electron відкрилось (лог "ready" / window title Cartelsia), потім заверши процес.
+   У headless-оточері без GUI просто переконайся що `npm run build` успішний.
+
+6) Збірка portable exe:
+   npm run build:win
+   Результат: dist/Cartelsia-2.0.0-portable.exe (~116 МБ) + dist/win-unpacked/
+   Перевір що файл існує і > 100 МБ.
+
+7) Фінальний звіт покажи мені:
+   - шлях до exe
+   - як запустити (подвійний клік; SmartScreen: «Докладніше» → «Виконати все одно» — файл самопідписаний)
+   - де будуть дані: папка data/ поруч з exe (ключі, accounts.txt, api_keys.txt)
+
+НОТАНКИ ЯКЩО ЩОСЬ ПАДЛО:
+   - electron postinstall скачує бінарник — якщо мережа блокує, постав ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ перед npm install
+   - playwright install вимагає ~300 МБ на диску
+   - VS Code / Visual Studio НЕ потрібні: збірка не вимагає native-компіляції.
+   - antivirus може ругнутись на chromium з playwright — це нормально, додай папку у винятки.
+
+Роби все автономно. В кінці коротко: status OK/FAIL + шлях до артефакту.

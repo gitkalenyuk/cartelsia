@@ -3,7 +3,6 @@ import { appendFileSync } from 'fs'
 import { join } from 'path'
 import { BrowserWindow } from 'electron'
 import { ImapClient } from './imapClient'
-import { ImapOtpPoller } from './imapOtpPoller'
 import type { RegisterResult } from './playwrightRegistrar'
 import type { CheckVerificationResult } from './imapClient'
 import type { KeyPool } from '../keys/keyPool'
@@ -76,13 +75,21 @@ function appendAccountsLine(email: string, pass: string, key?: string, err?: str
   try { appendFileSync(join(outputDir(), 'accounts.txt'), line, 'utf8') } catch {}
 }
 
+/** Ключі — в окремий файл (тільки sk_car_..., по одному на рядок) одразу після грабінгу. */
+export function appendKeyLine(key: string): void {
+  for (const dir of [dataDir(), outputDir()]) {
+    try { appendFileSync(join(dir, 'api_keys.txt'), key + '\n', 'utf8') } catch { /* best effort */ }
+  }
+}
+
 /** Публічний інтерфейс рушія реєстрації (PlaywrightRegistrar і BrowserlessRegistrar структурно сумісні). */
 export interface RegistrarEngine {
   registerOne(
     email: string,
     pass: string,
-    checkEmailFn: () => Promise<CheckVerificationResult>,
-    win: BrowserWindow | null,
+    /** Легасі-callback (старі рушії). BrowserSignup отримує OTP прямим IMAP сам. */
+    checkEmailFn?: () => Promise<CheckVerificationResult>,
+    win?: BrowserWindow | null,
     timeoutMs?: number,
     captchaTimeoutMs?: number
   ): Promise<RegisterResult>
@@ -166,9 +173,8 @@ export class AutoregService extends EventEmitter {
 
     const captchaProvider = opts.captchaProvider ?? 'manual'
     const delayMs = opts.delayMs ?? 2500 + Math.floor(Math.random() * 3000)
-    // Спільний IMAP OTP-полер: одне з'єднання на всі потоки (Gmail чутливий до скупчення LOGIN)
-    const poller = new ImapOtpPoller(opts.imapConfig)
-
+    // OTP через ПРЯМИЙ IMAP (REGER-механізм): кожен запит = свіже з'єднання +
+    // серверний SEARCH по To-заголовку. Стійкий до «мовчазних» backend-ів Gmail.
     // Префлайт IMAP
     const preflight = await ImapClient.testConnection(opts.imapConfig)
     if (!preflight.ok) {
@@ -252,11 +258,19 @@ export class AutoregService extends EventEmitter {
     }
     this.registrar.on('captcha', onCaptcha)
 
-    // Мультипотік: N воркерів тягнуть черговий queued-акаунт (concurrency=1 — те саме, що раніш серійно).
-    const workers = Math.max(1, Math.min(20, Math.floor(opts.concurrency ?? 1)))
+    // Мультипотік: N воркерів тягнуть черговий queued-акаунт. Воркери ПЕРСИСТЕНТНІ:
+    // після завершення задачі (успіх/фейл) + пауза delayMs беруть наступну —
+    // на весь прогін працює рівно N одночасних реєстрацій.
+    // Cap 25: понад це Clerk/Vercel починають 429-ти на всі запити одразу.
+    const workers = Math.max(1, Math.min(25, Math.floor(opts.concurrency ?? 1)))
     if (workers > 1) console.log('[autoreg] concurrency=' + workers + ' потоків')
+    // Proxy penalty: рушій може рапортувати фейли; BrowserSignup сам тримає лічильники,
+    // тут лише пробросимо події вилучення в лог.
+    const bs = this.registrar as import('./browserSignupRegistrar').BrowserSignupRegistrar
     let next = 0
-    const workerLoop = async (): Promise<void> => {
+    const workerLoop = async (workerId: number): Promise<void> => {
+      // Stagger старту: 1.2 c між потоками — не бомбимо Vercel checkpoint пачкою
+      if (workerId > 1) await new Promise((r) => setTimeout(r, (workerId - 1) * 1200))
       while (true) {
         if (this.cancelled) {
           let marked = false
@@ -285,7 +299,7 @@ export class AutoregService extends EventEmitter {
           result = await this.registrar.registerOne(
             item.email,
             item.pass,
-            () => poller.waitForVerification(item.email),
+            undefined, // OTP прямим IMAP усередині registrar (imapDirectOtp)
             win
           )
         } catch (err) {
@@ -297,9 +311,24 @@ export class AutoregService extends EventEmitter {
           }
         }
 
+        // Proxy penalty: 2 фейли підряд на одному проксі → вилучення з ротації
+        if (bs && typeof bs.reportProxySuccess === 'function') {
+          const usedProxy: string | null = bs._lastProxy ?? null
+          if (result.success) {
+            bs.reportProxySuccess(usedProxy)
+          } else {
+            const removed = bs.reportProxyFailure(usedProxy)
+            if (removed) {
+              console.log('[autoreg] proxy видалено після 2 фейлів підряд:',
+                usedProxy?.replace(/\/\/[^@]+@/, '//***@'))
+            }
+          }
+        }
+
         if (result.success && result.key) {
           item.state = 'done'
           item.key = result.key
+          appendKeyLine(result.key)
           try {
             await this.pool.addKeys([result.key], undefined, 'pool')
           } catch (e) {
@@ -318,20 +347,49 @@ export class AutoregService extends EventEmitter {
         this.emit('item-done', { item: { ...item }, index: i })
         emitProgress()
 
-        // Пауза після акаунта (якщо залишилось і не скасовано) — розтягує старти потоків
+        // Пауза після акаунта, потік бере наступний (restart delay).
         if (next < this.items.length && !this.cancelled) {
           const pause = delayMs + Math.floor(Math.random() * 1000)
-          console.log(`[autoreg] пауза ${pause}мс (потік #${i + 1})`)
           await new Promise((r) => setTimeout(r, pause))
         }
       }
     }
     try {
       await Promise.all(
-        Array.from({ length: Math.min(workers, this.items.length) }, () => workerLoop())
+        Array.from({ length: Math.min(workers, this.items.length) }, (_, k) => workerLoop(k + 1))
       )
+
+      // ── Рятувальний прохід: 'done без ключа' → відновити сесію → повторний /keys ──
+      const keyless = this.items.filter((it) => it.state === 'done' && !it.key)
+      const rescuer = this.registrar as import('./browserSignupRegistrar').BrowserSignupRegistrar
+      if (keyless.length > 0 && typeof rescuer.rescueKey === 'function' && !this.cancelled) {
+        console.log(`[autoreg] rescue: ${keyless.length} акаунтів без ключа — повторна спроба через збережені сесії`)
+        this.emit('progress', { items: [...this.items], current: this.currentIndex, total: this.items.length })
+        const rescueSem = Math.min(5, keyless.length)
+        let ri = 0
+        const rescueWorker = async (): Promise<void> => {
+          while (true) {
+            const i = ri++
+            if (i >= keyless.length || this.cancelled) return
+            const it = keyless[i]
+            try {
+              const key = await rescuer.rescueKey(it.email)
+              if (key) {
+                it.key = key
+                it.error = undefined
+                appendKeyLine(key)
+                try { await this.pool.addKeys([key], undefined, 'pool') } catch { /* ignore */ }
+                console.log(`[autoreg] rescue OK ${it.email} → ${key.slice(0, 16)}…`)
+                this.emit('item-done', { item: { ...it }, index: -1 })
+                this.emit('progress', { items: [...this.items], current: this.currentIndex, total: this.items.length })
+              }
+            } catch { /* rescue best-effort */ }
+            await new Promise((r) => setTimeout(r, 1500))
+          }
+        }
+        await Promise.all(Array.from({ length: rescueSem }, () => rescueWorker()))
+      }
     } finally {
-      poller.close()
       if (this.persistTimer) { clearTimeout(this.persistTimer); this.persistTimer = null }
       // Фінальний синхронний запис: стан на диску навіть якщо процес вийде
       // одразу після 'done'

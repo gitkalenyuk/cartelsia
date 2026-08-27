@@ -142,7 +142,7 @@ const api = {
       count: number,
       catchAllDomain: string,
       imapConfig: Settings['imapConfig'],
-      opts?: { captchaProvider?: string; captchaApiKey?: string; delayMs?: number; concurrency?: number }
+      opts?: { captchaProvider?: string; captchaApiKey?: string; delayMs?: number; concurrency?: number; headless?: boolean; useProxy?: boolean }
     ): Promise<{
       ok: boolean
       error?: string
@@ -162,6 +162,8 @@ const api = {
   proxy: {
     grab: (url: string): Promise<{ grabbed: number; proxies: any[] }> =>
       ipcRenderer.invoke(IPC.PROXY_GRAB, { url }),
+    importText: (text: string): Promise<{ added: number; proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_IMPORT, { text }),
     check: (): Promise<{ proxies: any[] }> =>
       ipcRenderer.invoke(IPC.PROXY_CHECK),
     list: (): Promise<any[]> =>

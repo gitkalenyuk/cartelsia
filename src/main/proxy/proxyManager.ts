@@ -7,6 +7,28 @@ export interface ProxyEntry {
   latencyMs?: number
 }
 
+/** Парсить multiline-текст з проксі у нормалізовані URL. Формати:
+ *  http://u:p@ip:port | http://ip:port | ip:port | ip:port:user:pass. Дедублікує. */
+export function parseProxyLines(text: string): string[] {
+  const out: string[] = []
+  for (const rawLine of text.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line || line.startsWith('#')) continue
+    if (/^https?:\/\//.test(line)) { out.push(line); continue }
+    const cred = /^(\d{1,3}(?:\.\d{1,3}){3}):(\d+):([^:\s]+):(.+)$/.exec(line)
+    if (cred) {
+      const [, ip, port, user, pass] = cred
+      out.push(`http://${user}:${pass}@${ip}:${port}`)
+      continue
+    }
+    if (/^\d{1,3}(?:\.\d{1,3}){3}:\d+$/.test(line)) { out.push('http://' + line); continue }
+    // URL-и всередині html/тексту
+    const embedded = line.match(/https?:\/\/[^\s'"<>]+/g)
+    if (embedded) out.push(...embedded)
+  }
+  return [...new Set(out)]
+}
+
 export class ProxyManager {
   private proxies: ProxyEntry[] = []
   private currentIndex = 0
@@ -15,15 +37,15 @@ export class ProxyManager {
   async fetchFromUrl(url: string): Promise<string[]> {
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) })
     const text = await res.text()
+    return parseProxyLines(text)
+  }
 
-    // 1) http(s)://user:pass@ip:port або http(s)://ip:port
-    const full = text.match(/https?:\/\/[^\s]+/g) || []
-
-    // 2) ip:port (без протоколу)
-    const raw = text.match(/\d+\.\d+\.\d+\.\d+:\d+/g) || []
-
-    const all = [...full, ...raw.map((r) => 'http://' + r)]
-    return [...new Set(all.filter((u) => /^https?:\/\/.+/.test(u)))]
+  /** Імпорт з тексту (multiline): http://u:p@ip:port | ip:port | ip:port:user:pass */
+  addFromText(text: string): number {
+    const urls = parseProxyLines(text)
+    const before = this.proxies.length
+    this.addProxies(urls)
+    return this.proxies.length - before
   }
 
   /** Перевіряємо проксі: запит до clerk.cartesia.ai через ProxyAgent. */

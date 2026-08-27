@@ -102,7 +102,9 @@ export class ImapOtpPoller {
   private async getSession(): Promise<ImapSession> {
     if (this.session) return this.session
     if (!this.connecting) {
-      this.connecting = openImapSession(this.config).then((s) => {
+      this.connecting = openImapSession(this.config).then(async (s) => {
+        // Без SELECT INBOX пошук/фетч повертає помилку — коди ніколи не знаходяться.
+        await s.exec('A1 SELECT INBOX')
         this.session = s
         this.connecting = null
         return s

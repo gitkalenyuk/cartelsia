@@ -1,6 +1,35 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { X } from 'lucide-react'
+import { X, HelpCircle } from 'lucide-react'
 import { t } from '../../i18n/uk'
+
+// ---------- Tooltip (знак питання + спливаюча підказка) ----------
+export function Hint(props: { text: string; label?: string }): React.JSX.Element {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const close = (e: MouseEvent): void => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    window.addEventListener('mousedown', close)
+    return () => window.removeEventListener('mousedown', close)
+  }, [open])
+  return (
+    <span
+      ref={ref}
+      className="hint"
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+      onClick={(e) => { e.preventDefault(); setOpen((v) => !v) }}
+    >
+      {props.label && <span className="hint__label">{props.label}</span>}
+      <HelpCircle size={13} className="hint__icon" />
+      {open && (
+        <span className="hint__bubble" role="tooltip">{props.text}</span>
+      )}
+    </span>
+  )
+}
 
 // ---------- Button ----------
 export function Button(props: {

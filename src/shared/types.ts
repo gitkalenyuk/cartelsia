@@ -221,16 +221,18 @@ export interface ImapConfig {
 
 export type CaptchaProvider = 'manual' | '2captcha' | 'capsolver'
 
-export type AutoregEngine = 'playwright' | 'browserless' | 'clerk-api'
+export type AutoregEngine = 'browser-signup' | 'playwright' | 'browserless' | 'clerk-api'
 
 export interface AutoregSettings {
-  engine?: AutoregEngine // default 'playwright'; browserless — fetch-цикл без UI
-  concurrency?: number // одночасних потоків, 1 = підряд (default), max 20
+  engine?: AutoregEngine // default 'browser-signup' (2.0); інші — legacy
+  concurrency?: number // одночасних потоків, 1 = підряд, max 50
   captchaProvider?: CaptchaProvider // default 'manual'
   captchaApiKey?: string
   delayMs?: number // пауза між акаунтами (мс), default ~2500-5500
   batchSize?: number // розмір пачки, undefined = без пачок
   chromiumMode?: 'bundled' | 'download' // bundled=все в .exe, download=докачка при першому запуску
+  headless?: boolean // headless Chromium (default true)
+  useProxy?: boolean // ганяти реєстрацію через проксі-пул
 }
 
 export interface ProxyEntry {
@@ -322,6 +324,7 @@ export type MainEvent =
   | { type: 'autoreg-progress'; items: AutoregItem[]; current: number; total: number }
   | { type: 'autoreg-done'; items: AutoregItem[] }
   | { type: 'autoreg-item-done'; item: AutoregItem; index: number }
+  | { type: 'autoreg-log'; line: string }
 
 // ---------- Дефолти ----------
 export const DEFAULT_KEY_LIMIT = 20000

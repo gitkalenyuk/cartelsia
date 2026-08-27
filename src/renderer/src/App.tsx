@@ -4,7 +4,7 @@ import { ChatView } from './components/chat/ChatView'
 import { KeysView } from './components/keys/KeysView'
 import { VoicesView } from './components/voices/VoicesView'
 import { CloneVoiceView } from './components/voices/CloneVoiceView'
-import { BrowserView } from './components/browser/BrowserView'
+import { AutoregView } from './components/browser/AutoregView'
 import { StatsView } from './components/stats/StatsView'
 import { SettingsView } from './components/settings/SettingsView'
 import { ToastHost } from './components/common/ToastHost'
@@ -42,7 +42,7 @@ export default function App(): React.JSX.Element {
       <Sidebar />
       {view === 'browser' ? (
         <main className="main" style={{ overflow: 'hidden' }}>
-          <BrowserView />
+          <AutoregView />
         </main>
       ) : (
         <main className="main">

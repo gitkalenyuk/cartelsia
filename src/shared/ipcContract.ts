@@ -55,6 +55,7 @@ export const IPC = {
   AUTOREG_STOP: 'autoreg:stop',
   // proxy
   PROXY_GRAB: 'proxy:grab',
+  PROXY_IMPORT: 'proxy:import',
   PROXY_CHECK: 'proxy:check',
   PROXY_LIST: 'proxy:list',
   PROXY_REMOVE: 'proxy:remove',

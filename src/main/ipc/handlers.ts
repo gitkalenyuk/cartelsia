@@ -25,6 +25,7 @@ import { ImapClient } from '../email/imapClient'
 import { PlaywrightRegistrar } from '../email/playwrightRegistrar'
 import { ClerkApiRegistrar } from '../email/clerkApiRegistrar'
 import { AutoregService } from '../email/autoregService'
+import { BrowserSignupRegistrar } from '../email/browserSignupRegistrar'
 import { ProxyManager } from '../proxy/proxyManager'
 
 export interface Services {
@@ -54,15 +55,38 @@ export function loadSettings(): Settings {
     ...settings,
     defaults: { ...DEFAULT_SETTINGS.defaults, ...settings.defaults }
   }
+  // 2.0 нормалізація: мертві рушії (clerk-api, browserless) → новий browser-signup
+  if (settings.autoreg?.engine === 'clerk-api' || settings.autoreg?.engine === 'browserless') {
+    settings.autoreg = { ...settings.autoreg, engine: 'browser-signup' }
+  }
   return settings
 }
 
 export function registerIpcHandlers(services: Services, getWindow: () => BrowserWindow | null): void {
   const { pool, scheduler, chats, voices, ledger, client, registrar, clerkApiRegistrar, autoregService, proxyManager } = services
   loadSettings()
-  // Рушій реєстрації за settings.autoreg.engine (default 'playwright')
-  const activeRegistrar = () =>
-    settings.autoreg?.engine === 'clerk-api' ? clerkApiRegistrar : registrar
+  // Рушій реєстрації за settings.autoreg.engine (default 'browser-signup' у 2.0)
+  // OTP — прямий IMAP (REGER-механізм): свіже з'єднання + HEADER To пошук на кожен запит.
+  const imapForOtp = () => ({
+    host: settings.imapConfig?.host ?? 'imap.gmail.com',
+    port: settings.imapConfig?.port ?? 993,
+    user: settings.imapConfig?.user ?? '',
+    pass: settings.imapConfig?.pass ?? ''
+  })
+  const browserSignup = new BrowserSignupRegistrar({
+    proxyGetter: () => (settings.autoreg?.useProxy ? proxyManager.rotate() : null),
+    headless: settings.autoreg?.headless ?? true,
+    imap: imapForOtp()
+  })
+  browserSignup.onLog = (line) => broadcast({ type: 'autoreg-log', line })
+  const activeRegistrar = () => {
+    // 2.0: clerk-api і browserless МЕРТВІ (Clerk soft-block створення юзерів).
+    // Старі settings можуть містити 'clerk-api' — ігноруємо, тільки два живі варіанти:
+    // 'playwright' (legacy visible-window) або 'browser-signup' (новий, default).
+    const eng = settings.autoreg?.engine
+    if (eng === 'playwright') return registrar
+    return browserSignup
+  }
   scheduler.setGlobalCap(settings.globalConcurrencyCap)
 
   const broadcast = (event: MainEvent): void => {
@@ -349,6 +373,8 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
         captchaApiKey?: string
         delayMs?: number
         concurrency?: number
+        headless?: boolean
+        useProxy?: boolean
       }
     ) => {
       const cfg = p.imapConfig ?? settings.imapConfig
@@ -360,6 +386,9 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
       }
       const win = getWindow()
       // Неблокуючий: запускаємо у фоні, одразу повертаємо ok
+      browserSignup.headless = p.headless ?? settings.autoreg?.headless ?? true
+      browserSignup.proxyGetter = () => (p.useProxy ?? settings.autoreg?.useProxy ?? false ? proxyManager.rotate() : null)
+      browserSignup.imap = imapForOtp()  // свіжі IMAP-креденшали на кожен прогін
       autoregService.setRegistrar(activeRegistrar())
       const opts = {
         count: p.count,
@@ -489,6 +518,11 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     const list = await proxyManager.fetchFromUrl(p.url)
     proxyManager.addProxies(list)
     return { grabbed: list.length, proxies: proxyManager.list() }
+  })
+
+  ipcMain.handle(IPC.PROXY_IMPORT, (_e, p: { text: string }) => {
+    const added = proxyManager.addFromText(p.text)
+    return { added, proxies: proxyManager.list() }
   })
 
   ipcMain.handle(IPC.PROXY_CHECK, async () => {

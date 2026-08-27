@@ -1,0 +1,61 @@
+Ти — досвідчений інженер збирачки Electron-додатків на macOS. Твоя задача: склонувати, встановити, зібрати і запустити проєкт Cartelsia 2.0. Виконуй кроки по порядку, після кожного перевіряй результат. Падіння діагностуєш і виправляєш сам.
+
+ПРОЄКТ:
+Repo: https://github.com/gitkalenyuk/cartelsia.git (гілка master)
+Electron + React + TypeScript (electron-vite). Порти под Windows, але код кросплатформенний (Electron + Playwright).
+Кінцева ціль: dev-режим працює У ТЕБЕ локально; опційно — dmg для mac.
+
+ВАЖЛИВО ПРО БЕЗПЕКУ MACOS (прочитай перед запуском):
+Зібраний додаток буде НЕПІДПИСАНИЙ (немає Apple Developer сертификата, $99/рік).
+macOS Gatekeeper заблокує перший запуск. Розблокування (робиться САМО, без терміналу):
+  1) При першому відкритті dmg/app macOS напише "Cartelsia cannot be opened because the developer cannot be verified" АБО "damaged".
+  2) Йди в System Settings → Privacy & Security → прокрути вниз → там буде кнопка "Open Anyway" біля повідомлення про Cartelsia → тисни її → Open.
+  3) Якщо пише "damaged and can't be opened" — це карантинний атрибут. Зніми його в Terminal:
+     xattr -dr com.apple.quarantine /Applications/Cartelsia.app
+     (або шлях до .app де ти його тримаєш)
+Це все — далі застосунок запускається як звичайний.
+
+КРОКИ:
+
+1) Передумови:
+   - Homebrew (/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)")
+   - Node >= 20: brew install node@20 (node -v перевір)
+   - git: brew install git (зазвичай вже є, xcode-select --install теж тягне)
+
+2) Клонуй:
+   git clone https://github.com/gitkalenyuk/cartelsia.git
+   cd cartelsia
+
+3) Залежності:
+   npm install
+   Playwright chromium (потрібен автореєстрації):
+   npx playwright install chromium
+   На Apple Silicon якщо Chromium падає при запуску: npx playwright install chromium --with-deps
+
+4) Перевірки:
+   npm run typecheck    (без помилок)
+   npm test             (тести зелені)
+   Примітка: tsconfig цілиться під Windows-шляхи тільки у вбудованих даних; сам код кросплатформений. Якщо typecheck лається на щось win-specific — повідом В МЕНІ точну помилку і патчи мінімально (не переписуй логіку).
+
+5) Запуск dev (перевірка живцем):
+   npm run dev          — має відкритись вікно Electron з темним UI "Cartelsia"
+   Закрий вікно коли переконаєшся.
+
+6) Опційна збірка mac-версії:
+   Додай в electron-builder.yml секцію:
+     mac:
+       target: dmg
+       icon: build/icon.png
+       category: public.app-category.productivity
+   Потім: npx electron-builder --mac
+   Артефакт: dist/Cartelsia-2.0.0.dmg
+   Перед поширенням попередження: непідписаний dmg вимагає розблокування з секції ВАЖЛИВО вище (xattr).
+
+7) Звіт мені: status OK/FAIL, що зібралось (exe/dmg/dev), шляхи, і чи потрібне було ручне розблокування Gatekeeper.
+
+НОТАНКИ:
+   - Electron скачує ~100 МБ; на повільній мережі ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+   - Playwright chromium ~300 МБ у ~/Library/Caches/ms-playwright
+   - Для portable exe під Windows — або збирай на Windows машині, або ci GitHub Actions windows-latest (npm run build:win).
+
+Роби все автономно. В кінці короткий звіт.
