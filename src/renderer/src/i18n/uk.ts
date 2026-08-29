@@ -424,7 +424,11 @@ export const t = {
   sharedRemoved: (alias: string) => `«${alias}» видалено з реєстру`,
   sharedRemoveTitle: 'Видалити зі спільних?',
   sharedRemoveBody: (alias: string) => `Ярлик «${alias}» буде видалено з бібліотеки. Сам голос на Cartesia не постраждає (ми його не створювали)`,
-  sharedVoiceRevokedAbort: (alias: string) => `Прогін зупинено: спільний голос «${alias}» став недоступним (власник вимкнув Share). Оберіть інший голос або попросіть власника увімкнути Shared знову`
+  sharedVoiceRevokedAbort: (alias: string) => `Прогін зупинено: спільний голос «${alias}» став недоступним (власник вимкнув Share). Оберіть інший голос або попросіть власника увімкнути Shared знову`,
+
+  // ── sonic-3.6 (2.1.1) ──
+  localeAuto: 'Авто (language)',
+  localeHint: 'Locale (тільки sonic-3.6): регіональні правила читання дат і чисел, напр. en-GB. Взаємовиключний з мовою — вибір locale прибирає language з запиту'
 }
 
 export const LANGUAGE_FLAGS: Record<string, string> = {

@@ -1,6 +1,6 @@
 {
   "name": "cartelsia",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Cartelsia — озвучення тексту через Cartesia API з пулом ключів",
   "main": "./out/main/index.js",
   "author": "Cartelsia",

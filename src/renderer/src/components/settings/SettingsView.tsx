@@ -97,12 +97,15 @@ export function SettingsView(): React.JSX.Element {
             down
             right
             options={[
+              { value: 'sonic-3.6', label: 'sonic-3.6 — найновіша' },
               { value: 'sonic-3.5', label: 'sonic-3.5' },
               { value: 'sonic-3', label: 'sonic-3' }
             ]}
             value={d.modelId}
             onSelect={(modelId) =>
-              void update({ defaults: { ...d, modelId: modelId as 'sonic-3.5' | 'sonic-3' } })
+              void update({
+                defaults: { ...d, modelId: modelId as 'sonic-3.6' | 'sonic-3.5' | 'sonic-3' }
+              })
             }
           />
         </Row>

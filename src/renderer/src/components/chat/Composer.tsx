@@ -23,6 +23,15 @@ const TAGS: { label: string; snippet: string; cursorInside?: boolean }[] = [
   { label: t.breathTag, snippet: '[breath]' }
 ]
 
+// 2.1.1: locale-коди для sonic-3.6 (регіональні правила читання дат/чисел).
+// Взаємовиключні з language на рівні API.
+const LOCALE_OPTIONS = [
+  'en-GB', 'en-US', 'en-AU', 'en-IN',
+  'uk-UA', 'pl-PL', 'de-DE', 'de-AT', 'de-CH',
+  'fr-FR', 'fr-CA', 'es-ES', 'es-MX', 'pt-BR', 'pt-PT',
+  'it-IT', 'nl-NL', 'sv-SE', 'tr-TR', 'ar-SA', 'cs-CZ', 'ro-RO'
+] as const
+
 export function Composer(): React.JSX.Element {
   const settings = useSettingsStore((s) => s.settings)
   const keys = useKeysStore((s) => s.keys)
@@ -140,11 +149,14 @@ export function Composer(): React.JSX.Element {
             </button>
           }
           options={[
-            { value: 'sonic-3.5', label: 'sonic-3.5', description: 'Найновіша, рекомендовано' },
-            { value: 'sonic-3', label: 'sonic-3', description: 'Попередня стабільна' }
+            { value: 'sonic-3.6', label: 'sonic-3.6', description: 'Найновіша (2.1.1), рекомендовано' },
+            { value: 'sonic-3.5', label: 'sonic-3.5', description: 'Попередня стабільна' },
+            { value: 'sonic-3', label: 'sonic-3', description: 'Застаріла' }
           ]}
           value={effective.modelId}
-          onSelect={(modelId) => setGen((g) => ({ ...g, modelId: modelId as 'sonic-3.5' | 'sonic-3' }))}
+          onSelect={(modelId) =>
+            setGen((g) => ({ ...g, modelId: modelId as 'sonic-3.6' | 'sonic-3.5' | 'sonic-3' }))
+          }
         />
         <Dropdown
           trigger={
@@ -165,8 +177,33 @@ export function Composer(): React.JSX.Element {
             }))
           ]}
           value={effective.language ?? ''}
-          onSelect={(lang) => setGen((g) => ({ ...g, language: lang || undefined }))}
+          onSelect={(lang) => setGen((g) => ({ ...g, language: lang || undefined, locale: undefined }))}
         />
+        {effective.modelId === 'sonic-3.6' ? (
+          <Dropdown
+            trigger={
+              <button className="pill" title={t.localeHint}>
+                <Globe size={13} />
+                Locale:{' '}
+                <span className="pill__value">{effective.locale ?? t.localeAuto}</span>
+              </button>
+            }
+            searchable
+            options={[
+              { value: '', label: t.localeAuto },
+              ...LOCALE_OPTIONS.map((l) => ({ value: l, label: l }))
+            ]}
+            value={effective.locale ?? ''}
+            onSelect={(locale) =>
+              setGen((g) => ({
+                ...g,
+                // locale і language взаємовиключні на рівні API
+                locale: locale || undefined,
+                language: locale ? undefined : g.language
+              }))
+            }
+          />
+        ) : null}
         <Dropdown
           trigger={
             <button className="pill">

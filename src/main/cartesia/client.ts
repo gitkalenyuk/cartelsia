@@ -126,11 +126,13 @@ export class CartesiaClient {
     if (s.volume !== undefined && s.volume !== 1) generationConfig.volume = s.volume
     if (s.emotion && s.emotion !== 'neutral') generationConfig.emotion = s.emotion
 
+    // 2.1.1: locale і language ВЗАЄМОВИКЛЮЧНІ (API: 400 "mutually exclusive").
+    // locale — новіше, перемагає.
     return {
       model_id: s.modelId,
       transcript: text,
       voice: { mode: 'id', id: s.voiceId },
-      ...(s.language ? { language: s.language } : {}),
+      ...(s.locale ? { locale: s.locale } : s.language ? { language: s.language } : {}),
       ...(Object.keys(generationConfig).length ? { generation_config: generationConfig } : {})
     }
   }

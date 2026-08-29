@@ -43,6 +43,7 @@
       <div class="cardx"><div class="ic">🛟</div><h3>Rescue-прохід</h3><p>Акаунти «без ключа» автоматично проходять повторний /keys через збережену сесію. Жоден акк не втрачається.</p></div>
       <div class="cardx"><div class="ic">🌐</div><h3>Проксі з розумом</h3><p>Імпорт ip:port:user:pass, перевірка, ротація. Проксі, що дала 2 фейли підряд, видаляється сама.</p></div>
       <div class="cardx"><div class="ic">👑</div><h3>Master-клонування <span style="color:var(--accent);font-size:12px">2.0.1</span></h3><p>Pro-акаунт ($5/міс) стає фабрикою голосів: клон по API з будь-якого кліпу ≤10 с, авто-публікація — і клон озвучується всім пулом безкоштовних ключів.</p></div>
+      <div class="cardx"><div class="ic">🚀</div><h3>sonic-3.6 + locale <span style="color:var(--accent);font-size:12px">2.1.1</span></h3><p>Нова модель Cartesia за замовчуванням, вибір у композері й налаштуваннях, locale-коди (en-GB, uk-UA…) для регіональної вимови. Стара 3.5 досі доступна.</p></div>
       <div class="cardx"><div class="ic">🌐</div><h3>Спільні голоси + кеш <span style="color:var(--accent);font-size:12px">2.1.0</span></h3><p>Додайте будь-який публічний голос за Voice ID — озвучуйте ним усім пулом free-ключів. Кредити списуються з вашого ключа, не власника. Кеш TTS: повтори безкоштовні.</p></div>
       <div class="cardx"><div class="ic">🎨</div><h3>Редизайн 2.0</h3><p>Inter + JetBrains Mono, градієнти, анімації, живий лог кожної реєстрації, тултіпи ? на всіх параметрах.</p></div>
     </div>
@@ -96,6 +97,15 @@
       <li>Cartelsia → Налаштування → Catch-All домен = reg.mydomain.com.</li>
     </ol>
     <div class="okbox">💡 Кілька субдоменів = кілька незалежних партій: reg1.mydomain.com і reg2.mydomain.com. Основний домен ніколи не світиться в реєстраціях.</div>
+
+    <h2 style="font-size:22px; margin-top:36px">🚀 Моделі озвучення (2.1.1)</h2>
+    <table class="t">
+      <tr><th>Модель</th><th>Що це</th></tr>
+      <tr><td><b>sonic-3.6</b> (рекомендовано)</td><td>Найновіша GA-модель (27.08.2026). Нова поле <code>locale</code>: регіональні правила читання дат/чисел (en-GB, uk-UA, de-DE…). Взаємовиключне з language — Cartelsia шле тільки одне. Вибір у композері та Налаштуваннях</td></tr>
+      <tr><td>sonic-3.5</td><td>Попередня стабільна. Усі старі чати й голоси сумісні</td></tr>
+      <tr><td>sonic-3</td><td>Застаріла, лишилась для сумісності</td></tr>
+    </table>
+    <div class="okbox">💡 API не змінився: Cartesia-Version 2026-03-01 приймає sonic-3.6. Перевірено наживо: bytes, SSE-субтитри, locale, emotion — усе 200. PVC-клони, створені на 3.5, працюють з 3.6 без перетворень.</div>
 
     <h2 style="font-size:22px; margin-top:36px">🌐 Спільні голоси за Voice ID (2.1.0)</h2>
     <p class="lead">Будь-який публічний («Shared») голос Cartesia можна додати за Voice ID — і озвучувати ним УСІМ пулом безкоштовних ключів. Кредити списуються з вашого ключа, не з акаунта власника (перевірено наживо).</p>

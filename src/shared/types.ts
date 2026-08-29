@@ -34,7 +34,7 @@ export interface AddKeysResult {
 }
 
 // ---------- Налаштування генерації ----------
-export type ModelId = 'sonic-3.5' | 'sonic-3'
+export type ModelId = 'sonic-3.6' | 'sonic-3.5' | 'sonic-3'
 export type AudioContainer = 'mp3' | 'wav'
 
 export interface OutputFormatSetting {
@@ -51,6 +51,11 @@ export interface GenerationSettings {
   /** 2.1: голос із реєстру спільних — перевіряється перед прогоном, пінгування ключа не потрібно */
   sharedVoiceAlias?: string
   language?: string // 'uk' і т.д.; undefined → автовизначення
+  /**
+   * 2.1.1: locale-код (напр. 'en-GB', 'uk-UA') — регіональні правила читання дат/чисел.
+   * НОВА модель sonic-3.6; ВЗАЄМОВИКЛЮЧНИЙ з language (API віддає 400 якщо обидва).
+   */
+  locale?: string
   speed?: number // [0.6, 1.5]
   volume?: number // [0.5, 2.0]
   emotion?: string
@@ -404,7 +409,7 @@ export const CARTESIA_VERSION = '2026-03-01'
 export const CARTESIA_BASE = 'https://api.cartesia.ai'
 
 export const DEFAULT_GENERATION_SETTINGS: GenerationSettings = {
-  modelId: 'sonic-3.5',
+  modelId: 'sonic-3.6',
   voiceId: '',
   chunkSize: 500,
   output: { container: 'mp3', sampleRate: 44100, bitRate: 128000 },
