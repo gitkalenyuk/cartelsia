@@ -3,245 +3,281 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cartelsia 2.0 — озвучення тексту + автареєстрація Cartesia</title>
-<meta name="description" content="Cartelsia 2.0: пул ключів Cartesia AI, автареєстрація акаунтів до 25 потоків, catch-all на субдомені. Portable exe, безкоштовно.">
-<link rel="icon" href="icon.png">
+<title>Cartelsia — озвучка Cartesia AI з пулом ключів</title>
+<meta name="description" content="Portable-застосунок: озвучення тексту через Cartesia AI з пулом безкоштовних ключів, автореєстрація акаунтів, master-клонування голосів.">
+<link rel="icon" type="image/png" href="icon.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav>
-  <div class="nav-in">
-    <a class="brand" href="#home" data-page="home"><img src="icon.png" alt="">Cartelsia <span class="v">2.0</span></a>
-    <div class="nav-links">
-      <a href="#home" data-page="home" class="active">Головна</a>
-      <a href="#docs" data-page="docs">Docs</a>
-      <a href="#ai" data-page="ai">🤖 AI-збірка</a>
-      <a href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank">Завантажити</a>
+<!-- ═══════════ Анімований фон ═══════════ -->
+<div class="bg">
+  <div class="bg__grid"></div>
+  <div class="bg__glow bg__glow--1"></div>
+  <div class="bg__glow bg__glow--2"></div>
+  <div class="bg__glow bg__glow--3"></div>
+</div>
+
+<!-- ═══════════ Навбар ═══════════ -->
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="nav__brand" href="#top">
+      <img src="icon.png" alt="" class="nav__icon">
+      <span>Cartelsia</span>
+    </a>
+    <div class="nav__links">
+      <a href="#features">Можливості</a>
+      <a href="#how">Як працює</a>
+      <a href="#docs">Доки</a>
+      <a href="#faq">FAQ</a>
     </div>
+    <a class="nav__cta" href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank" rel="noopener">
+      Завантажити <span class="nav__cta-version" id="nav-version">2.1.3</span>
+    </a>
   </div>
 </nav>
 
-<!-- ================= HOME ================= -->
-<div id="page-home" class="page active">
-  <div class="hero">
-    <img class="logo" src="icon.png" alt="Cartelsia">
-    <h1>Cartelsia <span>2.0</span></h1>
-    <p class="sub">Озвучення тексту через Cartesia AI з пулом безкоштовних ключів + <b>автореєстрація акаунтів нового покоління</b>: до 25 потоків у headless Chromium, ключі забирає сама.</p>
-    <div class="cta-row">
-      <a class="btn primary" href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank">⬇ Завантажити для Windows</a>
-      <a class="btn ghost" href="#docs" data-page="docs">📖 Документація</a>
+<!-- ═══════════ Hero ═══════════ -->
+<header class="hero" id="top">
+  <div class="hero__inner">
+    <div class="hero__badge reveal">
+      <span class="hero__badge-dot"></span>
+      v<span id="hero-version">2.1.3</span> · sonic-3.6 · 153 тести ✓
     </div>
-    <div><span class="downloads"><span class="dot"></span> Завантажень: <b id="dl-count">…</b></span></div>
+    <h1 class="hero__title reveal">
+      Озвучуй текст<br>
+      <span class="hero__title-gradient">всіма ключами одразу</span>
+    </h1>
+    <p class="hero__lead reveal">
+      Пул безкоштовних ключів Cartesia + автореєстрація акаунтів + клонування голосів.
+      100 000 символів тексту розподіляться по всіх твоїх ключах — але озвучаться
+      <b>одним голосом</b>.
+    </p>
+    <div class="hero__actions reveal">
+      <a class="btn btn--primary" href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Завантажити для Windows
+      </a>
+      <a class="btn btn--ghost" href="#how">
+        Як це працює
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
+    <div class="hero__stats reveal">
+      <div class="stat"><b id="dl-count">…</b><span>завантажень</span></div>
+      <div class="stat"><b>20 000</b><span>символів / ключ / міс</span></div>
+      <div class="stat"><b>25</b><span>потоків автореєстрації</span></div>
+      <div class="stat"><b>42</b><span>мови озвучення</span></div>
+    </div>
+
+    <!-- Анімований «скринкаст» — макет застосунку -->
+    <div class="app-shot reveal">
+      <div class="app-shot__bar">
+        <span></span><span></span><span></span>
+        <i>Cartelsia</i>
+      </div>
+      <div class="app-shot__body">
+        <div class="app-shot__sidebar">
+          <b>☠️ Cartelsia</b>
+          <u class="is-active">Нова генерація</u><u>Ключі</u><u>Голоси</u><u>Автореєстрація</u><u>Налаштування</u>
+        </div>
+        <div class="app-shot__main">
+          <div class="app-shot__composer">
+            «Коли останній потік добив першу тисячу відео, я зрозумів…»
+          </div>
+          <div class="app-shot__chips">
+            <span>🎙️ zluka</span><span>⚡ sonic-3.6</span><span>🌐 uk</span>
+          </div>
+          <div class="app-shot__progress">
+            <div class="app-shot__progress-fill"></div>
+          </div>
+          <div class="app-shot__keys">
+            <b>423 ключі · 8 364 316 символів</b>
+            <i>13 фрагментів паралельно · кеш активний</i>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+</header>
 
-  <section class="wrap">
+<!-- ═══════════ Можливості ═══════════ -->
+<section class="section" id="features">
+  <div class="section__inner">
+    <h2 class="reveal">Все, щоб не платити за озвучку</h2>
+    <p class="section__lead reveal">Шість систем, що працюють як одна машина</p>
     <div class="grid">
-      <div class="cardx"><div class="ic">🧠</div><h3>Новий рушій реєстрації</h3><p>Реєстрація через справжню форму в headless Chromium — як живий користувач. Чистий API Cartesія блокує: акаунти не створювались.</p></div>
-      <div class="cardx"><div class="ic">⚡</div><h3>До 25 потоків</h3><p>Персистентний пул: потік завершив акаунт — через паузу бере наступний. До 2000 акаунтів за прогін.</p></div>
-      <div class="cardx"><div class="ic">🔑</div><h3>Ключі одразу</h3><p>Ключ забирається в тому ж сеансі, що й реєстрація. Пишеться в api_keys.txt і одразу падає в пул.</p></div>
-      <div class="cardx"><div class="ic">🛟</div><h3>Rescue-прохід</h3><p>Акаунти «без ключа» автоматично проходять повторний /keys через збережену сесію. Жоден акк не втрачається.</p></div>
-      <div class="cardx"><div class="ic">🌐</div><h3>Проксі з розумом</h3><p>Імпорт ip:port:user:pass, перевірка, ротація. Проксі, що дала 2 фейли підряд, видаляється сама.</p></div>
-      <div class="cardx"><div class="ic">👑</div><h3>Master-клонування <span style="color:var(--accent);font-size:12px">2.0.1</span></h3><p>Pro-акаунт ($5/міс) стає фабрикою голосів: клон по API з будь-якого кліпу ≤10 с, авто-публікація — і клон озвучується всім пулом безкоштовних ключів.</p></div>
-      <div class="cardx"><div class="ic">🎭</div><h3>Реєстрація виправлена <span style="color:var(--accent);font-size:12px">2.1.2</span></h3><p>Cartesia забанила слово «cartelia» — ми переписали генерацію: 4 стилі email, людські імена, нуль бренд-слів. Стоп реально вбиває браузери. Проксі 2.0: realtime-чекінг, потоки, експорт.</p></div>
-      <div class="cardx"><div class="ic">🚀</div><h3>sonic-3.6 + locale <span style="color:var(--accent);font-size:12px">2.1.1</span></h3><p>Нова модель Cartesia за замовчуванням, вибір у композері й налаштуваннях, locale-коди (en-GB, uk-UA…) для регіональної вимови. Стара 3.5 досі доступна.</p></div>
-      <div class="cardx"><div class="ic">🌐</div><h3>Спільні голоси + кеш <span style="color:var(--accent);font-size:12px">2.1.0</span></h3><p>Додайте будь-який публічний голос за Voice ID — озвучуйте ним усім пулом free-ключів. Кредити списуються з вашого ключа, не власника. Кеш TTS: повтори безкоштовні.</p></div>
-      <div class="cardx"><div class="ic">🎨</div><h3>Редизайн 2.0</h3><p>Inter + JetBrains Mono, градієнти, анімації, живий лог кожної реєстрації, тултіпи ? на всіх параметрах.</p></div>
+      <div class="cardx reveal" style="--d:0">
+        <div class="cardx__icon">🔑</div>
+        <h3>Пул ключів</h3>
+        <p>Скільки завгодно безкоштовних ключів. Best-fit розподіл: фрагмент тексту йде на ключ із найменшим достатнім залишком. Авто-заморозка вичерпаних до 1-го числа.</p>
+      </div>
+      <div class="cardx reveal" style="--d:1">
+        <div class="cardx__icon">⚡</div>
+        <h3>Паралельна генерація</h3>
+        <p>Фрагменти тексту генеруються одночасно на різних ключах. Ретраї з ротацією, кеш — переозвучка того самого тексту взагалі без API.</p>
+      </div>
+      <div class="cardx reveal" style="--d:2">
+        <div class="cardx__icon">🤖</div>
+        <h3>Автореєстрація 2.0</h3>
+        <p>До 25 потоків у headless Chromium. Реєстрація через справжню форму, OTP прямим IMAP, ключ грабиться в тому ж сеансі. 4 стилі email — бан-слова виключені.</p>
+      </div>
+      <div class="cardx reveal" style="--d:3">
+        <div class="cardx__icon">🌐</div>
+        <h3>Спільні голоси</h3>
+        <p>Будь-який публічний голос Cartesia — за Voice ID у твою бібліотеку. Озвучуй ним усім пулом: кредити списуються з твого ключа, не власника. Перевірка ревокації перед кожним прогоном.</p>
+      </div>
+      <div class="cardx reveal" style="--d:4">
+        <div class="cardx__icon">👑</div>
+        <h3>Master-клонування</h3>
+        <p>Pro-акаунт ($5) = фабрика клонів: ffmpeg обрізає тишу і вирівнює гучність, клон публікується автоматично, дедуплікація SHA-256 береже кредити.</p>
+      </div>
+      <div class="cardx reveal" style="--d:5">
+        <div class="cardx__icon">🛡️</div>
+        <h3>Проксі 2.0</h3>
+        <p>Realtime-чекінг на домені Cartesia (марна проксі, через яку Cartesia недосяжна). Потоки 1–50, експорт, socks5, автопенальті за 2 фейли підряд.</p>
+      </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="wrap">
-    <h2>Як це виглядає</h2>
-    <p class="lead">Темна тема в стилі Claude, все українською.</p>
-    <img class="shot" src="shot-generation.png" alt="Генерація">
-    <br><br>
-    <img class="shot" src="shot-keys.png" alt="Менеджер ключів">
-  </section>
-
-  <section class="wrap">
-    <h2>Ліміти і цифри</h2>
-    <table class="t">
-      <tr><th>Параметр</th><th>Значення</th><th>Чому</th></tr>
-      <tr><td>Потоків max</td><td><b>25</b> (комфортно 5–15)</td><td>Понад 25 — Clerk починає rate-limit (429), реєстрації ламаються масово</td></tr>
-      <tr><td>Акаунтів за прогін</td><td><b>до 2000</b></td><td>Пул працює, поки є черга; потік завжди бере наступну задачу</td></tr>
-      <tr><td>Час одного акаунта</td><td>50–90 с</td><td>Checkpoint + форма + OTP + створення ключа</td></tr>
-      <tr><td>Успішність</td><td>~60–85% за прохід</td><td>Решту добиває retry (новий проксі) + rescue-прохід</td></tr>
-      <tr><td>Ключів безкоштовно</td><td>20 000 симв./міс</td><td>100 аків = 2 млн символів/місяць</td></tr>
-    </table>
-  </section>
-</div>
-
-<!-- ================= DOCS ================= -->
-<div id="page-docs" class="page">
-  <section class="wrap">
-    <h2>Docs — детальна документація</h2>
-    <p class="lead">Все: що за що відповідає, де що змінити, як працює під капотом.</p>
-
-    <h2 style="font-size:22px">🚀 Швидкий старт</h2>
+<!-- ═══════════ Як працює ═══════════ -->
+<section class="section section--alt" id="how">
+  <div class="section__inner">
+    <h2 class="reveal">П'ять хвилин від нуля до озвучки</h2>
     <div class="flow">
-      <div class="step"><div class="n">1</div><div class="body"><b>Скачайте portable exe</b><div>З розділу Releases. Покладіть в окрему папку — поруч створяться data/ і output/.</div></div></div>
-      <div class="step"><div class="n">2</div><div class="body"><b>Обійдіть SmartScreen</b><div>«Докладніше» → «Виконати все одно». Файл самопідписаний, код відкритий.</div></div></div>
-      <div class="step"><div class="n">3</div><div class="body"><b>Налаштуйте пошту</b><div>Налаштування → Catch-All домен (наприклад reg.vashdomen.com) + IMAP Gmail App Password → «Перевірити IMAP».</div></div></div>
-      <div class="step"><div class="n">4</div><div class="body"><b>Автореєстрація</b><div>Кількість, потоки (5–15 рекомендовано), Старт. Живий лог показує крок кожного потоку.</div></div></div>
-      <div class="step"><div class="n">5</div><div class="body"><b>Ключі готові</b><div>data/api_keys.txt (тільки ключі), accounts.txt (email:pass:key), пул у вкладці Ключі.</div></div></div>
+      <div class="step reveal" style="--d:0">
+        <div class="step__n">1</div>
+        <div class="step__body"><b>Скачай portable .exe</b><span>Один файл, без інсталяції. Дані поруч: data/ і output/.</span></div>
+      </div>
+      <div class="step reveal" style="--d:1">
+        <div class="step__n">2</div>
+        <div class="step__body"><b>Ключі: є або нарегати</b><span>Встав існуючі — або запусти автореєстрацію: 5–15 потоків, домен catch-all, IMAP.</span></div>
+      </div>
+      <div class="step reveal" style="--d:2">
+        <div class="step__n">3</div>
+        <div class="step__body"><b>Обери голос</b><span>Бібліотека Cartesia, твої клони, спільні голоси за ID — з прослуховуванням.</span></div>
+      </div>
+      <div class="step reveal" style="--d:3">
+        <div class="step__n">4</div>
+        <div class="step__body"><b>Встав текст і тисни «Озвучити»</b><span>Текст розіб'ється на фрагменти, фрагменти підуть на всі ключі паралельно.</span></div>
+      </div>
+      <div class="step reveal" style="--d:4">
+        <div class="step__n">5</div>
+        <div class="step__body"><b>Скачай результат</b><span>Один файл або по фрагментах, субтитри SRT/VTT, плеєр версій.</span></div>
+      </div>
     </div>
+  </div>
+</section>
 
-    <h2 style="font-size:22px; margin-top:36px">📮 Catch-All на субдомені (щоб основний домен не банили)</h2>
-    <p class="lead">Всі реєстрації йдуть на *@ваш-домен. Якщо Cartesia забанить домен — все пропало. Тому реєструйте на СУБДОМЕНІ: reg.mydomain.com. Забанили субдомен? Міняєте на reg2.mydomain.com за 2 хвилини, основний недоторканим.</p>
-    <h3 style="margin:18px 0 10px">Через ImprovMX (безкоштовно, 5 хв)</h3>
-    <ol style="color:var(--muted); padding-left:20px; font-size:14px">
-      <li>Зареєструйтесь на improvmx.com → Add Domain → введіть <code style="background:var(--card);padding:1px 6px;border-radius:6px">reg.mydomain.com</code>.</li>
-      <li>В DNS додайте записи (ImprovMX їх покаже):<br>MX reg → mx1.improvmx.com (пріоритет 10)<br>MX reg → mx2.improvmx.com (20)<br>TXT reg → v=spf1 include:spf.improvmx.com ~all</li>
-      <li>Forward to: ваша Gmail. Wildcard (будь-що@sub) включено за замовчуванням.</li>
-      <li>У Gmail зробіть фільтр: To contains @reg.mydomain.com → Never spam (щоб OTP не падав у спам).</li>
-      <li>Тест: надішліть лист на xyz@reg.mydomain.com — має прийти в Gmail.</li>
-      <li>Cartelsia → Налаштування → Catch-All домен = reg.mydomain.com.</li>
-    </ol>
-    <div class="okbox">💡 Кілька субдоменів = кілька незалежних партій: reg1.mydomain.com і reg2.mydomain.com. Основний домен ніколи не світиться в реєстраціях.</div>
-
-    <h2 style="font-size:22px; margin-top:36px">🎭 Стилі email для автореєстрації (2.1.2)</h2>
-    <p class="lead">Cartesia забанила слово «cartelia» — генератор переписаний з нуля. Слово більше НІКОЛИ не зʼявляється (регрес-тест у коді).</p>
-    <table class="t">
-      <tr><th>Стиль</th><th>Вигляд</th><th>Коли юзати</th></tr>
-      <tr><td><b>Random</b> (default)</td><td>mt8kb1dc8llr@saputti365.life</td><td>Найбезпечніший — нічого впізнаваного</td></tr>
-      <tr><td><b>Слова</b></td><td>stone42river@saputti365.life</td><td>Природніший вигляд</td></tr>
-      <tr><td><b>Support</b></td><td>support0010309202061014@saputti365.life</td><td>Вигляд техпідтримки</td></tr>
-      <tr><td><b>Свій префікс</b></td><td>john7xk2m9a@saputti365.life</td><td>Ваш префікс + рандомний хвіст</td></tr>
-    </table>
-    <div class="okbox">💡 Проксі 2.0 (2.1.2): імпорт із файлу, realtime-чекінг зі статусами в міру перевірки, потоки 1–50, таймаут, зупинка чекінгу, експорт, збереження між запусками, socks5. Стоп автореєстрації миттєво вбиває всі браузери; закриття вікна = повний вихід без фонових процесів.</div>
-
-    <h2 style="font-size:22px; margin-top:36px">🚀 Моделі озвучення (2.1.1)</h2>
-    <table class="t">
-      <tr><th>Модель</th><th>Що це</th></tr>
-      <tr><td><b>sonic-3.6</b> (рекомендовано)</td><td>Найновіша GA-модель (27.08.2026). Нова поле <code>locale</code>: регіональні правила читання дат/чисел (en-GB, uk-UA, de-DE…). Взаємовиключне з language — Cartelsia шле тільки одне. Вибір у композері та Налаштуваннях</td></tr>
-      <tr><td>sonic-3.5</td><td>Попередня стабільна. Усі старі чати й голоси сумісні</td></tr>
-      <tr><td>sonic-3</td><td>Застаріла, лишилась для сумісності</td></tr>
-    </table>
-    <div class="okbox">💡 API не змінився: Cartesia-Version 2026-03-01 приймає sonic-3.6. Перевірено наживо: bytes, SSE-субтитри, locale, emotion — усе 200. PVC-клони, створені на 3.5, працюють з 3.6 без перетворень.</div>
-
-    <h2 style="font-size:22px; margin-top:36px">🌐 Спільні голоси за Voice ID (2.1.0)</h2>
-    <p class="lead">Будь-який публічний («Shared») голос Cartesia можна додати за Voice ID — і озвучувати ним УСІМ пулом безкоштовних ключів. Кредити списуються з вашого ключа, не з акаунта власника (перевірено наживо).</p>
-
-    <h3 style="margin:18px 0 10px">Як зробити свій клон спільним і юзати його free-ключами</h3>
-    <div class="flow">
-      <div class="step"><div class="n">1</div><div class="body"><b>Створіть клон на сайті</b><div><a href="https://play.cartesia.ai" target="_blank" rel="noopener">play.cartesia.ai</a> → Voices → <b>Clone voice</b>: аудіо до 10 секунд (файл або мікрофон). Безкоштовно.</div></div></div>
-      <div class="step"><div class="n">2</div><div class="body"><b>Увімкніть Share → Shared</b><div>У картці клона натисніть <b>Share</b>, оберіть <b>Shared</b> — «Anyone with the voice ID can use it». Це те саме, що PATCH access=public по API.</div></div></div>
-      <div class="step"><div class="n">3</div><div class="body"><b>Скопіюйте Voice ID</b><div>У тому ж діалозі Share є поле <b>ID</b> — рядок виду afe1bd4e-954e-48cc-8225-22c0… Це ключ доступу до голосу.</div></div></div>
-      <div class="step"><div class="n">4</div><div class="body"><b>Додайте в Cartelsia</b><div>Вкладка «Клон голосу» → блок <b>🌐 Спільні голоси</b> → вставте ID + придумайте аліас (наприклад don-pedro) → «Додати». Cartelsia перевірить голос через API і збереже ярлик у data/shared_voices.json.</div></div></div>
-      <div class="step"><div class="n">5</div><div class="body"><b>Озвучуйте всім пулом</b><div>Голос зʼявиться в композері (секція «Спільні голоси»). Обери його — і генерація піде звичайними БЕЗКОШТОВНИМИ ключами: 100 тис. символів розподіляться по всіх free-ключах по ~20 тис., але озвучаться ОДНИМ голосом. Кредити власника не горять.</div></div></div>
+<!-- ═══════════ Скріншот ═══════════ -->
+<section class="section">
+  <div class="section__inner">
+    <h2 class="reveal">Виглядає так</h2>
+    <img class="shot reveal" src="screenshots/generation.png" alt="Cartelsia — генерація" loading="lazy">
+    <div class="shots-row">
+      <img class="shot shot--sm reveal" src="screenshots/keys.png" alt="Менеджер ключів" loading="lazy">
+      <img class="shot shot--sm reveal" src="screenshots/clone-tab.png" alt="Клонування голосу" loading="lazy">
     </div>
+  </div>
+</section>
 
-    <table class="t" style="margin-top:18px">
-      <tr><th>Механізм</th><th>Як працює</th></tr>
-      <tr><td>Хто платить кредити</td><td>Той, чиїм ключем робиться запит TTS. Власнику публічного voice_id — нічого. Перевірено живим викликом чужим free-ключем</td></tr>
-      <tr><td>Чому «ярлик», а не копія</td><td>API Cartesia НЕ вміє копіювати/імпортувати чужі голоси (офіційно підтверджено). Cartelsia зберігає alias → voice_id локально; нічого в Cartesia не пишеться</td></tr>
-      <tr><td>Захист від ревокації</td><td>Власник може вимкнути Shared будь-якої миті. Перед КОЖНИМ прогоном голос re-verifiкується (GET /voices/{id}); відкликаний → прогін ЧЕСНО зупиняється з назвою аліаса, НІКОЛИ не мовчки озвучує іншим голосом</td></tr>
-      <tr><td>Кеш TTS</td><td>sha256(voice+model+language+text) → data/tts-cache/. Переозвучка того самого тексту = 0 кредитів, миттєво. Атомарний запис (tmp→rename) переживає crash</td></tr>
-      <tr><td>PVC-голоси 👑</td><td>Pro Voice Clones мають обмеження моделей (fine_tunes[].public_model_id); невідповідна модель → voice_model_mismatch із чітким повідомленням</td></tr>
-    </table>
-
-    <h2 style="font-size:22px; margin-top:36px">👑 Master-клонування голосів (2.0.1)</h2>
-    <p class="lead">Один Pro-акаунт ($5/міс) = необмежені голосові клони для ВСІХ ваших безкоштовних ключів. Клони живуть на мастер-акаунті, але після публікації доступні будь-якому ключу.</p>
-    <div class="flow">
-      <div class="step"><div class="n">1</div><div class="body"><b>Додайте Master API-ключ</b><div>Налаштування → Master-акаунт → вставте ключ Pro-акаунта → «Перевірити». Він зберігається окремо від пулу і не витрачається на звичайні генерації.</div></div></div>
-      <div class="step"><div class="n">2</div><div class="body"><b>Створіть клон</b><div>Клон голосу → Master-секція → аудіо файлом або запис із мікрофона (до 10 с). ffmpeg сам обрізає тишу та нормалізує гучність.</div></div></div>
-      <div class="step"><div class="n">3</div><div class="body"><b>Голос публікується автоматично</b><div>PATCH access=public одразу після клонування — інакше чужі (free) ключі його не побачать. Можна вимкнути в Налаштуваннях.</div></div></div>
-      <div class="step"><div class="n">4</div><div class="body"><b>Озвучуйте free-ключами</b><div>Публічний master-клон вибирається у VoicePicker як звичайний голос — генерація йде через будь-який активний ключ пулу, без списання з Pro.</div></div></div>
+<!-- ═══════════ Доки ═══════════ -->
+<section class="section section--alt" id="docs">
+  <div class="section__inner">
+    <h2 class="reveal">Документація</h2>
+    <p class="section__lead reveal">Все детально: ліміти, формати, файли, catch-all, ліміти потоків</p>
+    <div class="docs-grid">
+      <div class="doc-card reveal" style="--d:0">
+        <h3>📊 Ліміти</h3>
+        <table>
+          <tr><td>Потоків автореєстрації</td><td><b>25 max</b> (5–15 комфортно)</td></tr>
+          <tr><td>Акаунтів за прогін</td><td><b>до 2000</b></td></tr>
+          <tr><td>Час акаунта</td><td>50–90 с</td></tr>
+          <tr><td>Успішність</td><td>60–85% + rescue</td></tr>
+          <tr><td>Символів на ключ</td><td>20 000 / міс</td></tr>
+        </table>
+      </div>
+      <div class="doc-card reveal" style="--d:1">
+        <h3>📁 Файли результатів</h3>
+        <table>
+          <tr><td><code>api_keys.txt</code></td><td>тільки sk_car_ ключі</td></tr>
+          <tr><td><code>accounts.txt</code></td><td>дата · email · pass · key</td></tr>
+          <tr><td><code>sessions/&lt;email&gt;.json</code></td><td>cookies для rescue</td></tr>
+          <tr><td><code>shared_voices.json</code></td><td>спільні голоси</td></tr>
+          <tr><td><code>tts-cache/</code></td><td>кеш генерацій</td></tr>
+          <tr><td><code>proxies.json</code></td><td>проксі між запусками</td></tr>
+        </table>
+      </div>
+      <div class="doc-card reveal" style="--d:2">
+        <h3>🎭 Стилі email</h3>
+        <table>
+          <tr><td><b>Random</b></td><td>mt8kb1dc8llr@домен</td></tr>
+          <tr><td><b>Слова</b></td><td>stone42river@домен</td></tr>
+          <tr><td><b>Support</b></td><td>support00103…@домен</td></tr>
+          <tr><td><b>Свій префікс</b></td><td>john7xk2m9a@домен</td></tr>
+        </table>
+        <p class="doc-note">Слово «cartelia» забанене Cartesia — більше не використовується ніде.</p>
+      </div>
+      <div class="doc-card reveal" style="--d:3">
+        <h3>📮 Catch-All субдомен</h3>
+        <p>Реєструйся на <code>reg.mydomain.com</code> через ImprovMX (безкоштовно): MX записи на субдомен, wildcard увімкнено, Gmail-фільтр «Never spam». Забанять субдомен — міняєш на <code>reg2.</code> за 2 хвилини, основний домен живий.</p>
+      </div>
+      <div class="doc-card reveal" style="--d:4">
+        <h3>🤖 AI-збірка з сирців</h3>
+        <p>Готовий промпт для <b>Claude Code / Codex / Antigravity</b>: агент сам склонує репо, встановить залежності, збере exe/dmg і запустить. Окремо для Windows і macOS (з розблокуванням Gatekeeper).</p>
+        <div class="doc-btns">
+          <a class="btn btn--ghost btn--sm" href="prompt-windows.txt" download>⬇ Windows .txt</a>
+          <a class="btn btn--ghost btn--sm" href="prompt-mac.txt" download>⬇ macOS .txt</a>
+        </div>
+      </div>
+      <div class="doc-card reveal" style="--d:5">
+        <h3>🚀 Моделі</h3>
+        <table>
+          <tr><td><b>sonic-3.6</b></td><td>найновіша, + locale</td></tr>
+          <tr><td><b>sonic-3.5</b></td><td>стабільна попередня</td></tr>
+          <tr><td><b>sonic-3</b></td><td>застаріла</td></tr>
+        </table>
+        <p class="doc-note">Locale (en-GB, uk-UA…) взаємовиключний з language — застосунок шле одне з двох.</p>
+      </div>
     </div>
-    <table class="t" style="margin-top:18px">
-      <tr><th>Механізм</th><th>Як працює</th></tr>
-      <tr><td>ffmpeg-препроцесинг</td><td>Обрізання тиші (−45 dB), loudnorm I=−16/TP=−1.5/LRA=11, mono 44.1 kHz s16, жорсткий cap 10 с</td></tr>
-      <tr><td>Дедуплікація</td><td>SHA-256 обробленого аудіо = первинний ключ реєстру data/master_voices.json: те саме аудіо ніколи не клонується двічі</td></tr>
-      <tr><td>Автоповтори</td><td>429/5xx повторюються ×5 (exponential backoff + jitter), інші 4xx показуються одразу; ліміт паралельності Free 2 / Pro 3 / Startup 5 / Scale 15</td></tr>
-      <tr><td>Crash-safety</td><td>Реєстр пишеться ДО публікації; синхронізація GET /voices?is_owner=true підтягує голоси, якщо локальний файл загублено</td></tr>
-    </table>
-    <div class="okbox">💡 Потрібен ffmpeg у PATH або поруч із exe — лише для клонування. TTS і автореєстрація працюють без нього. Без Pro-акаунта всі функції 2.0 далі працюють як раніше.</div>
+  </div>
+</section>
 
-    <h2 style="font-size:22px; margin-top:36px">🔧 Що відповідає за що (архітектура)</h2>
-    <table class="t">
-      <tr><th>Файл / Компонент</th><th>Роль</th></tr>
-      <tr><td>src/main/email/browserSignupRegistrar.ts</td><td>Рушій реєстрації: headless Chromium, форма, граб ключа, rescue, proxy penalty</td></tr>
-      <tr><td>src/main/email/imapDirectOtp.ts</td><td>OTP: свіже IMAP TLS+LOGIN на кожен запит + UID SEARCH HEADER To + видалення листа після читання</td></tr>
-      <tr><td>src/main/email/autoregService.ts</td><td>Пул воркерів до 25, черга акаунтів, rescue-етап після прогону, запис api_keys.txt</td></tr>
-      <tr><td>src/main/proxy/proxyManager.ts</td><td>Парсинг 4 форматів проксі, чек, ротація робочих</td></tr>
-      <tr><td>src/main/voices/masterVoiceService.ts</td><td>Master-клонування (2.0.1): дедуп SHA-256, семафор паралельності, ensurePublic, retry 429/5xx</td></tr>
-      <tr><td>src/main/voices/sharedVoiceRegistry.ts</td><td>Спільні голоси (2.1): реєстр alias→voice_id, пребатч-гейт ревокації, check/add/remove</td></tr>
-      <tr><td>data/shared_voices.json</td><td>Локальні ярлики спільних голосів; кредити TTS з вашого ключа, не власника</td></tr>
-      <tr><td>data/tts-cache/</td><td>Кеш генерацій sha256(voice+model+language+text) → .wav — повтори безкоштовні</td></tr>
-      <tr><td>src/main/audio/preprocess.ts</td><td>ffmpeg-препроцесинг кліпу (silence trim + loudnorm + mono 44.1k) і sha256Hex</td></tr>
-      <tr><td>data/master_voices.json</td><td>Реєстр master-клонів: audio_sha256 → voice_id (дедуплікація між запусками)</td></tr>
-      <tr><td>src/renderer/src/components/browser/AutoregView.tsx</td><td>UI: вкладки Автореєстрація / Проксі, живий лог, тултіпи</td></tr>
-      <tr><td>data/settings.json</td><td>Налаштування (домен, IMAP, потоки). engine має бути browser-signup</td></tr>
-      <tr><td>data/api_keys.txt · output/api_keys.txt</td><td>Тільки sk_car_... ключі, по одному на рядок</td></tr>
-      <tr><td>data/accounts.txt · output/accounts.txt</td><td>Повний лог: дата | email | pass | key | статус</td></tr>
-      <tr><td>data/sessions/&lt;email&gt;.json</td><td>Cookies сеансу акаунта — для rescue-проходу і входу без пароля</td></tr>
-      <tr><td>data/autoreg-state.json</td><td>Стан черги (resume після перезапуску)</td></tr>
-    </table>
-
-    <h2 style="font-size:22px; margin-top:36px">⚙️ Де що змінити</h2>
-    <table class="t">
-      <tr><th>Що хочете</th><th>Де</th></tr>
-      <tr><td>Інший домен/субдомен</td><td>Налаштування → Catch-All домен (можна міняти між прогонами)</td></tr>
-      <tr><td>Більше/менше потоків</td><td>Автореєстрація → Потоки (1–25). Понад 25 — rate-limit</td></tr>
-      <tr><td>Безпечніший режим</td><td>Налаштування → Пауза між акаунтами (мс): 5000–8000</td></tr>
-      <tr><td>Без проксі</td><td>Зніміть галку «Реєструвати через проксі» (риск — ваша IP)</td></tr>
-      <tr><td>Побачити браузер очима</td><td>Зніміть галку Headless — Chromium буде видимим</td></tr>
-      <tr><td>Власний UA / URL форми</td><td>browserSignupRegistrar.ts — константи UA, SIGNUP_URL</td></tr>
-      <tr><td>Тайминги OTP/retry</td><td>browserSignupRegistrar.ts: otpTimeoutMs, retry-цикл фази A</td></tr>
-    </table>
-
-    <h2 style="font-size:22px; margin-top:36px">❓ FAQ</h2>
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="section" id="faq">
+  <div class="section__inner">
+    <h2 class="reveal">FAQ</h2>
     <div class="faq">
-      <details><summary>Чому максимум 25 потоків?</summary><div class="a">При &gt;25 одночасних Clerk/Vercel масово віддають HTTP 429, checkpoint не проходить — фейли лавиною. 5–15 стабільно, 25 межа.</div></details>
-      <details><summary>Чому частина фейлиться навіть так?</summary><div class="a">Повільні проксі не встигають за 90 с + OTP-листи затримуються. Retry з новим проксі + rescue добирає більшість. Знизьте потоки до 10–15 — успішність зросте.</div></details>
-      <details><summary>Акаунт без ключа — загублено?</summary><div class="a">Ні. Rescue-прохід після прогону сам відновлює сесію з sessions/ та витягує ключ. Дані про всі акаунти — в accounts.txt.</div></details>
-      <details><summary>Чому не просто залогінитись знову за ключем?</summary><div class="a">Clerk Bot Protection: логін паролем з нового браузера = protect-check, «suspicious blocked». Тому ключ береться одразу в сеансі реєстрації, а сесія зберігається.</div></details>
-      <details><summary>OTP не знаходиться</summary><div class="a">Перевірте: Gmail App Password (не звичайний пароль), forwarding працює (тестовий лист на xyz@sub.domain.com приходить у Gmail), фільтр Never spam додано.</div></details>
-      <details><summary>Домен баниться?</summary><div class="a">На субдомені — тільки він. Змінюйте reg. → reg2. в ImprovMX та в Налаштуваннях Cartelsia. Основний домен живе.</div></details>
-      <details><summary>Антивірус лається на exe</summary><div class="a">Portable самопідписаний — SmartScreen попереджає всі непідписані. Код відкритий: зберіть самі або скористайтесь AI-промптом.</div></details>
-      <details><summary>macOS?</summary><div class="a">Технічно переноситься (Electron+Playwright). Збірка на Mac: npm install && npm run build && npx electron-builder --mac. Або AI-промпт нижче — він сам розбереться.</div></details>
+      <details class="reveal"><summary>Чому максимум 25 потоків автореєстрації?</summary><p>Понад 25 одночасних Chromium Clerk/Vercel віддають HTTP 429 масово. 5–15 = стабільно, 25 = межа.</p></details>
+      <details class="reveal"><summary>Акаунт «без ключа» — загублено?</summary><p>Ні. Rescue-прохід після прогону відновлює збережену сесію і витягує ключ автоматично.</p></details>
+      <details class="reveal"><summary>Як юзати чужий публічний голос?</summary><p>Клон голосу → Спільні голоси → встав Voice ID з діалогу Share → голос у бібліотеці. Озвучується будь-яким твоїм ключем, кредити з твого ключа.</p></details>
+      <details class="reveal"><summary>Чи можна більше 20 000 символів на місяць?</summary><p>Тільки якщо ключів багато: 100 акаунтів = 2 млн символів/міс. Автореєстрація нарегає їх автоматично.</p></details>
+      <details class="reveal"><summary>Домен забанили — що робити?</summary><p>Якщо ти на субдомені (рекомендовано) — баниться тільки він: reg. → reg2. за 2 хвилини. Основний домен недоторканий.</p></details>
+      <details class="reveal"><summary>Antivirus лається?</summary><p>Portable самопідписаний — SmartScreen попереджає всі непідписані exe. Код відкритий, можна зібрати самому через AI-промпт.</p></details>
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
-<!-- ================= AI PROMPT ================= -->
-<div id="page-ai" class="page">
-  <section class="wrap">
-    <h2>🤖 Зібрати проєкт силами AI-агента</h2>
-    <p class="lead">Скопіюй промпт нижче і встав у <b>Claude Code</b>, <b>OpenAI Codex</b>, <b>Antigravity</b> або будь-який інший coding-агент. Агент сам: склонує репо, встановить Node-залежності, Playwright Chromium, прожене тести, зберіе exe/dmg і запустить. Обери свою ОС.</p>
+<!-- ═══════════ Фінальний CTA ═══════════ -->
+<section class="cta">
+  <div class="section__inner reveal">
+    <h2>Готовий озвучувати безкоштовно?</h2>
+    <p>Один .exe. П'ять хвилин. Твої 100 тисяч символів — уже на пулі.</p>
+    <a class="btn btn--primary btn--lg" href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank" rel="noopener">
+      ⬇ Завантажити Cartelsia <span id="cta-version">2.1.3</span>
+    </a>
+  </div>
+</section>
 
-    <div class="tabs2">
-      <button class="active" data-os="win">🪟 Windows</button>
-      <button data-os="mac">🍎 macOS</button>
-    </div>
-
-    <div class="ai-os" data-os="win">
-      <div class="warnbox">⚠️ Майте на увазі: агенту знадобиться доступ в інтернет (npm, Electron ~100 МБ, Playwright Chromium ~300 МБ). Крок 5 — запуск GUI Electron — пропускається на headless-машинах.</div>
-      <pre class="code"><button class="copybtn" data-target="pw">Копіювати</button><textarea id="pw" style="display:none"></textarea></pre>
-      <script>
-        fetch('prompt-windows.txt').then(r => r.text()).then(t => {
-          document.getElementById('pw').outerHTML = '';
-          const pre = document.querySelector('.ai-os[data-os=win] pre.code');
-          pre.insertBefore(document.createTextNode(t), pre.querySelector('.copybtn'));
-        });
-      </script>
-      <a class="btn ghost" href="prompt-windows.txt" download>⬇ Скачать .txt</a>
-    </div>
-
-    <div class="ai-os" data-os="mac" style="display:none">
-      <div class="okbox">🍎 На macOS додаток буде непідписаний — промпт містить покрокове розблокування Gatekeeper (System Settings → Open Anyway / xattr).</div>
-      <pre class="code"><button class="copybtn" data-target="pm">Копіювати</button><textarea id="pm" style="display:none"></textarea></pre>
-      <script>
-        fetch('prompt-mac.txt').then(r => r.text()).then(t => {
-          document.getElementById('pm').outerHTML = '';
-          const pre = document.querySelector('.ai-os[data-os=mac] pre.code');
-          pre.insertBefore(document.createTextNode(t), pre.querySelector('.copybtn'));
-        });
-      </script>
-      <a class="btn ghost" href="prompt-mac.txt" download>⬇ Скачать .txt</a>
-    </div>
-  </section>
-</div>
+<footer class="footer">
+  <div class="footer__inner">
+    <span>☠️ YT CARTEL</span>
+    <a href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noopener">Канал</a>
+    <a href="https://t.me/+Jj06Fbj8-8oyZDQ6" target="_blank" rel="noopener">Чат</a>
+    <a href="https://github.com/gitkalenyuk/cartelsia" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</footer>
 
 <script src="app.js"></script>
 </body>

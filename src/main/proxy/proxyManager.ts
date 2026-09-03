@@ -61,7 +61,13 @@ export class ProxyManager extends EventEmitter {
     return this.proxies.length - before
   }
 
-  /** Перевіряємо проксі: запит до clerk.cartesia.ai через ProxyAgent. */
+  /**
+   * Перевіряємо проксі ЧЕРЕЗ ДОМЕН CARTESIA (2.1.3): марна проксі, через яку
+   * сама Cartesia недосяжна. Подвійний тест:
+   *  1) clerk.cartesia.ai /v1/client — 429 = IP троттлиться (непридатна),
+   *     403 = заблокована; 200/401/404 = Clerk досяжний
+   *  2) play.cartesia.ai /robots.txt — Vercel-сторінка реєстрації досяжна
+   */
   async checkProxy(proxyUrl: string, timeoutMs = 12_000): Promise<{ ok: boolean; latencyMs: number }> {
     const start = Date.now()
     try {
@@ -76,9 +82,21 @@ export class ProxyManager extends EventEmitter {
           signal: AbortSignal.timeout(timeoutMs)
         }
       )
-      // Будь-яка відповідь (200/401/403/404) означає що проксі дійшов до сервера
-      const ok = res.status === 200 || res.status === 401 || res.status === 403 || res.status === 404
-      return { ok, latencyMs: Date.now() - start }
+      // 429 = Clerk уже троттлить цей IP → для реєстрації непридатний
+      if (res.status === 429) return { ok: false, latencyMs: Date.now() - start }
+      // Clerk ок (200/401/404) → друга перевірка: Vercel (play.cartesia.ai)
+      if (res.status === 403) return { ok: false, latencyMs: Date.now() - start }
+      try {
+        const res2 = await undiciFetch('https://play.cartesia.ai/robots.txt', {
+          dispatcher: agent as never,
+          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+          signal: AbortSignal.timeout(timeoutMs)
+        })
+        const ok = res2.status === 200 || res2.status === 404
+        return { ok, latencyMs: Date.now() - start }
+      } catch {
+        return { ok: false, latencyMs: Date.now() - start }
+      }
     } catch {
       return { ok: false, latencyMs: Date.now() - start }
     }

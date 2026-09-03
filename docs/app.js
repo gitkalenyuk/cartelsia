@@ -1,58 +1,53 @@
-// Cartelsia site — tabs, downloads counter
+// Cartelsia site 2.1.3: reveal-on-scroll, лічильник завантажень, версія, hover-світло на картках
 (function () {
-  // ── Page tabs (nav) ──
-  const pages = ['home', 'docs', 'ai'];
-  function show(page) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    const el = document.getElementById('page-' + page);
-    if (el) el.classList.add('active');
-    document.querySelectorAll('.nav-links a').forEach(a =>
-      a.classList.toggle('active', a.dataset.page === page));
-    window.scrollTo({ top: 0 });
-    location.hash = page;
-  }
-  document.querySelectorAll('[data-page]').forEach(a =>
-    a.addEventListener('click', e => { e.preventDefault(); show(a.dataset.page); }));
-  const initial = location.hash.replace('#', '');
-  show(pages.includes(initial) ? initial : 'home');
+  'use strict'
 
-  // ── OS tabs inside AI prompt page ──
-  document.querySelectorAll('.tabs2 button').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs2 button').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const os = btn.dataset.os;
-      document.querySelectorAll('.ai-os').forEach(el => {
-        el.style.display = el.dataset.os === os ? 'block' : 'none';
-      });
-    });
-  });
-  document.querySelectorAll('.copybtn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const ta = document.getElementById(btn.dataset.target);
-      if (!ta) return;
-      navigator.clipboard.writeText(ta.value).then(() => {
-        btn.textContent = '✓ Скопійовано';
-        setTimeout(() => (btn.textContent = 'Копіювати'), 1600);
-      });
-    });
-  });
-
-  // ── Downloads counter: GitHub Releases API (усі релізи + нові) ──
-  async function loadDownloads() {
-    const el = document.getElementById('dl-count');
-    const els = document.querySelectorAll('.dl-count');
-    try {
-      const res = await fetch('https://api.github.com/repos/gitkalenyuk/cartelsia/releases?per_page=100');
-      const releases = await res.json();
-      let total = 0;
-      for (const r of releases) for (const a of r.assets || []) total += a.download_count || 0;
-      els.forEach(x => (x.textContent = total.toLocaleString('uk-UA')));
-      if (el) el.textContent = total.toLocaleString('uk-UA');
-    } catch {
-      els.forEach(x => (x.textContent = '193+'));
-      if (el) el.textContent = '193+'; // 37 (v1.4.0) + 156 (v1.1.0) на момент релізу 2.0
+  // ── Reveal on scroll ──
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.isIntersecting) {
+        e.target.classList.add('is-visible')
+        io.unobserve(e.target)
+      }
     }
+  }, { threshold: 0.12 })
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+
+  // ── Hover-підсвітка карток (radial за курсором) ──
+  document.querySelectorAll('.cardx').forEach((card) => {
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect()
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px')
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px')
+    })
+  })
+
+  // ── Версія з GitHub Releases (fallback 2.1.3) ──
+  const VER_FALLBACK = '2.1.3'
+  const versionEls = ['nav-version', 'hero-version', 'cta-version'].map((id) => document.getElementById(id)).filter(Boolean)
+  fetch('https://api.github.com/repos/gitkalenyuk/cartelsia/releases/latest')
+    .then((r) => r.json())
+    .then((d) => {
+      if (!d || !d.tag_name) return
+      const v = String(d.tag_name).replace(/^v/, '')
+      for (const el of versionEls) el.textContent = v
+    })
+    .catch(() => {
+      for (const el of versionEls) el.textContent = VER_FALLBACK
+    })
+
+  // ── Лічильник завантажень: сума download_count всіх asset-ів усіх релізів ──
+  const dlEl = document.getElementById('dl-count')
+  if (dlEl) {
+    fetch('https://api.github.com/repos/gitkalenyuk/cartelsia/releases?per_page=100')
+    .then((r) => r.json())
+    .then((releases) => {
+      let total = 0
+      for (const rel of releases) {
+        for (const a of rel.assets || []) total += a.download_count || 0
+      }
+      dlEl.textContent = total.toLocaleString('uk-UA')
+    })
+    .catch(() => { dlEl.textContent = '700+' })
   }
-  loadDownloads();
-})();
+})()
