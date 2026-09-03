@@ -197,7 +197,18 @@ const api = {
     list: (): Promise<any[]> =>
       ipcRenderer.invoke(IPC.PROXY_LIST),
     remove: (url: string): Promise<{ proxies: any[] }> =>
-      ipcRenderer.invoke(IPC.PROXY_REMOVE, { url })
+      ipcRenderer.invoke(IPC.PROXY_REMOVE, { url }),
+    // 2.1.2
+    checkStart: (opts?: { threads?: number; timeoutMs?: number }): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke(IPC.PROXY_CHECK_START, opts ?? {}),
+    checkStop: (): Promise<{ ok: boolean }> =>
+      ipcRenderer.invoke(IPC.PROXY_CHECK_STOP),
+    importFile: (): Promise<{ added: number; proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_IMPORT_FILE),
+    export: (masked?: boolean): Promise<{ path: string | null }> =>
+      ipcRenderer.invoke(IPC.PROXY_EXPORT, { masked }),
+    clear: (onlyDead?: boolean): Promise<{ removed: number; proxies: any[] }> =>
+      ipcRenderer.invoke(IPC.PROXY_CLEAR, { onlyDead })
   },
   paths: {
     get: (): Promise<AppPaths> => ipcRenderer.invoke(IPC.PATHS_GET)

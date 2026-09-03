@@ -66,6 +66,14 @@ export function Composer(): React.JSX.Element {
     })
   }
 
+  // 2.1.2: авто-розширення textarea під вміст (max-height обмежує, далі скрол)
+  const autoResize = (): void => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.min(el.scrollHeight, Math.floor(window.innerHeight * 0.45))}px`
+  }
+
   const submit = async (): Promise<void> => {
     if (!canGenerate) return
     const est = await window.cartelsia.tts.estimate(text, effective)
@@ -101,7 +109,10 @@ export function Composer(): React.JSX.Element {
           className="composer__textarea"
           placeholder={t.textPlaceholder}
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            setText(e.target.value)
+            autoResize()
+          }}
           onKeyDown={(e) => {
             if (e.ctrlKey && e.key === 'Enter') void submit()
           }}

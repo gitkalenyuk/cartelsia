@@ -30,6 +30,7 @@ import { ClerkApiRegistrar } from '../email/clerkApiRegistrar'
 import { AutoregService } from '../email/autoregService'
 import { BrowserSignupRegistrar } from '../email/browserSignupRegistrar'
 import { ProxyManager } from '../proxy/proxyManager'
+import { setAutoregSettingsProvider } from '../email/autoregService'
 import { setSettingsProvider } from '../index'
 
 export interface Services {
@@ -90,6 +91,12 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     imap: imapForOtp()
   })
   browserSignup.onLog = (line) => broadcast({ type: 'autoreg-log', line })
+  // 2.1.2: живий статус проксі → renderer
+  proxyManager.on('proxies-updated', () => {
+    broadcast({ type: 'proxies-updated', proxies: proxyManager.list() } as never)
+  })
+  // 2.1.2: identity-налаштування для генерації email
+  setAutoregSettingsProvider(() => settings.autoreg ?? {})
   const activeRegistrar = () => {
     // 2.0: clerk-api і browserless МЕРТВІ (Clerk soft-block створення юзерів).
     // Старі settings можуть містити 'clerk-api' — ігноруємо, тільки два живі варіанти:
@@ -505,8 +512,9 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     return { ok: true }
   })
 
-  ipcMain.handle(IPC.AUTOREG_STOP, () => {
-    autoregService.cancel()
+  ipcMain.handle(IPC.AUTOREG_STOP, async () => {
+    // 2.1.2: зупинка вбиває всі браузери реєстрації негайно
+    await autoregService.stop()
     return { ok: true }
   })
 
@@ -597,9 +605,66 @@ export function registerIpcHandlers(services: Services, getWindow: () => Browser
     return { added, proxies: proxyManager.list() }
   })
 
+  // Легасі-чек (без realtime-подій)
   ipcMain.handle(IPC.PROXY_CHECK, async () => {
-    await proxyManager.checkAll()
+    await proxyManager.checkAllRealtime({ threads: 10 })
     return { proxies: proxyManager.list() }
+  })
+
+  // 2.1.2: realtime-чек з потоками і живими подіями
+  ipcMain.handle(IPC.PROXY_CHECK_START, (_e, p: { threads?: number; timeoutMs?: number } = {}) => {
+    void proxyManager
+      .checkAllRealtime({ threads: p.threads, timeoutMs: p.timeoutMs })
+      .catch(() => {})
+    return { ok: true, started: true }
+  })
+
+  ipcMain.handle(IPC.PROXY_CHECK_STOP, () => {
+    proxyManager.stopCheck()
+    return { ok: true }
+  })
+
+  // 2.1.2: імпорт з файлу (нативний діалог)
+  ipcMain.handle(IPC.PROXY_IMPORT_FILE, async () => {
+    const win = getWindow()
+    if (!win) return { added: 0, proxies: proxyManager.list() }
+    const res = await dialog.showOpenDialog(win, {
+      title: 'Імпорт проксі з файлу',
+      filters: [
+        { name: 'Проксі', extensions: ['txt', 'csv', 'json'] },
+        { name: 'Всі файли', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    })
+    if (res.canceled || !res.filePaths[0]) return { added: 0, proxies: proxyManager.list() }
+    const text = readFileSync(res.filePaths[0], 'utf8')
+    const added = proxyManager.addFromText(text)
+    return { added, proxies: proxyManager.list() }
+  })
+
+  // 2.1.2: експорт у файл
+  ipcMain.handle(IPC.PROXY_EXPORT, async (_e, p: { masked?: boolean } = {}) => {
+    const win = getWindow()
+    const text = proxyManager.exportText(p.masked ?? false)
+    if (!win) {
+      const { writeFileSync } = await import('fs')
+      const target = join(outputDir(), 'proxies-export.txt')
+      writeFileSync(target, text, 'utf8')
+      return { path: target }
+    }
+    const res = await dialog.showSaveDialog(win, {
+      title: 'Експорт проксі',
+      defaultPath: join(outputDir(), 'proxies.txt'),
+      filters: [{ name: 'Текстові файли', extensions: ['txt'] }]
+    })
+    if (res.canceled || !res.filePath) return { path: null }
+    writeFileSync(res.filePath, text, 'utf8')
+    return { path: res.filePath }
+  })
+
+  ipcMain.handle(IPC.PROXY_CLEAR, (_e, p: { onlyDead?: boolean }) => {
+    const removed = proxyManager.clear(p.onlyDead ?? false)
+    return { removed, proxies: proxyManager.list() }
   })
 
   ipcMain.handle(IPC.PROXY_LIST, () => proxyManager.list())

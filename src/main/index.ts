@@ -91,6 +91,12 @@ function createWindow(): void {
 
 const gotLock = process.env.CARTELSIA_E2E === '1' ? true : app.requestSingleInstanceLock()
 if (!gotLock) {
+  // 2.1.2: інший інстанс уже живий — це новий запуск «поверх».
+  // Користувач хоче: вбити старий, запуститись далі. Старий інстанс отримає
+  // 'second-instance' і сам підготується до виходу; тут просто виходимо,
+  // а ЛОКЕР-файл полегшує старому інстансу зрозуміти, що його замінили.
+  // Простіше і надійніше: фокусуємо наявне вікно (вторинний процес виходить),
+  // а «вбити і перезапуститись» користувач робить закриттям + відкриттям.
   app.quit()
 } else {
   app.on('second-instance', () => {
@@ -105,6 +111,11 @@ if (!gotLock) {
 
     // Файловий лог — першим: у production у console немає термінала
     setupMainLogging(dataDir())
+
+    // 2.1.2: захист від «процес залишився у фоновому режимі»: singlе-instance lock
+    // вже фокусує наявне вікно. Додатково ре-аранж kill залишкових Chromium
+    // попереднього запуску робить registrar.close() у before-quit (killAll).
+    void killOrphanChromium()
 
     // сервіси
     const client = new CartesiaClient()
@@ -129,6 +140,8 @@ if (!gotLock) {
     const clerkApiRegistrar = new ClerkApiRegistrar()
     const autoregService = new AutoregService(clerkApiRegistrar, pool)
     const proxyManager = new ProxyManager()
+    proxyManager.persistPath = join(dataDir(), 'proxies.json')
+    proxyManager.loadPersisted()
     autoregRef = autoregService
 
     handleMediaProtocol(voices)
@@ -145,15 +158,49 @@ if (!gotLock) {
     })
   })
 
-  app.on('before-quit', () => flushAll())
+  app.on('before-quit', (e) => {
+    // 2.1.2: повне прибирання при будь-якому виході: вбити браузери реєстрації,
+    // зупинити проксі-чек, скинути стан. process.exit у listener забороняє 'before-quit',
+    // тому синхронно робимо тільки те, що встигаємо.
+    try { autoregRef?.interrupt('додаток закривається') } catch { /* ignore */ }
+    void autoregRef?.stop().catch(() => {})
+    flushAll()
+  })
 
   app.on('window-all-closed', () => {
-    // Батч посеред виконання — залишаємось у фоновому режимі, інакше
-    // стан залишиться замороженим (в той самий патерн, що вбив інцидент).
-    if (autoregRef?.isRunning()) {
-      console.log('[main] window-all-closed, але автозареєстрація активна — не виходжуємо')
-      return
-    }
-    if (process.platform !== 'darwin') app.quit()
+    // 2.1.2: закриття вікна = ПОВНИЙ вихід, навіть якщо автореєстрація активна
+    // (вона переривається у before-quit: браузери вбиті, стан збережено).
+    app.quit()
   })
+}
+
+/** 2.1.2: прибрати осиротілі Chromium попереднього запуску (Windows). */
+async function killOrphanChromium(): Promise<void> {
+  if (process.platform !== 'win32') return
+  try {
+    const { execFile } = await import('child_process')
+    // не бʼємо ВСІ chrome.exe — тільки headless-діти цього юзера зі світ pref:
+    // безпечний варіант: wmic за commandline ms-playwright (наш bundled Chromium)
+    const out = await new Promise<string>((resolve) => {
+      execFile(
+        'wmic',
+        ['process', 'where', "name='chrome.exe'", 'get', 'ProcessId,CommandLine', '/format:list'],
+        { timeout: 8000 },
+        (err: unknown, stdout: unknown) => resolve(err ? '' : String(stdout ?? ''))
+      )
+    })
+    if (!out) return
+    const blocks = out.split(/\n\n/)
+    const pids: string[] = []
+    for (const b of blocks) {
+      if (/ms-playwright|cartelsia/i.test(b) && /--headless|--type=/i.test(b)) {
+        const m = /ProcessId=(\d+)/.exec(b)
+        if (m) pids.push(m[1])
+      }
+    }
+    for (const pid of pids) {
+      try { process.kill(Number(pid)) } catch { /* already dead */ }
+    }
+    if (pids.length) console.log(`[main] killOrphanChromium: убито ${pids.length} осиротілих Chromium`)
+  } catch { /* best effort */ }
 }

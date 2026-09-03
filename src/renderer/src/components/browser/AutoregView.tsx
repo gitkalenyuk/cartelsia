@@ -9,22 +9,18 @@ import {
   KeyRound,
   Globe,
   Play,
+  Pause,
   Download,
+  Upload,
   Trash2,
   ListChecks,
-  Eraser
+  Eraser,
+  FileUp
 } from 'lucide-react'
 import { t } from '../../i18n/uk'
 import { toast, useKeysStore, useSettingsStore } from '../../stores/appStore'
 import { Hint } from '../common/primitives'
-import type { AutoregItem } from '@shared/types'
-
-type ProxyEntry = {
-  url: string
-  status: 'unchecked' | 'working' | 'dead'
-  lastChecked?: string
-  latencyMs?: number
-}
+import type { AutoregItem, ProxyEntry } from '@shared/types'
 
 function maskProxy(url: string): string {
   return url.replace(/\/\/([^@]+)@/, '//•••@')
@@ -100,6 +96,9 @@ export function AutoregView(): React.JSX.Element {
       } else if (event.type === 'autoreg-log') {
         setLogLines((prev) => [...prev.slice(-199), event.line])
         setLastLog(event.line)
+      } else if (event.type === 'proxies-updated') {
+        // 2.1.2: realtime-статус проксі під час чекінгу
+        setProxies(event.proxies as ProxyEntry[])
       }
     })
     return off
@@ -148,6 +147,11 @@ export function AutoregView(): React.JSX.Element {
   const [importText, setImportText] = useState('')
   const [grabUrl, setGrabUrl] = useState('')
   const [checking, setChecking] = useState(false)
+  // 2.1.2: налаштування чекінгу (потоки/таймаут) — з settings
+  const checkThreads = Math.max(1, Math.min(50, s?.autoreg?.proxyCheckThreads ?? 10))
+  const checkTimeout = s?.autoreg?.proxyCheckTimeoutMs ?? 12000
+  const emailStyle = s?.autoreg?.emailStyle ?? 'random'
+  const emailPrefix = s?.autoreg?.emailPrefix ?? ''
 
   const loadProxies = useCallback(async (): Promise<void> => {
     setProxies(await window.cartelsia.proxy.list())
@@ -165,6 +169,15 @@ export function AutoregView(): React.JSX.Element {
     void loadProxies()
   }, [importText, loadProxies])
 
+  // 2.1.2: імпорт з файлу через нативний діалог
+  const doImportFile = useCallback(async (): Promise<void> => {
+    const r = await window.cartelsia.proxy.importFile()
+    if (r.added > 0) {
+      toast('success', t.autoReg2ProxyAdded(r.added))
+      void loadProxies()
+    }
+  }, [loadProxies])
+
   const doGrab = useCallback(async (): Promise<void> => {
     if (!grabUrl.trim()) return
     const r = await window.cartelsia.proxy.grab(grabUrl.trim())
@@ -172,11 +185,34 @@ export function AutoregView(): React.JSX.Element {
     void loadProxies()
   }, [grabUrl, loadProxies])
 
+  // 2.1.2: realtime-чек — статуси приходять подіями proxies-updated
   const doCheck = useCallback(async (): Promise<void> => {
     setChecking(true)
-    try { await window.cartelsia.proxy.check(); toast('success', t.autoReg2ProxyChecked) }
-    finally { setChecking(false); void loadProxies() }
+    window.cartelsia.proxy.checkStart({ threads: checkThreads, timeoutMs: checkTimeout })
+  }, [checkThreads, checkTimeout])
+
+  // Синхронізація кнопки Stop: checking=true поки є 'checking' статуси
+  useEffect(() => {
+    if (checking && !proxies.some((p) => p.status === 'checking') && proxies.length > 0) {
+      const timer = setTimeout(() => {
+        setChecking(false)
+        void loadProxies()
+      }, 800)
+      return () => clearTimeout(timer)
+    }
+  }, [checking, proxies, loadProxies])
+
+  const doCheckStop = useCallback(async (): Promise<void> => {
+    await window.cartelsia.proxy.checkStop()
+    setChecking(false)
+    void loadProxies()
   }, [loadProxies])
+
+  // 2.1.2: експорт проксі у файл
+  const doExport = useCallback(async (): Promise<void> => {
+    const r = await window.cartelsia.proxy.export(false)
+    if (r.path) toast('success', t.fileSaved)
+  }, [])
 
   const removeProxy = useCallback(async (url: string): Promise<void> => {
     const r = await window.cartelsia.proxy.remove(url)
@@ -184,19 +220,19 @@ export function AutoregView(): React.JSX.Element {
   }, [])
 
   const clearDead = useCallback(async (): Promise<void> => {
-    const dead = proxies.filter((p) => p.status === 'dead')
-    for (const p of dead) await window.cartelsia.proxy.remove(p.url)
-    toast('info', t.autoReg2Removed(dead.length))
+    const r = await window.cartelsia.proxy.clear(true)
+    toast('info', t.autoReg2Removed(r.removed))
     void loadProxies()
-  }, [proxies, loadProxies])
+  }, [loadProxies])
 
   const clearAll = useCallback(async (): Promise<void> => {
-    for (const p of proxies) await window.cartelsia.proxy.remove(p.url)
-    toast('info', t.autoReg2Removed(proxies.length))
+    const r = await window.cartelsia.proxy.clear(false)
+    toast('info', t.autoReg2Removed(r.removed))
     void loadProxies()
-  }, [proxies, loadProxies])
+  }, [loadProxies])
 
   const aliveCount = proxies.filter((p) => p.status === 'working').length
+  const checkingCount = proxies.filter((p) => p.status === 'checking').length
 
   return (
     <div className="autoreg2">
@@ -291,6 +327,51 @@ export function AutoregView(): React.JSX.Element {
                   <Hint text={t.autoReg2HeadlessHint} />
                 </span>
               </label>
+
+              {/* 2.1.2: стиль генерації email */}
+              <label className="field">
+                <span className="field__label">
+                  {t.emailStyle}
+                  <Hint text={t.emailStyleHint} />
+                </span>
+                <select
+                  className="input"
+                  style={{ width: 180 }}
+                  value={emailStyle}
+                  disabled={running}
+                  onChange={(e) =>
+                    void useSettingsStore.getState().update({
+                      autoreg: { ...(settings?.autoreg ?? {}), emailStyle: e.target.value as typeof emailStyle }
+                    })
+                  }
+                >
+                  <option value="random">{t.emailStyleRandom}</option>
+                  <option value="word">{t.emailStyleWord}</option>
+                  <option value="support">{t.emailStyleSupport}</option>
+                  <option value="custom">{t.emailStyleCustom}</option>
+                </select>
+              </label>
+
+              {emailStyle === 'custom' && (
+                <label className="field">
+                  <span className="field__label">
+                    {t.emailPrefix}
+                    <Hint text={t.emailPrefixHint} />
+                  </span>
+                  <input
+                    className="input"
+                    style={{ width: 150 }}
+                    placeholder="john"
+                    value={emailPrefix}
+                    disabled={running}
+                    onChange={(e) =>
+                      void useSettingsStore.getState().update({
+                        autoreg: { ...(settings?.autoreg ?? {}), emailPrefix: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '') }
+                      })
+                    }
+                  />
+                </label>
+              )}
 
               <div className="autoreg2__actions">
                 {!running ? (
@@ -424,22 +505,29 @@ export function AutoregView(): React.JSX.Element {
             <div className="autoreg2__proxy-import">
               <textarea
                 className="input autoreg2__proxy-textarea"
-                placeholder={'ip:port:user:pass\nhttp://user:pass@ip:port\nip:port'}
+                placeholder={'ip:port:user:pass\nhttp://user:pass@ip:port\nip:port\nsocks5://ip:port'}
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
                 rows={5}
               />
-              <button className="btn btn--primary btn--sm" onClick={() => void doImport()} disabled={!importText.trim()}>
-                <Download size={13} />
-                {t.autoReg2ProxyImport}
-              </button>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <button className="btn btn--primary btn--sm" onClick={() => void doImport()} disabled={!importText.trim()}>
+                  <Download size={13} />
+                  {t.autoReg2ProxyImport}
+                </button>
+                {/* 2.1.2: імпорт з файлу */}
+                <button className="btn btn--secondary btn--sm" onClick={() => void doImportFile()}>
+                  <FileUp size={13} />
+                  {t.proxyImportFile}
+                </button>
+              </div>
             </div>
 
             <div className="autoreg2__proxy-grab">
               <input
                 className="input"
                 style={{ flex: 1 }}
-                placeholder="https://.../proxies.txt"
+                placeholder="https://.../proxies.txt (грабінг списку звідти)"
                 value={grabUrl}
                 onChange={(e) => setGrabUrl(e.target.value)}
               />
@@ -449,10 +537,69 @@ export function AutoregView(): React.JSX.Element {
               </button>
             </div>
 
+            {/* 2.1.2: потоки і таймаут чекінгу */}
+            <div className="row" style={{ gap: 12, alignItems: 'flex-end', marginTop: 10 }}>
+              <label className="field">
+                <span className="field__label">
+                  {t.proxyCheckThreads}
+                  <Hint text={t.proxyCheckThreadsHint} />
+                </span>
+                <input
+                  className="input tnum"
+                  type="number"
+                  min={1}
+                  max={50}
+                  style={{ width: 80 }}
+                  value={checkThreads}
+                  disabled={checking}
+                  onChange={(e) =>
+                    void useSettingsStore.getState().update({
+                      autoreg: { ...(settings?.autoreg ?? {}), proxyCheckThreads: Math.max(1, Math.min(50, Number(e.target.value) || 10)) }
+                    })
+                  }
+                />
+              </label>
+              <label className="field">
+                <span className="field__label">
+                  {t.proxyCheckTimeout}
+                  <Hint text={t.proxyCheckTimeoutHint} />
+                </span>
+                <input
+                  className="input tnum"
+                  type="number"
+                  min={3000}
+                  max={60000}
+                  step={1000}
+                  style={{ width: 100 }}
+                  value={checkTimeout}
+                  disabled={checking}
+                  onChange={(e) =>
+                    void useSettingsStore.getState().update({
+                      autoreg: { ...(settings?.autoreg ?? {}), proxyCheckTimeoutMs: Math.max(3000, Math.min(60000, Number(e.target.value) || 12000)) }
+                    })
+                  }
+                />
+              </label>
+              <span className="muted text-sm">
+                {checking && checkingCount > 0 ? t.proxyCheckingNow(checkingCount) : ''}
+              </span>
+            </div>
+
             <div className="autoreg2__proxy-actions">
-              <button className="btn btn--secondary btn--sm" onClick={() => void doCheck()} disabled={checking || proxies.length === 0}>
-                {checking ? <Loader2 size={13} className="spin" /> : <ListChecks size={13} />}
-                {t.autoReg2ProxyCheck}
+              {!checking ? (
+                <button className="btn btn--secondary btn--sm" onClick={() => void doCheck()} disabled={proxies.length === 0}>
+                  <ListChecks size={13} />
+                  {t.autoReg2ProxyCheck}
+                </button>
+              ) : (
+                <button className="btn btn--danger btn--sm" onClick={() => void doCheckStop()}>
+                  <Pause size={13} />
+                  {t.proxyCheckStop}
+                </button>
+              )}
+              <button className="btn btn--secondary btn--sm" onClick={() => void doExport()} disabled={proxies.length === 0}>
+                <Upload size={13} />
+                {t.proxyExport}
               </button>
               <button className="btn btn--secondary btn--sm" onClick={() => void clearDead()} disabled={checking}>
                 <Eraser size={13} />
@@ -488,8 +635,10 @@ export function AutoregView(): React.JSX.Element {
                       <tr key={p.url} className="autoreg2__row">
                         <td className="mono text-sm">{maskProxy(p.url)}</td>
                         <td>
-                          <span className={`badge ${p.status === 'working' ? 'badge--success' : p.status === 'dead' ? 'badge--danger' : 'badge--neutral'}`}>
-                            {p.status === 'working' ? 'живий' : p.status === 'dead' ? 'мертвий' : 'не перевірений'}
+                          <span className={`badge ${p.status === 'working' ? 'badge--success' : p.status === 'dead' ? 'badge--danger' : p.status === 'checking' ? 'badge--accent' : 'badge--neutral'}`}>
+                            {p.status === 'working' && <CheckCircle2 size={10} />}
+                            {p.status === 'checking' && <Loader2 size={10} className="spin" />}
+                            {p.status === 'working' ? t.proxyStatusWorking : p.status === 'dead' ? t.proxyStatusDead : p.status === 'checking' ? t.proxyStatusChecking : t.proxyStatusUnchecked}
                           </span>
                         </td>
                         <td className="text-sm tnum">{p.latencyMs != null ? `${p.latencyMs} мс` : '—'}</td>

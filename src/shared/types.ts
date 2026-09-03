@@ -294,11 +294,27 @@ export interface AutoregSettings {
   chromiumMode?: 'bundled' | 'download' // bundled=все в .exe, download=докачка при першому запуску
   headless?: boolean // headless Chromium (default true)
   useProxy?: boolean // ганяти реєстрацію через проксі-пул
+  /**
+   * 2.1.2: стратегія генерації локальної частини email.
+   * random: випадкові [a-z0-9] (за замовчуванням, безпечний)
+   * word: слово+цифри (чіткіші вигляд)
+   * support: support+timestamp (вигляд підтримки)
+   * custom: свій префікс + рандом
+   */
+  emailStyle?: 'random' | 'word' | 'support' | 'custom'
+  /** 2.1.2: префікс для emailStyle=custom (використовується як є, [a-z0-9-] далі рандом) */
+  emailPrefix?: string
+  /** 2.1.2: не використовувати жодних «відомих» слів брендів в email/іменах (default true) */
+  sanitizeBrandWords?: boolean
+  /** 2.1.2: потоки перевірки проксі (default 10, max 50) */
+  proxyCheckThreads?: number
+  /** 2.1.2: таймаут одного проксі-чеку, мс (default 12000) */
+  proxyCheckTimeoutMs?: number
 }
 
 export interface ProxyEntry {
   url: string
-  status: 'unchecked' | 'working' | 'dead'
+  status: 'unchecked' | 'working' | 'dead' | 'checking'
   lastChecked?: string
   latencyMs?: number
 }
@@ -399,6 +415,8 @@ export type MainEvent =
   | { type: 'master-log'; line: string }
   // 2.1 спільні голоси
   | { type: 'shared-voice-revoked'; alias: string; chatId: string }
+  // 2.1.2 живий статус проксі
+  | { type: 'proxies-updated'; proxies: import('./types').ProxyEntry[] }
 
 // ---------- Дефолти ----------
 export const DEFAULT_KEY_LIMIT = 20000

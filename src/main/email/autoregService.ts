@@ -8,6 +8,7 @@ import type { CheckVerificationResult } from './imapClient'
 import type { KeyPool } from '../keys/keyPool'
 import type { ImapConfig, CaptchaProvider } from '../../shared/types'
 import { dataDir, outputDir } from '../paths'
+import { genEmailLocal, genName, type EmailStyle } from './identity'
 import {
   clearState,
   emptyState,
@@ -37,6 +38,8 @@ export interface AutoregItem {
   state: AutoregState
   key?: string
   error?: string
+  /** 2.1.2: людські імʼя/прізвище для форми (генеруються разом з email) */
+  name?: { first: string; last: string }
 }
 
 export interface AutoregOptions {
@@ -50,23 +53,29 @@ export interface AutoregOptions {
   batchSize?: number // якщо задано — пачка з паузою, інакше всі підряд
 }
 
+/** 2.1.2: постачальник налаштувань (ставиться з handlers, щоб уникнути циклічних імпортів) */
+let settingsSnapshot: () => import('../../shared/types').AutoregSettings = () => ({})
+export function setAutoregSettingsProvider(fn: () => import('../../shared/types').AutoregSettings): void {
+  settingsSnapshot = fn
+}
+
 function randStr(len: number, alphabet: string): string {
   let s = ''
   for (let i = 0; i < len; i++) s += alphabet[Math.floor(Math.random() * alphabet.length)]
   return s
 }
 
-function genEmail(domain: string): string {
-  const time = Date.now().toString(36)
-  const rnd = randStr(4, 'abcdefghijklmnopqrstuvwxyz0123456789')
-  return `cartelia_${time}_${rnd}@${domain}`
+/** 2.1.2: email через identity-модуль (без бренд-слів; стиль з налаштувань) */
+function genEmail(domain: string, style: EmailStyle = 'random', prefix?: string): string {
+  return `${genEmailLocal(style, prefix)}@${domain}`
 }
 
 function genPass(): string {
+  // 2.1.2: пароль більше не містить бренд-слова
   const upper = randStr(5, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
   const digits = randStr(2, '0123456789')
   const lower = randStr(2, 'abcdefghijklmnopqrstuvwxyz')
-  return `Cartelia_${upper}${digits}${lower}!9`
+  return `Xq_${upper}${digits}${lower}!9`
 }
 
 function appendAccountsLine(email: string, pass: string, key?: string, err?: string): void {
@@ -91,7 +100,9 @@ export interface RegistrarEngine {
     checkEmailFn?: () => Promise<CheckVerificationResult>,
     win?: BrowserWindow | null,
     timeoutMs?: number,
-    captchaTimeoutMs?: number
+    captchaTimeoutMs?: number,
+    /** 2.1.2: людські імʼя/прізвище для форми */
+    name?: { first: string; last: string }
   ): Promise<RegisterResult>
   close(): Promise<void>
   resume(): void
@@ -132,6 +143,18 @@ export class AutoregService extends EventEmitter {
   cancel(): void {
     this.cancelled = true
     this.registrar.cancelCaptcha()
+  }
+
+  /**
+   * 2.1.2: ЖОРСТКА зупинка: прапор cancelled + негайне вбивство всіх живих
+   * браузерів (in-flight registerOne кидає помилку і потоки завершуються швидко).
+   */
+  async stop(): Promise<void> {
+    this.cancel()
+    const bs = this.registrar as import('./browserSignupRegistrar').BrowserSignupRegistrar
+    if (typeof bs.killAll === 'function') {
+      try { await bs.killAll() } catch { /* ignore */ }
+    }
   }
 
   /**
@@ -205,10 +228,15 @@ export class AutoregService extends EventEmitter {
 
     // Якщо резюму немає (або домен інший) — ініціалізуємо з нуля
     if (!resumeState) {
+      // 2.1.2: стиль email і людські імена з налаштувань
+      const st = settingsSnapshot()
+      const style: EmailStyle = st.emailStyle ?? 'random'
+      const prefix = st.emailPrefix
       this.items = Array.from({ length: opts.count }, () => {
-        const email = genEmail(opts.catchAllDomain)
+        const email = genEmail(opts.catchAllDomain, style, prefix)
         const pass = genPass()
-        return { id: crypto.randomUUID(), email, pass, state: 'queued' as AutoregState }
+        const name = genName()
+        return { id: crypto.randomUUID(), email, pass, state: 'queued' as AutoregState, name }
       })
       writeState(dataDir(), emptyState(opts.catchAllDomain))
     }
@@ -300,7 +328,10 @@ export class AutoregService extends EventEmitter {
             item.email,
             item.pass,
             undefined, // OTP прямим IMAP усередині registrar (imapDirectOtp)
-            win
+            win,
+            undefined,
+            undefined,
+            item.name
           )
         } catch (err) {
           result = {

@@ -594,9 +594,11 @@ textarea,
   font: 400 var(--fs-md) / 1.6 var(--font-sans);
   padding: var(--sp-4) var(--sp-4) var(--sp-2);
   min-height: 120px;
-  max-height: 40vh;
+  height: 120px;
+  max-height: 45vh;
   overflow-y: auto;
   resize: none;
+  transition: height 0.12s ease-out;
 }
 .composer__toolbar {
   display: flex;

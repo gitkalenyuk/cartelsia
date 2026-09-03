@@ -75,6 +75,45 @@ export class BrowserSignupRegistrar extends EventEmitter {
   /** fail-лічильники підряд по proxy-url. */
   private failCounts = new Map<string, number>()
   private proxyFailLimit = 2
+  /** 2.1.2: живі браузерні сесії для миттєвого killAll при зупинці/виході */
+  private live: Array<{ browser: Browser | null; ctx: BrowserContext | null; page: Page | null }> = []
+
+  /** Реєструє живі обʼєкти сесії (викликається після кожного launch/newPage). */
+  private trackLive(browser: Browser, ctx: BrowserContext, page: Page): void {
+    const entry = { browser, ctx, page }
+    this.live.push(entry)
+    const drop = (): void => {
+      this.live = this.live.filter((e) => e.browser !== browser)
+    }
+    browser.on('disconnected', drop)
+  }
+
+  /** 2.1.2: ЗУПИНКА = смерть усіх запущених браузерів негайно. */
+  async killAll(): Promise<number> {
+    const targets = [...this.live]
+    this.live = []
+    let killed = 0
+    for (const t of targets) {
+      try { await t.browser?.close(); killed++ } catch { /* already dead */ }
+    }
+    return killed
+  }
+
+  /** 2.1.2: імʼя з email без бренд-слів (fallback коли name не передано) */
+  private nameFromEmail(email: string): { first: string; last: string } {
+    const local = email.split('@')[0] ?? 'user'
+    const clean = local.replace(/[^a-zA-Z]/g, '')
+    if (clean.length >= 3) {
+      const half = Math.max(3, Math.floor(clean.length / 2))
+      const first = clean.slice(0, half)
+      const rest = clean.slice(half) || 'Stone'
+      return {
+        first: first.charAt(0).toUpperCase() + first.slice(1),
+        last: rest.charAt(0).toUpperCase() + rest.slice(1)
+      }
+    }
+    return { first: 'John', last: 'Stone' }
+  }
 
   constructor(opts: BrowserSignupOptions = {}) {
     super()
@@ -91,6 +130,8 @@ export class BrowserSignupRegistrar extends EventEmitter {
 
   async close(): Promise<void> {
     this.closed = true
+    // 2.1.2: close = вбити все живе негайно
+    await this.killAll()
   }
 
   /** Успішна рега скидає fail-лічильник проксі. */
@@ -140,7 +181,9 @@ export class BrowserSignupRegistrar extends EventEmitter {
     _checkEmailFn?: unknown,
     _win: unknown = null,
     timeoutMs = 240_000,
-    _captchaTimeoutMs = 240_000
+    _captchaTimeoutMs = 240_000,
+    /** 2.1.2: людські імʼя/прізвище (якщо не задані — виводяться з email) */
+    name?: { first: string; last: string }
   ): Promise<RegisterResult> {
     const t0 = Date.now()
     const tag = email.slice(0, email.indexOf('@'))
@@ -153,14 +196,15 @@ export class BrowserSignupRegistrar extends EventEmitter {
     const pwProxy = toPlaywrightProxy(proxy)
 
     let browser: Browser | null = null
+    let ctx: BrowserContext | null = null
+    let page: Page | null = null
     try {
       if (this.closed) throw new Error('регістратор закритий')
 
       // Фаза A: запуск браузера + проходження checkpoint + дочекатись форми.
       // 2 спроби: кожна з НОВИМ проксі (proxyGetter викликається знову) —
       // checkpoint/проксі часто фейлять по одному разу, retry конвертує це в успіх.
-      let ctx: BrowserContext | null = null
-      let page: Page | null = null
+      let formOk = false
       for (let attempt = 1; attempt <= 2; attempt++) {
         try {
           if (attempt > 1) {
@@ -182,13 +226,14 @@ export class BrowserSignupRegistrar extends EventEmitter {
             viewport: { width: 1366, height: 850 }
           })
           page = await ctx.newPage()
+          this.trackLive(browser, ctx, page)
 
           // sign-up (Vercel checkpoint проходить сам ~6–10 c)
           // 90 c: під навантаженням повільні проксі встигають відкрити сторінку
           await page.goto(SIGNUP_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 })
 
           // Чекати форму (checkpoint переадресовує → /sign-in/create)
-          let formOk = false
+          formOk = false
           for (let i = 0; i < 40; i++) {
             if (this.closed) throw new Error('stopped before form')
             await page.waitForTimeout(2_000)
@@ -206,10 +251,11 @@ export class BrowserSignupRegistrar extends EventEmitter {
       }
       if (!browser || !ctx || !page) throw new Error('браузер не ініціалізовано')
 
-      // 3) Заповнення форми
-      const [first, ...rest] = (email.split('@')[0] || 'cartel user').replace(/[^a-zA-Z ]/g, ' ').trim().split(/\s+/)
-      await page.fill('#firstName-field', first || 'Cartel', { timeout: 15_000 })
-      await page.fill('#lastName-field', rest.join(' ') || 'User', { timeout: 15_000 })
+      // 3) Заповнення форми: 2.1.2 людські імена (email-похідні безпечніші, але імʼя «cartelia» ловить бан)
+      const first = (name?.first || this.nameFromEmail(email).first) || 'John'
+      const last = (name?.last || this.nameFromEmail(email).last) || 'Stone'
+      await page.fill('#firstName-field', first, { timeout: 15_000 })
+      await page.fill('#lastName-field', last, { timeout: 15_000 })
       await page.fill('#emailAddress-field', email, { timeout: 15_000 })
       await page.fill('#password-field', pass, { timeout: 15_000 })
       await page.click("button:has-text('Continue')", { timeout: 15_000 })

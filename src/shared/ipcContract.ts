@@ -69,6 +69,12 @@ export const IPC = {
   PROXY_CHECK: 'proxy:check',
   PROXY_LIST: 'proxy:list',
   PROXY_REMOVE: 'proxy:remove',
+  // 2.1.2
+  PROXY_CHECK_START: 'proxy:checkStart',
+  PROXY_CHECK_STOP: 'proxy:checkStop',
+  PROXY_IMPORT_FILE: 'proxy:importFile',
+  PROXY_EXPORT: 'proxy:export',
+  PROXY_CLEAR: 'proxy:clear',
   // debug (тільки dev)
   DEBUG_SET_KEY_USAGE: 'debug:setKeyUsage',
   // події

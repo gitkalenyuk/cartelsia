@@ -10,6 +10,11 @@ declare module '*.wav?url' {
   export default url
 }
 
+declare module '*.png' {
+  const url: string
+  export default url
+}
+
 declare module '@breezystack/lamejs' {
   export class Mp3Encoder {
     constructor(channels: number, sampleRate: number, kbps: number)

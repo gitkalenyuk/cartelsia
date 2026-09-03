@@ -428,7 +428,29 @@ export const t = {
 
   // ── sonic-3.6 (2.1.1) ──
   localeAuto: 'Авто (language)',
-  localeHint: 'Locale (тільки sonic-3.6): регіональні правила читання дат і чисел, напр. en-GB. Взаємовиключний з мовою — вибір locale прибирає language з запиту'
+  localeHint: 'Locale (тільки sonic-3.6): регіональні правила читання дат і чисел, напр. en-GB. Взаємовиключний з мовою — вибір locale прибирає language з запиту',
+
+  // ── 2.1.2: identity + проксі ──
+  emailStyle: 'Стиль email',
+  emailStyleHint: 'Як генерувати адреси: random — випадковий набір букв/цифр (найбезпечніший, вигляд mt8kb1dc8llr); word — слово+число+слово (stone42river); support — support+цифри (вигляд техпідтримки); custom — ваш префікс + рандом. Слово «cartelia» більше НІКОЛИ не використовується — Cartesia його забанила',
+  emailStyleRandom: 'Random (безпечний)',
+  emailStyleWord: 'Слова (stone42river)',
+  emailStyleSupport: 'Support-стиль',
+  emailStyleCustom: 'Свій префікс',
+  emailPrefix: 'Префікс',
+  emailPrefixHint: 'Початок адреси для стилю «Свій префікс»: john → john7xk2m9a@домен. Заборонені слова (cartelia тощо) автоматично замінюються',
+  proxyImportFile: 'З файлу…',
+  proxyExport: 'Експорт',
+  proxyCheckThreads: 'Потоки чекінгу',
+  proxyCheckThreadsHint: 'Скільки проксі перевіряти одночасно. 10–20 = швидко і без навантаження; 50 = максимум для великих списків',
+  proxyCheckTimeout: 'Таймаут (мс)',
+  proxyCheckTimeoutHint: 'Скільки чекати відповіді від одного проксі. 12000 мс — комфортно для повільних резидентних проксі',
+  proxyCheckingNow: (n: number) => `Перевіряється: ${n}…`,
+  proxyCheckStop: 'Зупинити чек',
+  proxyStatusWorking: 'живий',
+  proxyStatusDead: 'мертвий',
+  proxyStatusChecking: 'перевіряється…',
+  proxyStatusUnchecked: 'не перевірений'
 }
 
 export const LANGUAGE_FLAGS: Record<string, string> = {
