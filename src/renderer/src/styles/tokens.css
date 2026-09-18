@@ -1,58 +1,67 @@
 :root {
   color-scheme: dark;
 
-  /* Фони — тепла темна палітра Claude */
-  --bg-app: #1a1915;
-  --bg-sidebar: #1f1e1b;
-  --bg-main: #262624;
-  --bg-surface: #2b2a27;
-  --bg-surface-2: #30302e;
-  --bg-hover: #33322e;
-  --bg-active: #3a3833;
-  --bg-overlay: rgba(20, 19, 16, 0.65);
+  /* ════════════════════════════════════════════════════════════════
+     Cartelsia Cyber Cartel v2.2 Design System Tokens
+     Obsidian noir, titanium surfaces, vibrant cartel amber/gold neon
+     ════════════════════════════════════════════════════════════════ */
 
-  /* Бордери */
-  --border-subtle: #33322d;
-  --border-default: #3e3d38;
-  --border-strong: #4d4b44;
+  /* Фони — глибокий нічний нуар */
+  --bg-app: #090907;
+  --bg-sidebar: #10100d;
+  --bg-main: #141310;
+  --bg-surface: #1b1a16;
+  --bg-surface-2: #22211c;
+  --bg-hover: #2a2922;
+  --bg-active: #333129;
+  --bg-overlay: rgba(9, 9, 7, 0.82);
+
+  /* Бордери — тонкі металеві грані з золотистим підсвічуванням */
+  --border-subtle: #24221c;
+  --border-default: #36332a;
+  --border-strong: #4d493c;
 
   /* Текст */
-  --text-primary: #f5f4ed;
-  --text-secondary: #b8b5a9;
-  --text-muted: #8a877c;
-  --text-faint: #6b6960;
-  --text-on-accent: #ffffff;
+  --text-primary: #fbf9f4;
+  --text-secondary: #c5c1b4;
+  --text-muted: #8d897c;
+  --text-faint: #636056;
+  --text-on-accent: #000000;
 
-  /* Акцент — теракота */
-  --accent: #d97757;
-  --accent-hover: #e08b6d;
-  --accent-active: #c96645;
-  --accent-muted: rgba(217, 119, 87, 0.14);
-  --accent-border: rgba(217, 119, 87, 0.4);
+  /* Акцент — YouTube Cartel палюче бурштинове золото */
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-active: #d97706;
+  --accent-muted: rgba(245, 158, 11, 0.14);
+  --accent-border: rgba(245, 158, 11, 0.42);
+  --accent-glow: rgba(245, 158, 11, 0.32);
+  --gradient-accent: linear-gradient(135deg, #fbbf24 0%, #f59e0b 55%, #ea580c 100%);
+  --gradient-card: linear-gradient(180deg, rgba(245, 158, 11, 0.04) 0%, rgba(255, 255, 255, 0) 100%);
 
-  /* Статуси */
-  --success: #7fa66f;
-  --success-muted: rgba(127, 166, 111, 0.14);
-  --warning: #d4a027;
-  --warning-muted: rgba(212, 160, 39, 0.16);
-  --danger: #e5695e;
-  --danger-muted: rgba(229, 105, 94, 0.14);
-  --info: #8aa9c9;
-  --info-muted: rgba(138, 169, 201, 0.14);
+  /* Статуси — неонові індикатори */
+  --success: #10b981;
+  --success-muted: rgba(16, 185, 129, 0.16);
+  --warning: #f59e0b;
+  --warning-muted: rgba(245, 158, 11, 0.16);
+  --danger: #ef4444;
+  --danger-muted: rgba(239, 68, 68, 0.16);
+  --info: #38bdf8;
+  --info-muted: rgba(56, 189, 248, 0.16);
 
-  /* Палітра графіка (по ключах) */
-  --chart-1: #d97757;
-  --chart-2: #8aa9c9;
-  --chart-3: #7fa66f;
-  --chart-4: #d4a027;
-  --chart-5: #b58bc9;
-  --chart-6: #6fb8ad;
+  /* Палітра графіка статистики */
+  --chart-1: #f59e0b;
+  --chart-2: #38bdf8;
+  --chart-3: #10b981;
+  --chart-4: #ec4899;
+  --chart-5: #a855f7;
+  --chart-6: #14b8a6;
 
   /* Радіуси */
   --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
   --radius-full: 999px;
 
   /* Відступи */
@@ -66,9 +75,8 @@
   --sp-10: 40px;
 
   /* Типографіка */
-  --font-sans: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-  --font-mono: 'JetBrains Mono', 'Cascadia Code', Consolas, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   --fs-xs: 11px;
   --fs-sm: 12px;
   --fs-base: 13px;
@@ -79,57 +87,19 @@
 
   /* Рух і тіні */
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
-  --dur-fast: 120ms;
-  --dur-base: 180ms;
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25);
-  --shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.4);
-  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: 360ms;
+
+  --shadow-card: 0 4px 18px rgba(0, 0, 0, 0.45);
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 1px rgba(245, 158, 11, 0.25);
+  --shadow-glow: 0 0 28px var(--accent-glow);
+  --shadow-modal: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 1px rgba(245, 158, 11, 0.35);
   --focus-ring: 0 0 0 2px var(--bg-main), 0 0 0 4px var(--accent-border);
 
   /* Макет */
-  --sidebar-w: 264px;
-  --content-max-w: 780px;
+  --sidebar-w: 268px;
+  --content-max-w: 820px;
   --titlebar-h: 36px;
 }
-
-/* ── 2.0 редизайн: сучаснішa палітра, м'якіші тіні, живий рух ── */
-:root {
-  /* глибші фони з холоднішим відтінком */
-  --bg-app: #161512;
-  --bg-sidebar: #1c1b18;
-  --bg-main: #20201d;
-  --bg-surface: #282825;
-  --bg-surface-2: #2e2e2b;
-
-  --accent-glow: rgba(224, 122, 82, 0.28);
-  --gradient-accent: linear-gradient(135deg, #e08b6d 0%, #d97757 45%, #c05f42 100%);
-  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0));
-
-  --radius-xl: 18px;
-  --radius-2xl: 24px;
-
-  --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.22), 0 8px 24px rgba(0, 0, 0, 0.18);
-  --shadow-glow: 0 0 24px var(--accent-glow);
-
-  --ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
-  --dur-slow: 320ms;
-
-  --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
-}
-
-/* Перевизначення base-токенів під 2.0 (пізніші правила перемагають) */
-:root {
-  --font-sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif !important;
-}
-
-/* Гладкий скрол по всьому додатку */
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 999px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-thumb:hover { background-color: var(--border-strong); }
-* { scrollbar-width: thin; scrollbar-color: var(--border-default) transparent; }

@@ -10,3 +10,6 @@ output/
 e2e/.artifacts/
 test-results/
 REGER/
+dist-go/
+cartelsia-go/Cartelsia*
+!cartelsia-go/rsrc_windows_amd64.syso

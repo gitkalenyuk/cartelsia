@@ -338,50 +338,6 @@ export function SettingsView(): React.JSX.Element {
       </div>
 
       <div className="settings-section">
-        <div className="settings-section__title">{t.sectionAutoregOptions}</div>
-        <Row label={t.autoregEngine} desc={t.autoregEngineDesc}>
-          <button className="pill" disabled style={{ opacity: 0.7 }}>Browser Signup 2.0</button>
-        </Row>
-        <Row label={t.autoregThreads} desc={t.autoregThreadsDesc}>
-          <input
-            className="input tnum"
-            style={{ width: 80 }}
-            type="number"
-            min={1}
-            max={50}
-            step={1}
-            placeholder="5"
-            value={settings.autoreg?.concurrency ?? ''}
-            onChange={(e) =>
-              void update({
-                autoreg: {
-                  ...settings.autoreg,
-                  concurrency: Math.max(1, Math.min(50, Number(e.target.value))) || undefined
-                }
-              })
-            }
-          />
-          <span className="muted text-sm">{t.autoregThreadsUnit}</span>
-        </Row>
-        <Row label={t.autoregDelayMs} desc={t.autoregDelayMsDesc}>
-          <input
-            className="input tnum"
-            style={{ width: 100 }}
-            type="number"
-            min={0}
-            max={30000}
-            step={500}
-            placeholder="4000"
-            value={settings.autoreg?.delayMs ?? ''}
-            onChange={(e) =>
-              void update({ autoreg: { ...settings.autoreg, delayMs: Number(e.target.value) || undefined } })
-            }
-          />
-          <span className="muted text-sm">мс</span>
-        </Row>
-      </div>
-
-      <div className="settings-section">
         <div className="settings-section__title">{t.sectionMaster}</div>
         <Row
           label={

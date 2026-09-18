@@ -12533,7 +12533,7 @@ const createLucideIcon = (iconName, iconNode) => {
   Component.displayName = toPascalCase(iconName);
   return Component;
 };
-const __iconNode$L = [
+const __iconNode$G = [
   ["path", { d: "M2 10v3", key: "1fnikh" }],
   ["path", { d: "M6 6v11", key: "11sgs0" }],
   ["path", { d: "M10 3v18", key: "yhl04a" }],
@@ -12541,8 +12541,8 @@ const __iconNode$L = [
   ["path", { d: "M18 5v13", key: "123xd1" }],
   ["path", { d: "M22 10v3", key: "154ddg" }]
 ];
-const AudioLines = createLucideIcon("audio-lines", __iconNode$L);
-const __iconNode$K = [
+const AudioLines = createLucideIcon("audio-lines", __iconNode$G);
+const __iconNode$F = [
   [
     "path",
     {
@@ -12552,44 +12552,50 @@ const __iconNode$K = [
   ],
   ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ];
-const BadgeCheck = createLucideIcon("badge-check", __iconNode$K);
-const __iconNode$J = [
+const BadgeCheck = createLucideIcon("badge-check", __iconNode$F);
+const __iconNode$E = [
+  ["path", { d: "M12 7v14", key: "1akyts" }],
+  [
+    "path",
+    {
+      d: "M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z",
+      key: "ruj8y"
+    }
+  ]
+];
+const BookOpen = createLucideIcon("book-open", __iconNode$E);
+const __iconNode$D = [
   ["rect", { width: "18", height: "14", x: "3", y: "5", rx: "2", ry: "2", key: "12ruh7" }],
   ["path", { d: "M7 15h4M15 15h2M7 11h2M13 11h4", key: "1ueiar" }]
 ];
-const Captions = createLucideIcon("captions", __iconNode$J);
-const __iconNode$I = [
+const Captions = createLucideIcon("captions", __iconNode$D);
+const __iconNode$C = [
   ["path", { d: "M3 3v16a2 2 0 0 0 2 2h16", key: "c24i48" }],
   ["path", { d: "M18 17V9", key: "2bz60n" }],
   ["path", { d: "M13 17V5", key: "1frdt8" }],
   ["path", { d: "M8 17v-3", key: "17ska0" }]
 ];
-const ChartColumn = createLucideIcon("chart-column", __iconNode$I);
-const __iconNode$H = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
-const Check = createLucideIcon("check", __iconNode$H);
-const __iconNode$G = [
+const ChartColumn = createLucideIcon("chart-column", __iconNode$C);
+const __iconNode$B = [["path", { d: "M20 6 9 17l-5-5", key: "1gmf2c" }]];
+const Check = createLucideIcon("check", __iconNode$B);
+const __iconNode$A = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["line", { x1: "12", x2: "12", y1: "8", y2: "12", key: "1pkeuh" }],
   ["line", { x1: "12", x2: "12.01", y1: "16", y2: "16", key: "4dfq90" }]
 ];
-const CircleAlert = createLucideIcon("circle-alert", __iconNode$G);
-const __iconNode$F = [
+const CircleAlert = createLucideIcon("circle-alert", __iconNode$A);
+const __iconNode$z = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "m9 12 2 2 4-4", key: "dzmm74" }]
 ];
-const CircleCheck = createLucideIcon("circle-check", __iconNode$F);
-const __iconNode$E = [
+const CircleCheck = createLucideIcon("circle-check", __iconNode$z);
+const __iconNode$y = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3", key: "1u773s" }],
   ["path", { d: "M12 17h.01", key: "p32p05" }]
 ];
-const CircleQuestionMark = createLucideIcon("circle-question-mark", __iconNode$E);
-const __iconNode$D = [
-  ["rect", { width: "14", height: "14", x: "8", y: "8", rx: "2", ry: "2", key: "17jyea" }],
-  ["path", { d: "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2", key: "zix9uf" }]
-];
-const Copy = createLucideIcon("copy", __iconNode$D);
-const __iconNode$C = [
+const CircleQuestionMark = createLucideIcon("circle-question-mark", __iconNode$y);
+const __iconNode$x = [
   ["path", { d: "M12 20v2", key: "1lh1kg" }],
   ["path", { d: "M12 2v2", key: "tus03m" }],
   ["path", { d: "M17 20v2", key: "1rnc9c" }],
@@ -12605,8 +12611,8 @@ const __iconNode$C = [
   ["rect", { x: "4", y: "4", width: "16", height: "16", rx: "2", key: "1vbyd7" }],
   ["rect", { x: "8", y: "8", width: "8", height: "8", rx: "1", key: "z9xiuo" }]
 ];
-const Cpu = createLucideIcon("cpu", __iconNode$C);
-const __iconNode$B = [
+const Cpu = createLucideIcon("cpu", __iconNode$x);
+const __iconNode$w = [
   [
     "path",
     {
@@ -12616,14 +12622,14 @@ const __iconNode$B = [
   ],
   ["path", { d: "M5 21h14", key: "11awu3" }]
 ];
-const Crown = createLucideIcon("crown", __iconNode$B);
-const __iconNode$A = [
+const Crown = createLucideIcon("crown", __iconNode$w);
+const __iconNode$v = [
   ["path", { d: "M12 15V3", key: "m9g1x1" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }],
   ["path", { d: "m7 10 5 5 5-5", key: "brsn70" }]
 ];
-const Download = createLucideIcon("download", __iconNode$A);
-const __iconNode$z = [
+const Download = createLucideIcon("download", __iconNode$v);
+const __iconNode$u = [
   ["path", { d: "M21.54 15H17a2 2 0 0 0-2 2v4.54", key: "1djwo0" }],
   [
     "path",
@@ -12635,25 +12641,20 @@ const __iconNode$z = [
   ["path", { d: "M11 21.95V18a2 2 0 0 0-2-2a2 2 0 0 1-2-2v-1a2 2 0 0 0-2-2H2.05", key: "14pb5j" }],
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }]
 ];
-const Earth = createLucideIcon("earth", __iconNode$z);
-const __iconNode$y = [
+const Earth = createLucideIcon("earth", __iconNode$u);
+const __iconNode$t = [
   ["circle", { cx: "12", cy: "12", r: "1", key: "41hilf" }],
   ["circle", { cx: "19", cy: "12", r: "1", key: "1wjl8i" }],
   ["circle", { cx: "5", cy: "12", r: "1", key: "1pcz8c" }]
 ];
-const Ellipsis = createLucideIcon("ellipsis", __iconNode$y);
-const __iconNode$x = [
-  [
-    "path",
-    {
-      d: "M21 21H8a2 2 0 0 1-1.42-.587l-3.994-3.999a2 2 0 0 1 0-2.828l10-10a2 2 0 0 1 2.829 0l5.999 6a2 2 0 0 1 0 2.828L12.834 21",
-      key: "g5wo59"
-    }
-  ],
-  ["path", { d: "m5.082 11.09 8.828 8.828", key: "1wx5vj" }]
+const Ellipsis = createLucideIcon("ellipsis", __iconNode$t);
+const __iconNode$s = [
+  ["path", { d: "M15 3h6v6", key: "1q9fwt" }],
+  ["path", { d: "M10 14 21 3", key: "gplh6r" }],
+  ["path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6", key: "a6xqqp" }]
 ];
-const Eraser = createLucideIcon("eraser", __iconNode$x);
-const __iconNode$w = [
+const ExternalLink = createLucideIcon("external-link", __iconNode$s);
+const __iconNode$r = [
   [
     "path",
     {
@@ -12666,21 +12667,8 @@ const __iconNode$w = [
   ["path", { d: "M16 13H8", key: "t4e002" }],
   ["path", { d: "M16 17H8", key: "z1uh3a" }]
 ];
-const FileText = createLucideIcon("file-text", __iconNode$w);
-const __iconNode$v = [
-  [
-    "path",
-    {
-      d: "M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z",
-      key: "1oefj6"
-    }
-  ],
-  ["path", { d: "M14 2v5a1 1 0 0 0 1 1h5", key: "wfsgrz" }],
-  ["path", { d: "M12 12v6", key: "3ahymv" }],
-  ["path", { d: "m15 15-3-3-3 3", key: "15xj92" }]
-];
-const FileUp = createLucideIcon("file-up", __iconNode$v);
-const __iconNode$u = [
+const FileText = createLucideIcon("file-text", __iconNode$r);
+const __iconNode$q = [
   [
     "path",
     {
@@ -12689,20 +12677,20 @@ const __iconNode$u = [
     }
   ]
 ];
-const Folder = createLucideIcon("folder", __iconNode$u);
-const __iconNode$t = [
+const Folder = createLucideIcon("folder", __iconNode$q);
+const __iconNode$p = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20", key: "13o1zl" }],
   ["path", { d: "M2 12h20", key: "9i4pu4" }]
 ];
-const Globe = createLucideIcon("globe", __iconNode$t);
-const __iconNode$s = [
+const Globe = createLucideIcon("globe", __iconNode$p);
+const __iconNode$o = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "M12 16v-4", key: "1dtifu" }],
   ["path", { d: "M12 8h.01", key: "e9boi3" }]
 ];
-const Info = createLucideIcon("info", __iconNode$s);
-const __iconNode$r = [
+const Info = createLucideIcon("info", __iconNode$o);
+const __iconNode$n = [
   [
     "path",
     {
@@ -12712,32 +12700,22 @@ const __iconNode$r = [
   ],
   ["circle", { cx: "16.5", cy: "7.5", r: ".5", fill: "currentColor", key: "w0ekpg" }]
 ];
-const KeyRound = createLucideIcon("key-round", __iconNode$r);
-const __iconNode$q = [
-  ["path", { d: "M13 5h8", key: "a7qcls" }],
-  ["path", { d: "M13 12h8", key: "h98zly" }],
-  ["path", { d: "M13 19h8", key: "c3s6r1" }],
-  ["path", { d: "m3 17 2 2 4-4", key: "1jhpwq" }],
-  ["path", { d: "m3 7 2 2 4-4", key: "1obspn" }]
-];
-const ListChecks = createLucideIcon("list-checks", __iconNode$q);
-const __iconNode$p = [
+const KeyRound = createLucideIcon("key-round", __iconNode$n);
+const __iconNode$m = [
   ["path", { d: "M16 5H3", key: "m91uny" }],
   ["path", { d: "M11 12H3", key: "51ecnj" }],
   ["path", { d: "M11 19H3", key: "zflm78" }],
   ["path", { d: "M21 16V5", key: "yxg4q8" }],
   ["circle", { cx: "18", cy: "16", r: "3", key: "1hluhg" }]
 ];
-const ListMusic = createLucideIcon("list-music", __iconNode$p);
-const __iconNode$o = [["path", { d: "M21 12a9 9 0 1 1-6.219-8.56", key: "13zald" }]];
-const LoaderCircle = createLucideIcon("loader-circle", __iconNode$o);
-const __iconNode$n = [
+const ListMusic = createLucideIcon("list-music", __iconNode$m);
+const __iconNode$l = [
   ["path", { d: "M22 13V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8", key: "12jkf8" }],
   ["path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7", key: "1ocrg3" }],
   ["path", { d: "m16 19 2 2 4-4", key: "1b14m6" }]
 ];
-const MailCheck = createLucideIcon("mail-check", __iconNode$n);
-const __iconNode$m = [
+const MailCheck = createLucideIcon("mail-check", __iconNode$l);
+const __iconNode$k = [
   [
     "path",
     {
@@ -12753,19 +12731,19 @@ const __iconNode$m = [
     }
   ]
 ];
-const MessagesSquare = createLucideIcon("messages-square", __iconNode$m);
-const __iconNode$l = [
+const MessagesSquare = createLucideIcon("messages-square", __iconNode$k);
+const __iconNode$j = [
   ["path", { d: "M12 19v3", key: "npa21l" }],
   ["path", { d: "M19 10v2a7 7 0 0 1-14 0v-2", key: "1vc78b" }],
   ["rect", { x: "9", y: "2", width: "6", height: "13", rx: "3", key: "s6n7sd" }]
 ];
-const Mic = createLucideIcon("mic", __iconNode$l);
-const __iconNode$k = [
+const Mic = createLucideIcon("mic", __iconNode$j);
+const __iconNode$i = [
   ["rect", { x: "14", y: "3", width: "5", height: "18", rx: "1", key: "kaeet6" }],
   ["rect", { x: "5", y: "3", width: "5", height: "18", rx: "1", key: "1wsw3u" }]
 ];
-const Pause = createLucideIcon("pause", __iconNode$k);
-const __iconNode$j = [
+const Pause = createLucideIcon("pause", __iconNode$i);
+const __iconNode$h = [
   [
     "path",
     {
@@ -12775,8 +12753,8 @@ const __iconNode$j = [
   ],
   ["path", { d: "m15 5 4 4", key: "1mk7zo" }]
 ];
-const Pencil = createLucideIcon("pencil", __iconNode$j);
-const __iconNode$i = [
+const Pencil = createLucideIcon("pencil", __iconNode$h);
+const __iconNode$g = [
   [
     "path",
     {
@@ -12785,25 +12763,25 @@ const __iconNode$i = [
     }
   ]
 ];
-const Play = createLucideIcon("play", __iconNode$i);
-const __iconNode$h = [
+const Play = createLucideIcon("play", __iconNode$g);
+const __iconNode$f = [
   ["path", { d: "M5 12h14", key: "1ays0h" }],
   ["path", { d: "M12 5v14", key: "s699le" }]
 ];
-const Plus = createLucideIcon("plus", __iconNode$h);
-const __iconNode$g = [
+const Plus = createLucideIcon("plus", __iconNode$f);
+const __iconNode$e = [
   ["path", { d: "M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "14sxne" }],
   ["path", { d: "M3 3v5h5", key: "1xhq8a" }],
   ["path", { d: "M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16", key: "1hlbsb" }],
   ["path", { d: "M16 16h5v5", key: "ccwih5" }]
 ];
-const RefreshCcw = createLucideIcon("refresh-ccw", __iconNode$g);
-const __iconNode$f = [
+const RefreshCcw = createLucideIcon("refresh-ccw", __iconNode$e);
+const __iconNode$d = [
   ["path", { d: "M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8", key: "1357e3" }],
   ["path", { d: "M3 3v5h5", key: "1xhq8a" }]
 ];
-const RotateCcw = createLucideIcon("rotate-ccw", __iconNode$f);
-const __iconNode$e = [
+const RotateCcw = createLucideIcon("rotate-ccw", __iconNode$d);
+const __iconNode$c = [
   [
     "path",
     {
@@ -12813,8 +12791,8 @@ const __iconNode$e = [
   ],
   ["path", { d: "m21.854 2.147-10.94 10.939", key: "12cjpa" }]
 ];
-const Send = createLucideIcon("send", __iconNode$e);
-const __iconNode$d = [
+const Send = createLucideIcon("send", __iconNode$c);
+const __iconNode$b = [
   [
     "path",
     {
@@ -12824,16 +12802,16 @@ const __iconNode$d = [
   ],
   ["circle", { cx: "12", cy: "12", r: "3", key: "1v7zrd" }]
 ];
-const Settings = createLucideIcon("settings", __iconNode$d);
-const __iconNode$c = [
+const Settings = createLucideIcon("settings", __iconNode$b);
+const __iconNode$a = [
   ["circle", { cx: "18", cy: "5", r: "3", key: "gq8acd" }],
   ["circle", { cx: "6", cy: "12", r: "3", key: "w7nqdw" }],
   ["circle", { cx: "18", cy: "19", r: "3", key: "1xt0gg" }],
   ["line", { x1: "8.59", x2: "15.42", y1: "13.51", y2: "17.49", key: "47mynk" }],
   ["line", { x1: "15.41", x2: "8.59", y1: "6.51", y2: "10.49", key: "1n3mei" }]
 ];
-const Share2 = createLucideIcon("share-2", __iconNode$c);
-const __iconNode$b = [
+const Share2 = createLucideIcon("share-2", __iconNode$a);
+const __iconNode$9 = [
   [
     "path",
     {
@@ -12843,8 +12821,8 @@ const __iconNode$b = [
   ],
   ["path", { d: "M3 20V4", key: "1ptbpl" }]
 ];
-const SkipBack = createLucideIcon("skip-back", __iconNode$b);
-const __iconNode$a = [
+const SkipBack = createLucideIcon("skip-back", __iconNode$9);
+const __iconNode$8 = [
   ["path", { d: "M21 4v16", key: "7j8fe9" }],
   [
     "path",
@@ -12854,8 +12832,8 @@ const __iconNode$a = [
     }
   ]
 ];
-const SkipForward = createLucideIcon("skip-forward", __iconNode$a);
-const __iconNode$9 = [
+const SkipForward = createLucideIcon("skip-forward", __iconNode$8);
+const __iconNode$7 = [
   ["path", { d: "M10 5H3", key: "1qgfaw" }],
   ["path", { d: "M12 19H3", key: "yhmn1j" }],
   ["path", { d: "M14 3v4", key: "1sua03" }],
@@ -12866,15 +12844,15 @@ const __iconNode$9 = [
   ["path", { d: "M8 10v4", key: "tgpxqk" }],
   ["path", { d: "M8 12H3", key: "a7s4jb" }]
 ];
-const SlidersHorizontal = createLucideIcon("sliders-horizontal", __iconNode$9);
-const __iconNode$8 = [
+const SlidersHorizontal = createLucideIcon("sliders-horizontal", __iconNode$7);
+const __iconNode$6 = [
   ["circle", { cx: "12", cy: "12", r: "10", key: "1mglay" }],
   ["path", { d: "M8 14s1.5 2 4 2 4-2 4-2", key: "1y1vjs" }],
   ["line", { x1: "9", x2: "9.01", y1: "9", y2: "9", key: "yxxnd0" }],
   ["line", { x1: "15", x2: "15.01", y1: "9", y2: "9", key: "1p4y9e" }]
 ];
-const Smile = createLucideIcon("smile", __iconNode$8);
-const __iconNode$7 = [
+const Smile = createLucideIcon("smile", __iconNode$6);
+const __iconNode$5 = [
   [
     "path",
     {
@@ -12886,12 +12864,12 @@ const __iconNode$7 = [
   ["path", { d: "M22 4h-4", key: "gwowj6" }],
   ["circle", { cx: "4", cy: "20", r: "2", key: "6kqj1y" }]
 ];
-const Sparkles = createLucideIcon("sparkles", __iconNode$7);
-const __iconNode$6 = [
+const Sparkles = createLucideIcon("sparkles", __iconNode$5);
+const __iconNode$4 = [
   ["rect", { width: "18", height: "18", x: "3", y: "3", rx: "2", key: "afitv7" }]
 ];
-const Square = createLucideIcon("square", __iconNode$6);
-const __iconNode$5 = [
+const Square = createLucideIcon("square", __iconNode$4);
+const __iconNode$3 = [
   [
     "path",
     {
@@ -12900,40 +12878,21 @@ const __iconNode$5 = [
     }
   ]
 ];
-const Star = createLucideIcon("star", __iconNode$5);
-const __iconNode$4 = [
+const Star = createLucideIcon("star", __iconNode$3);
+const __iconNode$2 = [
   ["path", { d: "M10 11v6", key: "nco0om" }],
   ["path", { d: "M14 11v6", key: "outv1u" }],
   ["path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6", key: "miytrc" }],
   ["path", { d: "M3 6h18", key: "d0wm0j" }],
   ["path", { d: "M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2", key: "e791ji" }]
 ];
-const Trash2 = createLucideIcon("trash-2", __iconNode$4);
-const __iconNode$3 = [
-  [
-    "path",
-    {
-      d: "m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3",
-      key: "wmoenq"
-    }
-  ],
-  ["path", { d: "M12 9v4", key: "juzpu7" }],
-  ["path", { d: "M12 17h.01", key: "p32p05" }]
-];
-const TriangleAlert = createLucideIcon("triangle-alert", __iconNode$3);
-const __iconNode$2 = [
+const Trash2 = createLucideIcon("trash-2", __iconNode$2);
+const __iconNode$1 = [
   ["path", { d: "M12 3v12", key: "1x0j5s" }],
   ["path", { d: "m17 8-5-5-5 5", key: "7q97r8" }],
   ["path", { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", key: "ih7n3h" }]
 ];
-const Upload = createLucideIcon("upload", __iconNode$2);
-const __iconNode$1 = [
-  ["path", { d: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2", key: "1yyitq" }],
-  ["circle", { cx: "9", cy: "7", r: "4", key: "nufk8" }],
-  ["line", { x1: "19", x2: "19", y1: "8", y2: "14", key: "1bvyxn" }],
-  ["line", { x1: "22", x2: "16", y1: "11", y2: "11", key: "1shjgl" }]
-];
-const UserPlus = createLucideIcon("user-plus", __iconNode$1);
+const Upload = createLucideIcon("upload", __iconNode$1);
 const __iconNode = [
   ["path", { d: "M18 6 6 18", key: "1bl5f8" }],
   ["path", { d: "m6 6 12 12", key: "d8bk6v" }]
@@ -13900,7 +13859,6 @@ const NAV = [
   { view: "keys", label: t.keys, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { size: 16 }) },
   { view: "voices", label: t.voices, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(AudioLines, { size: 16 }) },
   { view: "clone", label: t.cloneVoiceTab, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Mic, { size: 16 }) },
-  { view: "browser", label: t.browserTab, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { size: 16 }) },
   { view: "stats", label: t.stats, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(ChartColumn, { size: 16 }) },
   { view: "settings", label: t.settings, icon: /* @__PURE__ */ jsxRuntimeExports.jsx(Settings, { size: 16 }) }
 ];
@@ -14014,6 +13972,21 @@ function Sidebar() {
         chat.id
       ))
     ] }, group.label)) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "sidebar__links", children: /* @__PURE__ */ jsxRuntimeExports.jsxs(
+      "a",
+      {
+        href: "https://gitkalenyuk.github.io/cartelsia/",
+        target: "_blank",
+        rel: "noreferrer",
+        className: "sidebar__link-btn",
+        title: "Відкрити документацію та гайди YouTube Cartel",
+        children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(BookOpen, { size: 14 }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { children: "Документація & Гайди" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { size: 12, className: "link-ext" })
+        ]
+      }
+    ) }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs(
       "div",
       {
@@ -16979,591 +16952,6 @@ function CloneDialog(props) {
     }
   );
 }
-function maskProxy(url) {
-  return url.replace(/\/\/([^@]+)@/, "//•••@");
-}
-function stateLabel(state, hasKey) {
-  switch (state) {
-    case "queued":
-      return t.autoRegisterStateQueued;
-    case "form":
-      return t.autoRegisterStateForm;
-    case "waiting-mail":
-      return t.autoRegisterStateWaitingMail;
-    case "verifying":
-      return t.autoRegisterStateVerifying;
-    case "creating-key":
-      return t.autoRegisterStateCreatingKey;
-    case "done":
-      return hasKey ? t.autoRegisterStateDone : t.autoRegisterStateDoneNoKey;
-    case "failed":
-      return t.autoRegisterStateFailed;
-    case "cancelled":
-      return t.autoRegisterStateCancelled;
-    default:
-      return state;
-  }
-}
-function stateBadgeClass(state, hasKey) {
-  switch (state) {
-    case "done":
-      return hasKey ? "badge--success" : "badge--warning";
-    case "failed":
-      return "badge--danger";
-    case "cancelled":
-      return "badge--neutral";
-    case "queued":
-      return "badge--neutral";
-    default:
-      return "badge--accent";
-  }
-}
-function AutoregView() {
-  const settings = useSettingsStore((s2) => s2.settings);
-  const [subTab, setSubTab] = reactExports.useState("reg");
-  const [count, setCount] = reactExports.useState(10);
-  const [running, setRunning] = reactExports.useState(false);
-  const [stopping, setStopping] = reactExports.useState(false);
-  const [items, setItems] = reactExports.useState([]);
-  const [lastLog, setLastLog] = reactExports.useState("");
-  const [logLines, setLogLines] = reactExports.useState([]);
-  const s = settings ?? null;
-  const threads = Math.max(1, Math.min(25, s?.autoreg?.concurrency ?? 5));
-  const useProxy = s?.autoreg?.useProxy ?? false;
-  const headless = s?.autoreg?.headless ?? true;
-  reactExports.useEffect(() => {
-    void window.cartelsia.email.getAutoRegStatus().then((s2) => {
-      if (s2.running) {
-        setRunning(true);
-        setItems(s2.items);
-      } else if (s2.items.length) setItems(s2.items);
-    });
-    const off = window.cartelsia.onEvent((event) => {
-      if (event.type === "autoreg-progress") {
-        const arr = event.items;
-        setItems(arr);
-        setRunning(true);
-        const inFlight = arr.find((x) => x.state === "form" || x.state === "waiting-mail" || x.state === "verifying" || x.state === "creating-key");
-        if (inFlight) setLastLog(`${inFlight.email} → ${stateLabel(inFlight.state, !!inFlight.key)}`);
-      } else if (event.type === "autoreg-item-done") {
-        const it = event.item;
-        if (it.key) void useKeysStore.getState().load();
-      } else if (event.type === "autoreg-done") {
-        const arr = event.items;
-        setItems(arr);
-        setRunning(false);
-        setStopping(false);
-        const done = arr.filter((x) => x.state === "done" && x.key).length;
-        if (done > 0) toast("success", t.autoRegisterDone(done));
-        else toast("info", `Завершено: ${done}/${arr.length} з ключами`);
-        void useKeysStore.getState().load();
-      } else if (event.type === "autoreg-captcha") {
-        toast("info", `Потрібна ручна дія: ${event.email}`);
-      } else if (event.type === "autoreg-log") {
-        setLogLines((prev) => [...prev.slice(-199), event.line]);
-        setLastLog(event.line);
-      } else if (event.type === "proxies-updated") {
-        setProxies(event.proxies);
-      }
-    });
-    return off;
-  }, []);
-  const start = reactExports.useCallback(async () => {
-    if (!settings?.catchAllDomain) {
-      toast("info", "Спочатку вкажіть Catch-All домен у Налаштуваннях");
-      return;
-    }
-    const target = Math.max(1, count);
-    setRunning(true);
-    setStopping(false);
-    setItems([]);
-    setLastLog("");
-    setLogLines([]);
-    const res = await window.cartelsia.email.runAutoReg(target, settings.catchAllDomain, settings.imapConfig, {
-      concurrency: threads,
-      delayMs: settings.autoreg?.delayMs ?? 4e3,
-      headless,
-      useProxy
-    });
-    if (!res.ok) {
-      setRunning(false);
-      toast("danger", res.error || "Не вдалося запустити автореєстрацію");
-    }
-  }, [settings, count, threads, headless, useProxy]);
-  const stop = reactExports.useCallback(async () => {
-    setStopping(true);
-    await window.cartelsia.email.stopAutoReg();
-  }, []);
-  const copy = reactExports.useCallback(async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast("success", t.autoRegisterCopied);
-    } catch {
-      toast("danger", "Не вдалося скопіювати");
-    }
-  }, []);
-  const okCount = items.filter((x) => x.state === "done" && x.key).length;
-  const partialCount = items.filter((x) => x.state === "done" && !x.key).length;
-  const failCount = items.filter((x) => x.state === "failed").length;
-  const [proxies, setProxies] = reactExports.useState([]);
-  const [importText, setImportText] = reactExports.useState("");
-  const [grabUrl, setGrabUrl] = reactExports.useState("");
-  const [checking, setChecking] = reactExports.useState(false);
-  const checkThreads = Math.max(1, Math.min(50, s?.autoreg?.proxyCheckThreads ?? 10));
-  const checkTimeout = s?.autoreg?.proxyCheckTimeoutMs ?? 12e3;
-  const emailStyle = s?.autoreg?.emailStyle ?? "random";
-  const emailPrefix = s?.autoreg?.emailPrefix ?? "";
-  const loadProxies = reactExports.useCallback(async () => {
-    setProxies(await window.cartelsia.proxy.list());
-  }, []);
-  reactExports.useEffect(() => {
-    if (subTab === "proxy") void loadProxies();
-  }, [subTab, loadProxies]);
-  const doImport = reactExports.useCallback(async () => {
-    if (!importText.trim()) return;
-    const r = await window.cartelsia.proxy.importText(importText);
-    setImportText("");
-    toast("success", t.autoReg2ProxyAdded(r.added));
-    void loadProxies();
-  }, [importText, loadProxies]);
-  const doImportFile = reactExports.useCallback(async () => {
-    const r = await window.cartelsia.proxy.importFile();
-    if (r.added > 0) {
-      toast("success", t.autoReg2ProxyAdded(r.added));
-      void loadProxies();
-    }
-  }, [loadProxies]);
-  const doGrab = reactExports.useCallback(async () => {
-    if (!grabUrl.trim()) return;
-    const r = await window.cartelsia.proxy.grab(grabUrl.trim());
-    toast("success", t.autoReg2ProxyAdded(r.grabbed));
-    void loadProxies();
-  }, [grabUrl, loadProxies]);
-  const doCheck = reactExports.useCallback(async () => {
-    setChecking(true);
-    window.cartelsia.proxy.checkStart({ threads: checkThreads, timeoutMs: checkTimeout });
-  }, [checkThreads, checkTimeout]);
-  reactExports.useEffect(() => {
-    if (checking && !proxies.some((p) => p.status === "checking") && proxies.length > 0) {
-      const timer = setTimeout(() => {
-        setChecking(false);
-        void loadProxies();
-      }, 800);
-      return () => clearTimeout(timer);
-    }
-  }, [checking, proxies, loadProxies]);
-  const doCheckStop = reactExports.useCallback(async () => {
-    await window.cartelsia.proxy.checkStop();
-    setChecking(false);
-    void loadProxies();
-  }, [loadProxies]);
-  const doExport = reactExports.useCallback(async () => {
-    const r = await window.cartelsia.proxy.export(false);
-    if (r.path) toast("success", t.fileSaved);
-  }, []);
-  const removeProxy = reactExports.useCallback(async (url) => {
-    const r = await window.cartelsia.proxy.remove(url);
-    setProxies(r.proxies);
-  }, []);
-  const clearDead = reactExports.useCallback(async () => {
-    const r = await window.cartelsia.proxy.clear(true);
-    toast("info", t.autoReg2Removed(r.removed));
-    void loadProxies();
-  }, [loadProxies]);
-  const clearAll = reactExports.useCallback(async () => {
-    const r = await window.cartelsia.proxy.clear(false);
-    toast("info", t.autoReg2Removed(r.removed));
-    void loadProxies();
-  }, [loadProxies]);
-  const aliveCount = proxies.filter((p) => p.status === "working").length;
-  const checkingCount = proxies.filter((p) => p.status === "checking").length;
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "view-head", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "view-head__icon", children: /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { size: 20 }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "view-title", children: t.autoReg2Title }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "view-subtitle", children: t.autoReg2Subtitle })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "subtabs", role: "tablist", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "button",
-        {
-          className: `subtab ${subTab === "reg" ? "subtab--active" : ""}`,
-          onClick: () => setSubTab("reg"),
-          role: "tab",
-          "aria-selected": subTab === "reg",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(UserPlus, { size: 14 }),
-            t.autoReg2TabRegister
-          ]
-        }
-      ),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(
-        "button",
-        {
-          className: `subtab ${subTab === "proxy" ? "subtab--active" : ""}`,
-          onClick: () => setSubTab("proxy"),
-          role: "tab",
-          "aria-selected": subTab === "proxy",
-          children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { size: 14 }),
-            t.autoReg2TabProxy,
-            useProxy && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "subtab__dot", title: "проксі увімкнені" })
-          ]
-        }
-      )
-    ] }),
-    subTab === "reg" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card autoreg2__panel", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__controls", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.autoReg2Accounts,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.autoReg2AccountsHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                className: "input tnum",
-                type: "number",
-                min: 1,
-                max: 2e3,
-                value: count,
-                onChange: (e) => setCount(Math.max(1, Math.min(2e3, Number(e.target.value) || 1))),
-                disabled: running
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.autoReg2Threads,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.autoReg2ThreadsHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                className: "input tnum",
-                type: "number",
-                min: 1,
-                max: 25,
-                value: threads,
-                onChange: (e) => void useSettingsStore.getState().update({ autoreg: { ...settings?.autoreg ?? {}, concurrency: Math.max(1, Math.min(25, Number(e.target.value) || 1)) } }),
-                disabled: running
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "field field--check", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "check", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                type: "checkbox",
-                checked: useProxy,
-                onChange: (e) => void useSettingsStore.getState().update({ autoreg: { ...settings?.autoreg ?? {}, useProxy: e.target.checked } })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "field__label", children: t.autoReg2UseProxy }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.autoReg2UseProxyHint })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "field field--check", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "check", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                type: "checkbox",
-                checked: headless,
-                onChange: (e) => void useSettingsStore.getState().update({ autoreg: { ...settings?.autoreg ?? {}, headless: e.target.checked } })
-              }
-            ),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "field__label", children: t.autoReg2Headless }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.autoReg2HeadlessHint })
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.emailStyle,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.emailStyleHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs(
-              "select",
-              {
-                className: "input",
-                style: { width: 180 },
-                value: emailStyle,
-                disabled: running,
-                onChange: (e) => void useSettingsStore.getState().update({
-                  autoreg: { ...settings?.autoreg ?? {}, emailStyle: e.target.value }
-                }),
-                children: [
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "random", children: t.emailStyleRandom }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "word", children: t.emailStyleWord }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "support", children: t.emailStyleSupport }),
-                  /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "custom", children: t.emailStyleCustom })
-                ]
-              }
-            )
-          ] }),
-          emailStyle === "custom" && /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.emailPrefix,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.emailPrefixHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                className: "input",
-                style: { width: 150 },
-                placeholder: "john",
-                value: emailPrefix,
-                disabled: running,
-                onChange: (e) => void useSettingsStore.getState().update({
-                  autoreg: { ...settings?.autoreg ?? {}, emailPrefix: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") }
-                })
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "autoreg2__actions", children: !running ? /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--primary", onClick: () => void start(), "data-testid": "auto-reg-start", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Play, { size: 14 }),
-            t.autoReg2Start
-          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--danger", onClick: () => void stop(), disabled: stopping, "data-testid": "auto-reg-stop", children: [
-            stopping ? /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { size: 14, className: "spin" }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Square, { size: 14 }),
-            stopping ? t.autoRegisterStopping : t.autoReg2Stop
-          ] }) })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__meta", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Domain:" }),
-            " ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("code", { children: settings?.catchAllDomain || "—" })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "IMAP:" }),
-            " ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("code", { children: settings?.imapConfig?.host ? `${settings.imapConfig.user}@${settings.imapConfig.host}` : "—" })
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Threads:" }),
-            " ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("code", { children: threads })
-          ] }),
-          useProxy && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("strong", { children: "Proxy:" }),
-            " ",
-            /* @__PURE__ */ jsxRuntimeExports.jsx("code", { children: "on" })
-          ] })
-        ] }),
-        (running || items.length > 0) && /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__progress-wrap", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "progress", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "div",
-            {
-              className: "progress__fill progress__fill--animated",
-              style: { width: `${items.length ? Math.round((okCount + partialCount + failCount) / Math.max(items.length, count) * 100) : 0}%` }
-            }
-          ) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__progress-row", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "text-sm muted", children: t.autoReg2Progress(okCount, items.length || count, okCount) }),
-            okCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm", style: { color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 4 }, children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { size: 12 }),
-              " +",
-              okCount,
-              " в пулі"
-            ] }),
-            partialCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm", style: { color: "var(--warning)" }, children: [
-              partialCount,
-              " без ключа"
-            ] }),
-            failCount > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "text-sm", style: { color: "var(--danger)" }, children: [
-              failCount,
-              " фейлів"
-            ] })
-          ] }),
-          running && lastLog && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "autoreg2__lastlog text-sm muted mono", children: lastLog }),
-          logLines.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("pre", { className: "autoreg2__log mono", ref: (el) => {
-            if (el) el.scrollTop = el.scrollHeight;
-          }, children: logLines.slice(-40).join("\n") })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card autoreg2__results", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__results-head", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: "Результати" }),
-          items.length > 0 && /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "muted text-sm", children: [
-            items.length,
-            " · ",
-            okCount,
-            " з ключем"
-          ] })
-        ] }),
-        items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "empty", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(KeyRound, { size: 22 }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "muted text-sm", children: t.autoRegisterNoItems })
-        ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "table-wrap--scroll", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "table", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: t.autoRegisterTableEmail }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: t.autoRegisterTableStatus }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: t.autoRegisterTableKey }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: t.autoRegisterTableError }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("th", {})
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: items.map((it) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: it.state === "failed" ? "is-dimmed autoreg2__row" : "autoreg2__row", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("td", { children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "mono text-sm", children: it.email }),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "iconbtn", onClick: () => void copy(it.email), title: "Копіювати пошту", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { size: 12 }) })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: `badge ${stateBadgeClass(it.state, !!it.key)}`, children: [
-              (it.state === "form" || it.state === "waiting-mail" || it.state === "verifying" || it.state === "creating-key") && /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { size: 10, className: "spin" }),
-              it.state === "done" && !!it.key && /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { size: 10 }),
-              it.state === "failed" && /* @__PURE__ */ jsxRuntimeExports.jsx(TriangleAlert, { size: 10 }),
-              stateLabel(it.state, !!it.key)
-            ] }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: it.key ? /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "mono text-sm autoreg2__key", children: [
-              it.key.slice(0, 14),
-              "…",
-              it.key.slice(-4),
-              /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "iconbtn", onClick: () => void copy(it.key), title: "Копіювати ключ", children: /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { size: 12 }) })
-            ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted text-sm", children: "—" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "text-sm autoreg2__error", title: it.error, children: it.error || /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted", children: "—" }) }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "iconbtn", title: "Копіювати пароль", onClick: () => void copy(it.pass), children: /* @__PURE__ */ jsxRuntimeExports.jsx(Copy, { size: 12 }) }) })
-          ] }, it.id)) })
-        ] }) })
-      ] })
-    ] }),
-    subTab === "proxy" && /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "card autoreg2__proxy-panel", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__proxy-head", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { children: t.autoReg2ProxyTitle }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted text-sm", children: t.autoReg2ProxyStats(proxies.length, aliveCount) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.autoReg2ProxyHint })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__proxy-import", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "textarea",
-            {
-              className: "input autoreg2__proxy-textarea",
-              placeholder: "ip:port:user:pass\nhttp://user:pass@ip:port\nip:port\nsocks5://ip:port",
-              value: importText,
-              onChange: (e) => setImportText(e.target.value),
-              rows: 5
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { style: { display: "flex", flexDirection: "column", gap: 6 }, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--primary btn--sm", onClick: () => void doImport(), disabled: !importText.trim(), children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Download, { size: 13 }),
-              t.autoReg2ProxyImport
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--secondary btn--sm", onClick: () => void doImportFile(), children: [
-              /* @__PURE__ */ jsxRuntimeExports.jsx(FileUp, { size: 13 }),
-              t.proxyImportFile
-            ] })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__proxy-grab", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx(
-            "input",
-            {
-              className: "input",
-              style: { flex: 1 },
-              placeholder: "https://.../proxies.txt (грабінг списку звідти)",
-              value: grabUrl,
-              onChange: (e) => setGrabUrl(e.target.value)
-            }
-          ),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--secondary btn--sm", onClick: () => void doGrab(), disabled: !grabUrl.trim(), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { size: 13 }),
-            "Grab URL"
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "row", style: { gap: 12, alignItems: "flex-end", marginTop: 10 }, children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.proxyCheckThreads,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.proxyCheckThreadsHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                className: "input tnum",
-                type: "number",
-                min: 1,
-                max: 50,
-                style: { width: 80 },
-                value: checkThreads,
-                disabled: checking,
-                onChange: (e) => void useSettingsStore.getState().update({
-                  autoreg: { ...settings?.autoreg ?? {}, proxyCheckThreads: Math.max(1, Math.min(50, Number(e.target.value) || 10)) }
-                })
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("label", { className: "field", children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "field__label", children: [
-              t.proxyCheckTimeout,
-              /* @__PURE__ */ jsxRuntimeExports.jsx(Hint, { text: t.proxyCheckTimeoutHint })
-            ] }),
-            /* @__PURE__ */ jsxRuntimeExports.jsx(
-              "input",
-              {
-                className: "input tnum",
-                type: "number",
-                min: 3e3,
-                max: 6e4,
-                step: 1e3,
-                style: { width: 100 },
-                value: checkTimeout,
-                disabled: checking,
-                onChange: (e) => void useSettingsStore.getState().update({
-                  autoreg: { ...settings?.autoreg ?? {}, proxyCheckTimeoutMs: Math.max(3e3, Math.min(6e4, Number(e.target.value) || 12e3)) }
-                })
-              }
-            )
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted text-sm", children: checking && checkingCount > 0 ? t.proxyCheckingNow(checkingCount) : "" })
-        ] }),
-        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "autoreg2__proxy-actions", children: [
-          !checking ? /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--secondary btn--sm", onClick: () => void doCheck(), disabled: proxies.length === 0, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(ListChecks, { size: 13 }),
-            t.autoReg2ProxyCheck
-          ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--danger btn--sm", onClick: () => void doCheckStop(), children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Pause, { size: 13 }),
-            t.proxyCheckStop
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--secondary btn--sm", onClick: () => void doExport(), disabled: proxies.length === 0, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Upload, { size: 13 }),
-            t.proxyExport
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--secondary btn--sm", onClick: () => void clearDead(), disabled: checking, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Eraser, { size: 13 }),
-            t.autoReg2ProxyClearDead
-          ] }),
-          /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { className: "btn btn--ghost btn--sm", onClick: () => void clearAll(), disabled: checking || proxies.length === 0, children: [
-            /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { size: 13 }),
-            t.autoReg2ProxyClearAll
-          ] })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "card", children: proxies.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "empty", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(Globe, { size: 22 }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "muted text-sm", children: t.autoReg2ProxyEmpty })
-      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "table-wrap--scroll", style: { maxHeight: 420 }, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("table", { className: "table", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("thead", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: "URL" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: "Статус" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: "Затримка" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("th", { children: "Перевірено" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("th", {})
-        ] }) }),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("tbody", { children: proxies.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsxs("tr", { className: "autoreg2__row", children: [
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "mono text-sm", children: maskProxy(p.url) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: `badge ${p.status === "working" ? "badge--success" : p.status === "dead" ? "badge--danger" : p.status === "checking" ? "badge--accent" : "badge--neutral"}`, children: [
-            p.status === "working" && /* @__PURE__ */ jsxRuntimeExports.jsx(CircleCheck, { size: 10 }),
-            p.status === "checking" && /* @__PURE__ */ jsxRuntimeExports.jsx(LoaderCircle, { size: 10, className: "spin" }),
-            p.status === "working" ? t.proxyStatusWorking : p.status === "dead" ? t.proxyStatusDead : p.status === "checking" ? t.proxyStatusChecking : t.proxyStatusUnchecked
-          ] }) }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "text-sm tnum", children: p.latencyMs != null ? `${p.latencyMs} мс` : "—" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { className: "text-sm muted", children: p.lastChecked ? new Date(p.lastChecked).toLocaleTimeString() : "—" }),
-          /* @__PURE__ */ jsxRuntimeExports.jsx("td", { children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "iconbtn", title: "Видалити", onClick: () => void removeProxy(p.url), children: /* @__PURE__ */ jsxRuntimeExports.jsx(Trash2, { size: 12 }) }) })
-        ] }, p.url)) })
-      ] }) }) })
-    ] })
-  ] });
-}
 const CHART_COLORS = ["#d97757", "#8aa9c9", "#7fa66f", "#d4a027", "#b58bc9", "#6fb8ad"];
 function StatsView() {
   const [stats, setStats] = reactExports.useState(null);
@@ -18041,49 +17429,6 @@ function SettingsView() {
       ) })
     ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "settings-section", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "settings-section__title", children: t.sectionAutoregOptions }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx(Row, { label: t.autoregEngine, desc: t.autoregEngineDesc, children: /* @__PURE__ */ jsxRuntimeExports.jsx("button", { className: "pill", disabled: true, style: { opacity: 0.7 }, children: "Browser Signup 2.0" }) }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(Row, { label: t.autoregThreads, desc: t.autoregThreadsDesc, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            className: "input tnum",
-            style: { width: 80 },
-            type: "number",
-            min: 1,
-            max: 50,
-            step: 1,
-            placeholder: "5",
-            value: settings.autoreg?.concurrency ?? "",
-            onChange: (e) => void update({
-              autoreg: {
-                ...settings.autoreg,
-                concurrency: Math.max(1, Math.min(50, Number(e.target.value))) || void 0
-              }
-            })
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted text-sm", children: t.autoregThreadsUnit })
-      ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsxs(Row, { label: t.autoregDelayMs, desc: t.autoregDelayMsDesc, children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx(
-          "input",
-          {
-            className: "input tnum",
-            style: { width: 100 },
-            type: "number",
-            min: 0,
-            max: 3e4,
-            step: 500,
-            placeholder: "4000",
-            value: settings.autoreg?.delayMs ?? "",
-            onChange: (e) => void update({ autoreg: { ...settings.autoreg, delayMs: Number(e.target.value) || void 0 } })
-          }
-        ),
-        /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "muted text-sm", children: "мс" })
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "settings-section", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "settings-section__title", children: t.sectionMaster }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs(
         Row,
@@ -18226,7 +17571,7 @@ function App() {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "shell", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "dragbar" }),
     /* @__PURE__ */ jsxRuntimeExports.jsx(Sidebar, {}),
-    view === "browser" ? /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "main", style: { overflow: "hidden" }, children: /* @__PURE__ */ jsxRuntimeExports.jsx(AutoregView, {}) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "main", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "main__inner", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "main", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "main__inner", children: [
       view === "chat" && /* @__PURE__ */ jsxRuntimeExports.jsx(ChatView, {}),
       view === "keys" && /* @__PURE__ */ jsxRuntimeExports.jsx(KeysView, {}),
       view === "voices" && /* @__PURE__ */ jsxRuntimeExports.jsx(VoicesView, {}),

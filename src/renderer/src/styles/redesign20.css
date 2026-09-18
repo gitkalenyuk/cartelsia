@@ -311,3 +311,194 @@
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+
+/* ════════════════════════════════════════════════════════════════
+   CYBER CARTEL v2.2 PRESTIGE ENHANCEMENTS
+   Ultra-sleek graphics, neon cartel glows, glassmorphism, animated accents
+   ════════════════════════════════════════════════════════════════ */
+
+.skull-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 6px auto 14px;
+  padding: 8px 12px;
+  border-radius: var(--radius-xl);
+  background: radial-gradient(circle at 50% 30%, rgba(245, 158, 11, 0.08) 0%, transparent 75%);
+  transition: transform var(--dur-base) var(--ease);
+}
+.skull-wrap:hover {
+  transform: scale(1.03);
+}
+.skull-glow {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.28) 0%, rgba(234, 88, 12, 0.14) 50%, transparent 80%);
+  filter: blur(16px);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: skullPulse 4s ease-in-out infinite;
+}
+@keyframes skullPulse {
+  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+  50% { opacity: 1; transform: translateX(-50%) scale(1.18); filter: blur(20px); }
+}
+.skull-caption {
+  margin-top: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 60%, #ea580c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.navitem {
+  position: relative;
+  font-weight: 500;
+  transition: all var(--dur-fast) var(--ease);
+}
+.navitem:hover {
+  background: rgba(245, 158, 11, 0.09) !important;
+  color: var(--text-primary) !important;
+  transform: translateX(2px);
+}
+.navitem.is-active {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.04) 100%) !important;
+  color: #ffffff !important;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  box-shadow: inset 1px 0 12px rgba(245, 158, 11, 0.15);
+}
+.navitem.is-active svg {
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7));
+}
+
+.sidebar__new .btn {
+  background: var(--gradient-accent) !important;
+  color: #000 !important;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  transition: all var(--dur-fast) var(--ease-spring);
+}
+.sidebar__new .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 26px rgba(245, 158, 11, 0.6);
+  filter: brightness(1.08);
+}
+
+.sidebar__links {
+  padding: 8px 12px;
+  margin-top: auto;
+}
+.sidebar__link-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(20, 19, 16, 0.7) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: var(--radius-md);
+  color: #f59e0b;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--dur-base) var(--ease);
+  cursor: pointer;
+}
+.sidebar__link-btn:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-color: rgba(245, 158, 11, 0.65);
+  color: #fbbf24;
+  box-shadow: 0 4px 18px rgba(245, 158, 11, 0.3);
+  transform: translateY(-1px);
+}
+.sidebar__link-btn .link-ext {
+  margin-left: auto;
+  opacity: 0.75;
+}
+
+.sidebar__footer {
+  background: rgba(10, 10, 8, 0.8) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  padding: 11px 14px !important;
+  font-size: var(--fs-xs) !important;
+  transition: background var(--dur-fast) var(--ease);
+}
+.sidebar__footer:hover {
+  background: rgba(245, 158, 11, 0.08) !important;
+  border-top-color: var(--border-default) !important;
+}
+
+.card, .panel, .settings-section {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: 0 4px 22px rgba(0, 0, 0, 0.4) !important;
+  transition: border-color var(--dur-base) var(--ease), box-shadow var(--dur-base) var(--ease);
+}
+.card:hover {
+  border-color: var(--border-strong) !important;
+}
+
+.chunk {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  transition: all var(--dur-base) var(--ease);
+}
+.chunk:hover {
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+}
+.chunk.is-running {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 24px var(--accent-glow) !important;
+}
+
+.input, .textarea {
+  background: var(--bg-app) !important;
+  border: 1px solid var(--border-default) !important;
+  color: var(--text-primary) !important;
+  transition: all var(--dur-fast) var(--ease);
+}
+.input:focus, .textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25), 0 0 18px rgba(245, 158, 11, 0.18) !important;
+  outline: none;
+}
+
+.pill, .badge {
+  background: var(--bg-surface-2) !important;
+  border: 1px solid var(--border-default) !important;
+  transition: all var(--dur-fast) var(--ease);
+}
+.pill:hover:not(:disabled) {
+  border-color: var(--accent) !important;
+  color: #fff !important;
+  background: var(--bg-hover) !important;
+}
+
+.player-bar {
+  background: rgba(15, 15, 13, 0.9) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border-top: 1px solid rgba(245, 158, 11, 0.25) !important;
+  box-shadow: 0 -4px 28px rgba(0, 0, 0, 0.7) !important;
+}
+.player-progress__fill {
+  background: var(--gradient-accent) !important;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.8) !important;
+}

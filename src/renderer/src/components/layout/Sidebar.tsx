@@ -11,7 +11,9 @@ import {
   Mic,
   Send,
   MessagesSquare,
-  Globe
+  Globe,
+  BookOpen,
+  ExternalLink
 } from 'lucide-react'
 import { t } from '../../i18n/uk'
 import {
@@ -31,8 +33,7 @@ const NAV: { view: ViewId; label: string; icon: React.JSX.Element }[] = [
   { view: 'keys', label: t.keys, icon: <KeyRound size={16} /> },
   { view: 'voices', label: t.voices, icon: <AudioLines size={16} /> },
   { view: 'clone', label: t.cloneVoiceTab, icon: <Mic size={16} /> },
-  { view: 'browser', label: t.browserTab, icon: <Globe size={16} /> },
-  { view: 'stats', label: t.stats, icon: <BarChart3 size={16} /> },
+    { view: 'stats', label: t.stats, icon: <BarChart3 size={16} /> },
   { view: 'settings', label: t.settings, icon: <SettingsIcon size={16} /> }
 ]
 
@@ -157,6 +158,20 @@ export function Sidebar(): React.JSX.Element {
             ))}
           </div>
         ))}
+      </div>
+      
+      <div className="sidebar__links">
+        <a
+          href="https://gitkalenyuk.github.io/cartelsia/"
+          target="_blank"
+          rel="noreferrer"
+          className="sidebar__link-btn"
+          title="Відкрити документацію та гайди YouTube Cartel"
+        >
+          <BookOpen size={14} />
+          <span>Документація & Гайди</span>
+          <ExternalLink size={12} className="link-ext" />
+        </a>
       </div>
       <div
         className={`sidebar__footer${low ? ' is-low' : ''}`}

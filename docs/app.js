@@ -1,69 +1,43 @@
-// Cartelsia site 2.1.3: reveal-on-scroll, лічильник завантажень, версія, hover-світло на картках, таби
+// Cartelsia v2.2.0 - YouTube Cartel Website Script
 (function () {
-  'use strict'
+  'use strict';
 
-  // ── Reveal on scroll ──
-  const io = new IntersectionObserver((entries) => {
+  // Reveal on scroll
+  const observer = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (e.isIntersecting) {
-        e.target.classList.add('is-visible')
-        io.unobserve(e.target)
+        e.target.classList.add('is-visible');
+        observer.unobserve(e.target);
       }
     }
-  }, { threshold: 0.12 })
-  document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
+  }, { threshold: 0.08 });
 
-  // ── Hover-підсвітка карток (radial за курсором) ──
-  document.querySelectorAll('.cardx, .dl-card').forEach((card) => {
-    card.addEventListener('mousemove', (e) => {
-      const r = card.getBoundingClientRect()
-      card.style.setProperty('--mx', (e.clientX - r.left) + 'px')
-      card.style.setProperty('--my', (e.clientY - r.top) + 'px')
-    })
-  })
+  document.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
 
-  // ── Інтерактивні таби інструкцій ──
-  const tabBtns = document.querySelectorAll('.tab-btn')
+  // Interactive Tabs
+  const tabBtns = document.querySelectorAll('.tab-btn');
   tabBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      tabBtns.forEach((b) => b.classList.remove('is-active'))
-      document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('is-active'))
+      tabBtns.forEach((b) => b.classList.remove('is-active'));
+      document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('is-active'));
 
-      btn.classList.add('is-active')
-      const targetId = 'tab-' + btn.getAttribute('data-tab')
-      const targetContent = document.getElementById(targetId)
+      btn.classList.add('is-active');
+      const targetId = 'tab-' + btn.getAttribute('data-tab');
+      const targetContent = document.getElementById(targetId);
       if (targetContent) {
-        targetContent.classList.add('is-active')
+        targetContent.classList.add('is-active');
       }
-    })
-  })
+    });
+  });
 
-  // ── Версія з GitHub Releases (fallback 2.1.3) ──
-  const VER_FALLBACK = '2.1.3'
-  const versionEls = ['nav-version', 'hero-version', 'cta-version'].map((id) => document.getElementById(id)).filter(Boolean)
-  fetch('https://api.github.com/repos/gitkalenyuk/cartelsia/releases/latest')
-    .then((r) => r.json())
-    .then((d) => {
-      if (!d || !d.tag_name) return
-      const v = String(d.tag_name).replace(/^v/, '')
-      for (const el of versionEls) el.textContent = v
-    })
-    .catch(() => {
-      for (const el of versionEls) el.textContent = VER_FALLBACK
-    })
-
-  // ── Лічильник завантажень: сума download_count всіх asset-ів усіх релізів ──
-  const dlEl = document.getElementById('dl-count')
-  if (dlEl) {
-    fetch('https://api.github.com/repos/gitkalenyuk/cartelsia/releases?per_page=100')
-    .then((r) => r.json())
-    .then((releases) => {
-      let total = 0
-      for (const rel of releases) {
-        for (const a of rel.assets || []) total += a.download_count || 0
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', function (e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth' });
       }
-      dlEl.textContent = total.toLocaleString('uk-UA')
-    })
-    .catch(() => { dlEl.textContent = '800+' })
-  }
-})()
+    });
+  });
+})();

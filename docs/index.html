@@ -3,321 +3,395 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cartelsia — швидка озвучка Cartesia AI з пулом ключів (Go & Electron)</title>
-<meta name="description" content="Швидкісний застосунок: озвучення тексту через Cartesia AI з пулом безкоштовних ключів. Доступна надлегка нативна версія на Go (Windows та Mac) і класична версія на Electron.">
+<title>Cartelsia v2.2.0 — by YouTube Cartel | Надшвидка озвучка Cartesia AI з пулом ключів</title>
+<meta name="description" content="Cartelsia від YouTube Cartel: портативний застосунок на Go та Electron для ультрашвидкого озвучення тексту через Cartesia AI (sonic-3.6) з пулом безкоштовних ключів та детальними гайдами по Catch-All.">
 <link rel="icon" type="image/png" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ═══════════ Анімований фон ═══════════ -->
+<!-- ═══════════ Анімований фон Cyber Cartel ═══════════ -->
 <div class="bg">
   <div class="bg__grid"></div>
-  <div class="bg__glow bg__glow--1"></div>
-  <div class="bg__glow bg__glow--2"></div>
-  <div class="bg__glow bg__glow--3"></div>
+  <div class="bg__glow bg__glow--amber"></div>
+  <div class="bg__glow bg__glow--gold"></div>
+  <div class="bg__glow bg__glow--emerald"></div>
+  <div class="bg__particles"></div>
 </div>
 
 <!-- ═══════════ Навбар ═══════════ -->
 <nav class="nav">
   <div class="nav__inner">
     <a class="nav__brand" href="#top">
-      <img src="icon.png" alt="" class="nav__icon">
-      <span>Cartelsia</span>
-      <span class="nav__pill">Go + Electron</span>
+      <div class="nav__logo-wrap">
+        <img src="icon.png" alt="Cartelsia Logo" class="nav__icon">
+        <span class="nav__logo-glow"></span>
+      </div>
+      <div class="nav__brand-text">
+        <span class="nav__title">Cartelsia</span>
+        <span class="nav__by">by YouTube Cartel</span>
+      </div>
+      <span class="nav__badge">v2.2.0 Go</span>
     </a>
     <div class="nav__links">
-      <a href="#downloads">Завантаження</a>
-      <a href="#comparison">Go vs Electron</a>
+      <a href="#downloads">Завантажити</a>
+      <a href="#catchall">Гайд Catch-All & Домени</a>
       <a href="#features">Можливості</a>
-      <a href="#how">Як запустити</a>
-      <a href="#docs">Доки</a>
-      <a href="#faq">FAQ</a>
+      <a href="#how">Інструкції</a>
+      <a href="#docs">Документація</a>
+      <a href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noreferrer" class="nav__link-tg">Telegram</a>
     </div>
     <a class="nav__cta" href="#downloads">
-      Завантажити <span class="nav__cta-version" id="nav-version">2.1.3</span>
+      <span>Завантажити v2.2.0</span>
+      <span class="nav__cta-arrow">→</span>
     </a>
   </div>
 </nav>
 
-<!-- ═══════════ Hero ═══════════ -->
+<!-- ═══════════ Hero Секція ═══════════ -->
 <header class="hero" id="top">
   <div class="hero__inner">
-    <div class="hero__badge reveal">
-      <span class="hero__badge-dot"></span>
-      v<span id="hero-version">2.1.3</span> · 🚀 Нова нативна версія на Go (12 МБ) + Electron · sonic-3.6
-    </div>
-    <h1 class="hero__title reveal">
-      Озвучуй текст<br>
-      <span class="hero__title-gradient">всіма ключами одразу</span>
-    </h1>
-    <p class="hero__lead reveal">
-      Пул безкоштовних ключів Cartesia + паралельний конвеєр TTS + спільні голоси.
-      100 000 символів тексту розподіляться по всіх твоїх ключах — але озвучаться
-      <b>одним голосом</b>. Тепер на надшвидкому нативному ядрі <b>Go</b>!
-    </p>
-    <div class="hero__actions reveal">
-      <a class="btn btn--primary" href="#downloads">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-        Обрати версію для завантаження
-      </a>
-      <a class="btn btn--ghost" href="#how">
-        Швидкий старт
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      </a>
-    </div>
-    <div class="hero__stats reveal">
-      <div class="stat"><b id="dl-count">…</b><span>завантажень</span></div>
-      <div class="stat"><b>12 МБ</b><span>розмір Go-версії</span></div>
-      <div class="stat"><b>20 000</b><span>символів / ключ / міс</span></div>
-      <div class="stat"><b>42</b><span>мови озвучення</span></div>
+
+    <div class="cartel-badge reveal">
+      <span class="cartel-badge__dot"></span>
+      <span class="cartel-badge__text">YOUTUBE CARTEL EXCLUSIVE EDITION · v2.2.0</span>
+      <span class="cartel-badge__pill">GO STANDALONE + ELECTRON</span>
     </div>
 
-    <!-- Анімований скринкаст -->
-    <div class="app-shot reveal">
-      <div class="app-shot__bar">
-        <span></span><span></span><span></span>
-        <i>Cartelsia v2.1.3 (Native Go Engine)</i>
+    <div class="hero__skull reveal">
+      <div class="skull-aura"></div>
+      <img src="icon.png" alt="Cartelsia Skull" class="skull-img">
+    </div>
+
+    <h1 class="hero__title reveal">
+      Надшвидка озвучка <span class="gradient-text">Cartesia AI</span><br>
+      з нескінченним пулом ключів
+    </h1>
+
+    <p class="hero__lead reveal">
+      Створено спеціально для YouTube-креаторів та ком'юніті <b>YouTube Cartel</b>.
+      Озвучуйте <b>мільйони символів безкоштовно</b> на найновішій моделі <code>sonic-3.6</code>.
+      Повний пул ключів, паралельний синтез, спільні голоси та вбудований захист.
+    </p>
+
+    <div class="hero__actions reveal">
+      <a class="btn btn--primary btn--glow" href="#downloads">
+        <span class="btn__icon">⚡</span>
+        <span>Завантажити для Windows (Go .exe)</span>
+      </a>
+      <a class="btn btn--secondary" href="#catchall">
+        <span class="btn__icon">📖</span>
+        <span>Гайд Catch-All & Імпорт ключів</span>
+      </a>
+      <a class="btn btn--ghost" href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noreferrer">
+        <span class="btn__icon">💬</span>
+        <span>YouTube Cartel Telegram</span>
+      </a>
+    </div>
+
+    <div class="hero__stats reveal">
+      <div class="stat-card">
+        <div class="stat-card__val">20 000</div>
+        <div class="stat-card__lbl">Символів / безкоштовний ключ</div>
       </div>
-      <div class="app-shot__body">
-        <div class="app-shot__sidebar">
-          <b>☠️ Cartelsia</b>
-          <u class="is-active">Нова генерація</u><u>Ключі (578)</u><u>Голоси</u><u>Спільні голоси</u><u>Налаштування</u>
-        </div>
-        <div class="app-shot__main">
-          <div class="app-shot__composer">
-            «Коли останній потік добив першу тисячу відео, я зрозумів…»
-          </div>
-          <div class="app-shot__chips">
-            <span>🎙️ zluka</span><span>⚡ sonic-3.6</span><span>🌐 uk</span><span>🚀 Go Concurrency</span>
-          </div>
-          <div class="app-shot__progress">
-            <div class="app-shot__progress-fill"></div>
-          </div>
-          <div class="app-shot__keys">
-            <b>578 ключів · 11 560 000 символів</b>
-            <i>Нативні горутини · миттєвий HTTP Range 206 плеєр</i>
-          </div>
-        </div>
+      <div class="stat-card stat-card--highlight">
+        <div class="stat-card__val">1 000 000+</div>
+        <div class="stat-card__lbl">Символів у пулі з 50 ключів</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val">sonic-3.6</div>
+        <div class="stat-card__lbl">Флагманська модель Cartesia</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card__val">0.05с</div>
+        <div class="stat-card__lbl">Затримка синтезу в Go</div>
       </div>
     </div>
+
   </div>
 </header>
 
 <!-- ═══════════ Завантаження ═══════════ -->
 <section class="section" id="downloads">
   <div class="section__inner">
-    <div class="badge-center reveal">
-      <span class="pill-badge">Офіційні релізи v2.1.3</span>
+    <div class="section__header reveal">
+      <span class="section__tag">РЕЛІЗ v2.2.0</span>
+      <h2>Завантаження Cartelsia</h2>
+      <p class="section__lead">Оберіть версію для вашої операційної системи. Без інсталяторів — розпакував та озвучуєш.</p>
     </div>
-    <h2 class="reveal">Обери свою версію Cartelsia</h2>
-    <p class="section__lead reveal">Повністю відкритий вихідний код, без встановлення, працює з коробки</p>
 
     <div class="dl-grid">
-      <!-- Go Windows -->
-      <div class="dl-card dl-card--featured reveal" style="--d:0">
-        <div class="dl-card__badge">🔥 Рекомендовано</div>
+
+      <!-- Windows Go Card (Featured) -->
+      <div class="dl-card dl-card--featured reveal">
+        <div class="dl-card__badge">РЕКОМЕНДОВАНО · ТОП ШВИДКІСТЬ</div>
         <div class="dl-card__header">
-          <div class="dl-card__icon">🪟</div>
+          <div class="dl-card__platform-icon">🪟</div>
           <div>
-            <h3>Cartelsia Go (Windows)</h3>
-            <span class="dl-card__sub">Windows 10 / 11 · x64 Standalone</span>
+            <h3>Windows Portable (Go Standalone)</h3>
+            <span class="dl-card__sub">Windows 10 / 11 · x64 · Вшита іконка · Без вікна cmd</span>
           </div>
         </div>
-        <p class="dl-card__desc">
-          Нативне Go-ядро + Microsoft Edge WebView2. Миттєвий старт, наднизьке споживання оперативної пам'яті, миттєва обробка черги чанків.
-        </p>
-        <ul class="dl-card__specs">
-          <li><span>Розмір архіву:</span> <b>~8.2 МБ</b> (розпакований ~12 МБ)</li>
-          <li><span>GUI:</span> Нативне вікно WebView2 або браузер</li>
-          <li><span>Портативність:</span> 100% (data/ і output/ поруч)</li>
+
+        <ul class="dl-card__list">
+          <li><b>Надлегкий білд на Go:</b> розмір усього ~8 МБ замість 200 МБ у важких додатках.</li>
+          <li><b>Вбудована іконка Windows:</b> нативна іконка у провіднику та на панелі завдань.</li>
+          <li><b>Чистий GUI без консолі:</b> стартує одразу у нативному вікні (WebView2).</li>
+          <li><b>Повна автономність:</b> усі налаштування та пул ключів зберігаються у папці <code>data/</code>.</li>
         </ul>
-        <a class="btn btn--primary btn--block" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.1.3/Cartelsia-Go-v2.1.3-windows-x64.zip">
-          ⬇ Завантажити Go для Windows (.zip)
-        </a>
+
+        <div class="dl-card__actions">
+          <a class="btn btn--primary btn--full" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.2.0/Cartelsia-Go-v2.2.0-windows-x64.zip">
+            <span>⬇ Завантажити Cartelsia.exe (v2.2.0)</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Go Mac ARM64 -->
-      <div class="dl-card reveal" style="--d:1">
-        <div class="dl-card__badge dl-card__badge--mac">🍏 Apple Silicon</div>
+      <!-- macOS Card -->
+      <div class="dl-card reveal">
+        <div class="dl-card__badge">macOS NATIVE</div>
         <div class="dl-card__header">
-          <div class="dl-card__icon">💻</div>
+          <div class="dl-card__platform-icon">🍏</div>
           <div>
-            <h3>Cartelsia Go (Mac ARM64)</h3>
-            <span class="dl-card__sub">macOS · M1 / M2 / M3 / M4</span>
+            <h3>macOS (Apple Silicon & Intel)</h3>
+            <span class="dl-card__sub">macOS 12+ · Чипи M1/M2/M3/M4 та Intel Core</span>
           </div>
         </div>
-        <p class="dl-card__desc">
-          Оптимізована збірка під процесори Apple Silicon. Запускається локальним сервером і відкриває швидкий Web UI у Safari/Chrome.
-        </p>
-        <ul class="dl-card__specs">
-          <li><span>Розмір архіву:</span> <b>~7.4 МБ</b></li>
-          <li><span>Сумісність:</span> macOS 11+ Big Sur, Monterey, Ventura, Sonoma, Sequoia</li>
-          <li><span>Запуск:</span> скрипт <code>./run.sh</code></li>
+
+        <ul class="dl-card__list">
+          <li><b>ARM64 & x64:</b> окремі оптимізовані білди під Apple Silicon та Intel.</li>
+          <li><b>Веб-інтерфейс у Safari/Chrome:</b> запускається через простий <code>./run.sh</code>.</li>
+          <li><b>Мінімальне споживання RAM:</b> менше 30 МБ оперативної пам'яті.</li>
+          <li><b>Швидка інструкція:</b> зняття Gatekeeper за 1 команду в Terminal.</li>
         </ul>
-        <a class="btn btn--ghost btn--block" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.1.3/Cartelsia-Go-v2.1.3-macOS-arm64.zip">
-          ⬇ Завантажити для Mac M1-M4 (.zip)
-        </a>
+
+        <div class="dl-card__actions dl-card__actions--split">
+          <a class="btn btn--secondary btn--half" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.2.0/Cartelsia-Go-v2.2.0-mac-arm64.zip">
+            <span>🍏 M1/M2/M3/M4</span>
+          </a>
+          <a class="btn btn--secondary btn--half" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.2.0/Cartelsia-Go-v2.2.0-mac-amd64.zip">
+            <span>💻 Intel x64</span>
+          </a>
+        </div>
       </div>
 
-      <!-- Go Mac Intel -->
-      <div class="dl-card reveal" style="--d:2">
-        <div class="dl-card__badge dl-card__badge--mac">🍏 Mac Intel</div>
-        <div class="dl-card__header">
-          <div class="dl-card__icon">🖥️</div>
-          <div>
-            <h3>Cartelsia Go (Mac x64)</h3>
-            <span class="dl-card__sub">macOS · Intel Core x64</span>
-          </div>
-        </div>
-        <p class="dl-card__desc">
-          Нативна збірка Go для MacBook та iMac на базі процесорів Intel. Максимальна швидкість без емуляції Rosetta.
-        </p>
-        <ul class="dl-card__specs">
-          <li><span>Розмір архіву:</span> <b>~7.8 МБ</b></li>
-          <li><span>Сумісність:</span> Intel-based Mac (x86_64)</li>
-          <li><span>Запуск:</span> скрипт <code>./run.sh</code></li>
-        </ul>
-        <a class="btn btn--ghost btn--block" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.1.3/Cartelsia-Go-v2.1.3-macOS-x64.zip">
-          ⬇ Завантажити для Mac Intel (.zip)
-        </a>
-      </div>
-
-      <!-- Electron Classic -->
-      <div class="dl-card reveal" style="--d:3">
-        <div class="dl-card__badge dl-card__badge--classic">📦 Класична версія</div>
-        <div class="dl-card__header">
-          <div class="dl-card__icon">⚡</div>
-          <div>
-            <h3>Cartelsia Electron Classic</h3>
-            <span class="dl-card__sub">Windows x64 · Full Bundle</span>
-          </div>
-        </div>
-        <p class="dl-card__desc">
-          Класичний автономний білд на базі Electron з вбудованим Chromium. Для користувачів, які віддають перевагу монолітному єдиному .exe файлу.
-        </p>
-        <ul class="dl-card__specs">
-          <li><span>Розмір файлу:</span> <b>121 МБ</b></li>
-          <li><span>Тип:</span> Одиночний Portable .exe</li>
-          <li><span>Двигун:</span> Node.js + Electron</li>
-        </ul>
-        <a class="btn btn--ghost btn--block" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.1.3/Cartelsia-2.1.3-portable.exe">
-          ⬇ Завантажити Electron .exe (121 МБ)
-        </a>
-      </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ Порівняння Go vs Electron ═══════════ -->
-<section class="section section--alt" id="comparison">
+<!-- ═══════════ Гігантський розділ Catch-All & Домени ═══════════ -->
+<section class="section section--accent" id="catchall">
   <div class="section__inner">
-    <h2 class="reveal">Чому нова Go версія — це новий рівень?</h2>
-    <p class="section__lead reveal">Порівняння архітектури Native Go та класичного Electron</p>
 
-    <div class="table-wrap reveal">
-      <table class="cmp-table">
-        <thead>
-          <tr>
-            <th>Характеристика</th>
-            <th class="cmp-highlight">🚀 Cartelsia Go Edition (v2.1.3)</th>
-            <th>📦 Cartelsia Electron Classic</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><b>Розмір завантаження</b></td>
-            <td class="cmp-highlight"><b>~8 МБ</b> (у 15 разів менше!)</td>
-            <td>121 МБ</td>
-          </tr>
-          <tr>
-            <td><b>Споживання RAM</b></td>
-            <td class="cmp-highlight"><b>~30–50 МБ</b></td>
-            <td>~220–350 МБ</td>
-          </tr>
-          <tr>
-            <td><b>Швидкість холодного старту</b></td>
-            <td class="cmp-highlight"><b>Миттєво (&lt; 0.3 сек)</b></td>
-            <td>3.5–5.0 сек</td>
-          </tr>
-          <tr>
-            <td><b>Паралелізм генерації</b></td>
-            <td class="cmp-highlight"><b>Нативні горутини Go</b> (без зависань UI)</td>
-            <td>Node.js Event Loop</td>
-          </tr>
-          <tr>
-            <td><b>Підтримка macOS</b></td>
-            <td class="cmp-highlight"><b>Є нативні збірки (M1–M4 та Intel)</b></td>
-            <td>Потребує окремої збірки з сирців</td>
-          </tr>
-          <tr>
-            <td><b>Плеєр аудіо</b></td>
-            <td class="cmp-highlight"><b>HTTP 206 Partial Content (перемотка без затримок)</b></td>
-            <td>Custom protocol handler</td>
-          </tr>
-          <tr>
-            <td><b>Збереження файлів</b></td>
-            <td class="cmp-highlight">Портативно поруч (data/, output/)</td>
-            <td>Портативно поруч (data/, output/)</td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="section__header reveal">
+      <span class="section__tag">МЕГА-ГАЙД ВІД YOUTUBE CARTEL</span>
+      <h2>Стратегія Catch-All: Нескінченні ключі через піддомени 3-го рівня</h2>
+      <p class="section__lead">
+        Як правильно організувати потік акаунтів, щоб ніколи не платити за озвучку, не витрачати гроші на нові домени та не боятися блокувань від Clerk чи Cartesia.
+      </p>
     </div>
+
+    <!-- 4 кроки стратегії -->
+    <div class="strategy-grid">
+
+      <!-- Крок 1 -->
+      <div class="strategy-card reveal">
+        <div class="strategy-card__step">01</div>
+        <h3>Чому саме піддомени 3-го рівня?</h3>
+        <p>
+          Коли ви реєструєте багато акаунтів на один основний домен (наприклад, <code>*@domain.com</code>), поштовий фільтр антифрод-системи Clerk може внести домен до спам-листа.
+        </p>
+        <div class="strategy-card__callout">
+          <b>Секрет YouTube Cartel:</b> Використовуйте піддомени 3-го рівня: <code>c1.domain.watch</code>, <code>c2.domain.watch</code>, <code>sub.domain.watch</code>.
+          Якщо один піддомен помітять — <b>основний домен залишається чистим</b>! Створення нового піддомену в Namecheap займає 30 секунд і коштує <b>0$</b>.
+        </div>
+      </div>
+
+      <!-- Крок 2 -->
+      <div class="strategy-card reveal">
+        <div class="strategy-card__step">02</div>
+        <h3>Рекомендовані дешеві доменні зони (TLD)</h3>
+        <p>
+          Для роботи з Catch-All не потрібно купувати дорогі <code>.com</code> чи <code>.ua</code>. Вибирайте найдешевші зони на <b>Namecheap.com</b>:
+        </p>
+        <div class="tld-pills">
+          <span class="tld-pill"><b>.watch</b> (~$1.98)</span>
+          <span class="tld-pill"><b>.xyz</b> (~$1.99)</span>
+          <span class="tld-pill"><b>.top</b> (~$1.80)</span>
+          <span class="tld-pill"><b>.site</b> (~$1.99)</span>
+          <span class="tld-pill"><b>.shop</b> (~$1.88)</span>
+          <span class="tld-pill"><b>.online</b> (~$1.99)</span>
+          <span class="tld-pill"><b>.club</b> (~$1.99)</span>
+        </div>
+        <p class="strategy-card__note">
+          Один раз купуєте домен за $1.80 на рік і генеруєте з нього <b>тисячі</b> піддоменів та сотні тисяч поштових скриньок без жодних додаткових платежів.
+        </p>
+      </div>
+
+      <!-- Крок 3 -->
+      <div class="strategy-card reveal">
+        <div class="strategy-card__step">03</div>
+        <h3>Безкоштовний Catch-All через ImprovMX.com</h3>
+        <p>
+          Сервіс <a href="https://improvmx.com/" target="_blank" rel="noreferrer" class="gold-link"><b>ImprovMX.com</b></a> дозволяє безкоштовно перенаправляти ВСІ листи з будь-якого вашого домену чи піддомену на вашу єдину робочу пошту Gmail.
+        </p>
+        <ul class="strategy-list">
+          <li>Реєструєтесь на <b>improvmx.com</b> за 1 хвилину (без кредитки).</li>
+          <li>Вказуєте ваш домен або піддомен (наприклад, <code>c1.youtubecartel.watch</code>).</li>
+          <li>Вказуєте адресу призначення (вашу особисту Gmail-скриньку, куди надходитимуть OTP-коди підтвердження).</li>
+        </ul>
+      </div>
+
+      <!-- Крок 4 -->
+      <div class="strategy-card reveal">
+        <div class="strategy-card__step">04</div>
+        <h3>Покрокове налаштування DNS у Namecheap</h3>
+        <p>
+          Відкрийте панель керування доменом у <b>Namecheap</b> ➔ <b>Advanced DNS</b> ➔ <b>Mail Settings</b>. Оберіть <i>Custom MX</i> та додайте наступні записи:
+        </p>
+
+        <div class="dns-table-wrap">
+          <table class="dns-table">
+            <thead>
+              <tr>
+                <th>Тип запису</th>
+                <th>Host (Ім'я хоста)</th>
+                <th>Value (Значення)</th>
+                <th>Пріоритет / TTL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge-type">MX</span></td>
+                <td><code>c1</code> <i>(або @ для кореня)</i></td>
+                <td><code>mx1.improvmx.com.</code></td>
+                <td>Priority <b>10</b></td>
+              </tr>
+              <tr>
+                <td><span class="badge-type">MX</span></td>
+                <td><code>c1</code> <i>(або @ для кореня)</i></td>
+                <td><code>mx2.improvmx.com.</code></td>
+                <td>Priority <b>20</b></td>
+              </tr>
+              <tr>
+                <td><span class="badge-type">TXT</span></td>
+                <td><code>c1</code> <i>(або @ для кореня)</i></td>
+                <td><code>v=spf1 include:spf.improvmx.com ~all</code></td>
+                <td>Automatic</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Практичний алгоритм реєстрації -->
+    <div class="guide-full reveal">
+      <h3>🚀 Покроковий алгоритм: створення 50 ключів за 20 хвилин</h3>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <span class="flow-step__num">1</span>
+          <div>
+            <b>Вигадуєте випадкову пошту на вашому піддомені:</b>
+            <p>Наприклад, <code>alex9384@c1.youtubecartel.watch</code>. Оскільки увімкнено Catch-All (<code>*</code>), створювати скриньку не потрібно — лист надійде на ваш Gmail автоматично!</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step__num">2</span>
+          <div>
+            <b>Реєструєтесь на play.cartesia.ai:</b>
+            <p>Вказуєте пошту. Лист з 6-значним OTP-кодом надходить у вашу Gmail скриньку через 1–2 секунди. Вставляєте код — акаунт готовий!</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step__num">3</span>
+          <div>
+            <b>Створюєте API Key:</b>
+            <p>Переходите у <b>Settings ➔ API Keys</b>, натискаєте <i>Create New API Key</i> і копіюєте ключ формату <code>sk_car_...</code>.</p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <span class="flow-step__num">4</span>
+          <div>
+            <b>Вставляєте ключ у Cartelsia:</b>
+            <p>Відкриваєте вкладку «Ключі» у Cartelsia, натискаєте <i>«+ Додати ключ»</i> або вставляєте список з 50 ключів оптом. Cartelsia миттєво валідує кожен ключ і об'єднує їх у спільний пул символів!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- ═══════════ Можливості ═══════════ -->
+<!-- ═══════════ Можливості Cartelsia ═══════════ -->
 <section class="section" id="features">
   <div class="section__inner">
-    <h2 class="reveal">Все, щоб озвучувати без обмежень</h2>
-    <p class="section__lead reveal">Потужний інструментарій для контент-мейкерів</p>
-    <div class="grid">
-      <div class="cardx reveal" style="--d:0">
-        <div class="cardx__icon">🔑</div>
-        <h3>Пул ключів (500+)</h3>
-        <p>Скільки завгодно безкоштовних ключів. Best-fit алгоритм розподілу: кожен фрагмент тексту йде на ключ із найменшим достатнім залишком символів. Авто-заморозка вичерпаних ключів.</p>
+    <div class="section__header reveal">
+      <span class="section__tag">ФУНКЦІОНАЛ v2.2.0</span>
+      <h2>Чому топові ютубери обирають Cartelsia</h2>
+      <p class="section__lead">Озвучуйте цілі відеоролики, аудіокниги та шортси за лічені секунди.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">⚡</div>
+        <h3>Ультрашвидкий рушій на Go</h3>
+        <p>Ядро програми переписано на нативну мову Go. Час холодного старту — менше 0.1 секунди, жодних підвисань, наднизьке споживання оперативної пам'яті.</p>
       </div>
-      <div class="cardx reveal" style="--d:1">
-        <div class="cardx__icon">⚡</div>
-        <h3>Паралельна Go-генерація</h3>
-        <p>Чанки тексту озвучуються паралельно через горутини на різних ключах. Автоматичні повтори при збоях, вбудований кеш — повторна озвучка фрагмента взагалі не витрачає API.</p>
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">🌊</div>
+        <h3>Підтримка флагмана sonic-3.6</h3>
+        <p>Новітня модель Cartesia AI з кришталево чистою вимовою, підтримкою української та десятків інших мов, точним керуванням емоціями та темпом мовлення.</p>
       </div>
-      <div class="cardx reveal" style="--d:2">
-        <div class="cardx__icon">🌐</div>
-        <h3>Спільні голоси</h3>
-        <p>Будь-який публічний голос Cartesia додається за Voice ID у твою бібліотеку в один клік. Озвучуй ним усім пулом: символи списуються з твоїх ключів, а не з власника голосу.</p>
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">🔑</div>
+        <h3>Динамічний розподіл пулу ключів</h3>
+        <p>Алгоритм Best-Fit розбиває довгий текст на оптимальні смислові фрагменти та паралельно розподіляє їх між активними ключами вашого пулу.</p>
       </div>
-      <div class="cardx reveal" style="--d:3">
-        <div class="cardx__icon">👑</div>
-        <h3>Master-клонування</h3>
-        <p>Pro-акаунт ($5) перетворюється на фабрику клонів: автоматичне обрізання тиші, нормалізація гучності, автопублікація та дедуплікація SHA-256 для економії балансу.</p>
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">🎙️</div>
+        <h3>Спільні голоси за Voice ID</h3>
+        <p>Додавайте будь-який чужий або публічний голос за його ідентифікатором (Voice ID). Озвучуйте його вашими безкоштовними ключами без списання кредитів у автора.</p>
       </div>
-      <div class="cardx reveal" style="--d:4">
-        <div class="cardx__icon">🎯</div>
-        <h3>Субтитри SRT/VTT</h3>
-        <p>Послівні таймкоди від моделі sonic-3.6. Автоматичний експорт готових синхронізованих субтитрів разом із зведеним аудіотреком.</p>
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">📝</div>
+        <h3>Генерація субтитрів (SRT / VTT)</h3>
+        <p>Миттєвий експорт таймкодів кожного слова. Ідеально підходить для автоматичного створення субтитрів для YouTube, TikTok та Instagram Reels.</p>
       </div>
-      <div class="cardx reveal" style="--d:5">
-        <div class="cardx__icon">🛡️</div>
-        <h3>Проксі 2.0 & Захист</h3>
-        <p>Realtime-перевірка досяжності доменів Cartesia. Розумне балансування запитів та захист від троттлінгу з'єднань.</p>
+
+      <div class="feature-card reveal">
+        <div class="feature-card__icon">🎧</div>
+        <h3>Кешування зразків та склейка</h3>
+        <p>Попереднє прослуховування 950+ голосів бібліотеки Cartesia з розумним локальним кешем. Автоматичне об'єднання всіх чанків у фінальний MP3 або WAV файл.</p>
       </div>
+
     </div>
   </div>
 </section>
 
-<!-- ═══════════ Як запустити (Інструкції) ═══════════ -->
+<!-- ═══════════ Інструкції із запуску ═══════════ -->
 <section class="section section--alt" id="how">
   <div class="section__inner">
-    <h2 class="reveal">Детальні інструкції із запуску</h2>
-    <p class="section__lead reveal">Оберіть вашу платформу та почніть озвучення за пару хвилин</p>
+    <div class="section__header reveal">
+      <span class="section__tag">ЗАПУСК ЗА 2 ХВИЛИНИ</span>
+      <h2>Посібник користувача</h2>
+      <p class="section__lead">Оберіть вашу ОС та дізнайтесь про всі деталі налаштування</p>
+    </div>
 
-    <!-- Інтерактивні таби інструкцій -->
     <div class="tabs-wrap reveal">
       <div class="tabs-nav">
-        <button class="tab-btn is-active" data-tab="win">🪟 Windows (Go)</button>
-        <button class="tab-btn" data-tab="mac">🍏 macOS (M1–M4 та Intel)</button>
-        <button class="tab-btn" data-tab="auth">🔑 Акаунти та Google Login</button>
+        <button class="tab-btn is-active" data-tab="win">🪟 Windows (Go .exe)</button>
+        <button class="tab-btn" data-tab="mac">🍏 macOS (Apple Silicon & Intel)</button>
+        <button class="tab-btn" data-tab="keys">🔑 Робота з пулом ключів</button>
       </div>
 
       <!-- Tab Windows -->
@@ -326,22 +400,22 @@
           <div class="guide-step">
             <span class="guide-num">1</span>
             <div>
-              <b>Завантажте та розархівуйте:</b>
-              <p>Завантажте <code>Cartelsia-Go-v2.1.3-windows-x64.zip</code> та розпакуйте його у будь-яку зручну папку на диску.</p>
+              <b>Завантажте архів:</b>
+              <p>Отримайте <code>Cartelsia-Go-v2.2.0-windows-x64.zip</code> та розпакуйте його в будь-яку теку (наприклад, <code>C:\Cartelsia</code> або на робочий стіл).</p>
             </div>
           </div>
           <div class="guide-step">
             <span class="guide-num">2</span>
             <div>
               <b>Запустіть Cartelsia.exe:</b>
-              <p>Двічі клікніть по <code>Cartelsia.exe</code>. Якщо на вашому ПК встановлено Edge WebView2 (є за замовчуванням у Windows 10/11), відкриється нативне вікно застосунку. Якщо ні — автоматично відкриється сторінка у вашому браузері.</p>
+              <p>Двічі клікніть по <code>Cartelsia.exe</code>. Завдяки прапору <code>-H=windowsgui</code> чорне вікно командного рядка не з'являється — застосунок стартує миттєво у нативному елегантному вікні.</p>
             </div>
           </div>
           <div class="guide-step">
             <span class="guide-num">3</span>
             <div>
-              <b>Додайте ключі та озвучуйте:</b>
-              <p>Перейдіть у розділ «Ключі», вставте ваші API-ключі або імпортуйте текстовий файл. Готово! Ваші налаштування зберігатимуться у папці <code>data/</code>, а аудіо — у <code>output/</code>.</p>
+              <b>Вставте ключі та почніть озвучення:</b>
+              <p>Перейдіть у розділ «Ключі», вставте ваші API-ключі. Створюйте чат, обирайте голос і насолоджуйтесь якістю!</p>
             </div>
           </div>
         </div>
@@ -353,15 +427,15 @@
           <div class="guide-step">
             <span class="guide-num">1</span>
             <div>
-              <b>Оберіть правильний архів:</b>
-              <p>Для Mac з чипами <b>M1 / M2 / M3 / M4</b> завантажте <code>Cartelsia-Go-v2.1.3-macOS-arm64.zip</code>. Для моделей на <b>Intel</b> — <code>Cartelsia-Go-v2.1.3-macOS-x64.zip</code>.</p>
+              <b>Завантажте відповідний архів для Mac:</b>
+              <p>Для чипів <b>M1 / M2 / M3 / M4</b> — <code>Cartelsia-Go-v2.2.0-mac-arm64.zip</code>. Для процесорів <b>Intel</b> — <code>Cartelsia-Go-v2.2.0-mac-amd64.zip</code>.</p>
             </div>
           </div>
           <div class="guide-step">
             <span class="guide-num">2</span>
             <div>
-              <b>Зніміть карантин macOS (Gatekeeper):</b>
-              <p>Оскільки це портативний білд без платного підпису Apple Developer, відкрийте Terminal у папці застосунку та виконайте:</p>
+              <b>Зніміть блокування Gatekeeper:</b>
+              <p>Відкрийте Terminal у розпакованій папці та виконайте команду:</p>
               <div class="code-box">
                 <code>xattr -cr . && chmod +x Cartelsia run.sh</code>
               </div>
@@ -374,36 +448,27 @@
               <div class="code-box">
                 <code>./run.sh</code>
               </div>
-              <p>Сервер Cartelsia підніметься на <code>http://127.0.0.1:54321</code> і відкриє інтерфейс у вашому Safari або Chrome.</p>
+              <p>Застосунок підніме швидкісний локальний веб-сервер та відкриє інтерфейс у вашому браузері.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Tab Auth -->
-      <div class="tab-content" id="tab-auth">
+      <!-- Tab Keys -->
+      <div class="tab-content" id="tab-keys">
         <div class="guide-box">
           <div class="guide-step">
-            <span class="guide-num">💡</span>
+            <span class="guide-num">⚡</span>
             <div>
-              <b>Важливе роз'яснення щодо реєстрації та акаунтів Cartesia:</b>
-              <p>
-                Пряма програмна автореєстрація через сторонні скрипти або IMAP наразі заблокована на рівні Cloudflare/Turnstile захисту платформи Cartesia.
-              </p>
+              <b>Автоматична ротація при вичерпанні ліміту:</b>
+              <p>Коли на одному з ключів закінчуються безкоштовні 20 000 символів, Cartelsia автоматично позначає його та перенаправляє чергу чанків на наступний активний ключ. Жоден фрагмент аудіо не губиться!</p>
             </div>
           </div>
           <div class="guide-step">
-            <span class="guide-num">✅</span>
+            <span class="guide-num">🔄</span>
             <div>
-              <b>Як правильно отримувати ключі без банів:</b>
-              <p>
-                Найбезпечніший, стабільний і перевірений спосіб: відкрити офіційний сайт <code>play.cartesia.ai</code> у браузері і просто увійти через кнопку <b>Continue with Google</b>.
-              </p>
-              <ul class="guide-list">
-                <li>Google OAuth пропускає будь-які капчі без ризику блокувань.</li>
-                <li>Ніколи не вводьте номери телефонів у форми виклику IAP — звичайний Google-вхід створює акаунт миттєво.</li>
-                <li>Отриманий безкоштовний ключ додайте у розділ «Ключі» в Cartelsia — він одразу додасться до вашого пулу.</li>
-              </ul>
+              <b>Кешування згенерованих фрагментів:</b>
+              <p>Якщо ви змінили одне слово у середині 10-хвилинного тексту, Cartelsia переозвучить лише змінений фрагмент, заощаджуючи ваші символи.</p>
             </div>
           </div>
         </div>
@@ -413,84 +478,72 @@
   </div>
 </section>
 
-<!-- ═══════════ Скріншот ═══════════ -->
-<section class="section">
+<!-- ═══════════ Структура даних ═══════════ -->
+<section class="section" id="docs">
   <div class="section__inner">
-    <h2 class="reveal">Інтерфейс застосунку</h2>
-    <img class="shot reveal" src="screenshots/generation.png" alt="Cartelsia — генерація" loading="lazy">
-    <div class="shots-row">
-      <img class="shot shot--sm reveal" src="screenshots/keys.png" alt="Менеджер ключів" loading="lazy">
-      <img class="shot shot--sm reveal" src="screenshots/clone-tab.png" alt="Клонування голосу" loading="lazy">
+    <div class="section__header reveal">
+      <span class="section__tag">ПОРТАТИВНІСТЬ</span>
+      <h2>Структура даних та збереження</h2>
+      <p class="section__lead">Повна автономність: усі файли зберігаються поруч із програмою.</p>
     </div>
-  </div>
-</section>
 
-<!-- ═══════════ Доки ═══════════ -->
-<section class="section section--alt" id="docs">
-  <div class="section__inner">
-    <h2 class="reveal">Документація та структура даних</h2>
-    <p class="section__lead reveal">Файли, налаштування та ліміти системи</p>
     <div class="docs-grid">
-      <div class="doc-card reveal" style="--d:0">
-        <h3>📊 Ліміти сервісу</h3>
-        <table>
-          <tr><td>Символів на 1 безкоштовний ключ</td><td><b>20 000 / міс</b></td></tr>
-          <tr><td>Пул на 10 ключів</td><td><b>200 000 символів</b></td></tr>
-          <tr><td>Пул на 100 ключів</td><td><b>2 000 000 символів</b></td></tr>
-          <tr><td>Паралельні потоки</td><td>Налаштовуються у Settings</td></tr>
-          <tr><td>Модель за замовчуванням</td><td><code>sonic-3.6</code></td></tr>
-        </table>
+      <div class="doc-card reveal">
+        <h3>📁 Папка <code>data/</code></h3>
+        <p>Усе ваше налаштування, історія та ключі:</p>
+        <ul class="doc-list">
+          <li><code>keys.json</code> — база ваших API-ключів та лічильники використаних символів.</li>
+          <li><code>settings.json</code> — дефолтні налаштування моделі, формату аудіо та IMAP.</li>
+          <li><code>shared_voices.json</code> — реєстр доданих спільних голосів за Voice ID.</li>
+          <li><code>chats/</code> — тексти та згенеровані аудіо-чанки.</li>
+        </ul>
       </div>
-      <div class="doc-card reveal" style="--d:1">
-        <h3>📁 Файли та папки</h3>
-        <table>
-          <tr><td><code>data/keys.json</code></td><td>Збережений пул ключів</td></tr>
-          <tr><td><code>data/chats/</code></td><td>Історія озвучень та аудіочанки</td></tr>
-          <tr><td><code>data/settings.json</code></td><td>Глобальні налаштування</td></tr>
-          <tr><td><code>data/shared_voices.json</code></td><td>Реєстр спільних голосів</td></tr>
-          <tr><td><code>output/</code></td><td>Зведені фінальні аудіофайли</td></tr>
-        </table>
-      </div>
-      <div class="doc-card reveal" style="--d:2">
-        <h3>🚀 Новітня модель sonic-3.6</h3>
-        <p>Підтримує розширену палітру емоцій, наднизьку затримку, якісний український та міжнародний акценти. Працює як з вибором мови (language), так і з регіональною локаллю (locale).</p>
+
+      <div class="doc-card reveal">
+        <h3>🎧 Папка <code>output/</code></h3>
+        <p>Готові аудіофайли для ваших відео:</p>
+        <ul class="doc-list">
+          <li>Склеєні повнорозмірні аудіотреки у форматі <code>.mp3</code> або <code>.wav</code>.</li>
+          <li>Файли субтитрів <code>.srt</code> та <code>.vtt</code> з точними таймінгами слів.</li>
+          <li>Прямий доступ до результатів без зайвих меню.</li>
+        </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ FAQ ═══════════ -->
-<section class="section" id="faq">
-  <div class="section__inner">
-    <h2 class="reveal">Часті питання (FAQ)</h2>
-    <div class="faq">
-      <details class="reveal"><summary>Яку версію краще обрати — Go чи Electron?</summary><p>Для більшості користувачів ми рекомендуємо нову <b>Go Standalone версію</b>: вона важить лише ~12 МБ (проти 121 МБ), стартує миттєво, не вантажить процесор та оперативну пам'ять і доступна як для Windows, так і для macOS. Класичний Electron білд збережено для тих, хто звик до старого формату.</p></details>
-      <details class="reveal"><summary>Чи безпечно використовувати пул ключів?</summary><p>Так, Cartelsia працює через офіційний Cartesia REST API. Запити балансуються за принципом best-fit, тож ключі не спаляться і не перевантажуються.</p></details>
-      <details class="reveal"><summary>Як додати свій клон голосу на всі ключі?</summary><p>Створіть клон один раз (наприклад, на Pro-акаунті або через діалог клонування), скопіюйте Voice ID і додайте його у розділ «Спільні голоси». Після цього будь-який ключ вашого пулу зможе генерувати мовлення цим голосом.</p></details>
-      <details class="reveal"><summary>Що робити, якщо SmartScreen лається на Windows?</summary><p>Портативні збірки без платного сертифіката Microsoft викликають звичайне попередження SmartScreen. Натисніть «Докладніше» → «Виконати у будь-якому разі». Код програми повністю відкритий на GitHub.</p></details>
-      <details class="reveal"><summary>Як перенести ключі зі старої версії у нову?</summary><p>Просто скопіюйте файл <code>keys.json</code> з папки <code>data/</code> старої версії у папку <code>data/</code> нової версії Cartelsia Go.</p></details>
+<!-- ═══════════ Call To Action ═══════════ -->
+<section class="cta-banner">
+  <div class="cta-banner__inner reveal">
+    <div class="cta-banner__logo">☠️</div>
+    <h2>Приєднуйтесь до спільноти YouTube Cartel</h2>
+    <p>Дізнавайтесь про нові фішки, діліться спільними голосами та отримуйте актуальні оновлення Cartelsia першими.</p>
+    <div class="cta-banner__actions">
+      <a class="btn btn--primary btn--glow" href="https://github.com/gitkalenyuk/cartelsia/releases/download/v2.2.0/Cartelsia-Go-v2.2.0-windows-x64.zip">
+        <span>⬇ Завантажити Cartelsia v2.2.0</span>
+      </a>
+      <a class="btn btn--secondary" href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noreferrer">
+        <span>💬 Telegram-канал YouTube Cartel</span>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- ═══════════ Фінальний CTA ═══════════ -->
-<section class="cta">
-  <div class="section__inner reveal">
-    <h2>Готовий озвучувати безкоштовно?</h2>
-    <p>Нативне ядро Go. 12 МБ. Повний контроль над генерацією аудіо.</p>
-    <a class="btn btn--primary btn--lg" href="#downloads">
-      ⬇ Отримати Cartelsia <span id="cta-version">2.1.3</span>
-    </a>
-  </div>
-</section>
-
+<!-- ═══════════ Підвал ═══════════ -->
 <footer class="footer">
   <div class="footer__inner">
-    <span>☠️ YT CARTEL</span>
-    <a href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noopener">Канал</a>
-    <a href="https://t.me/+Jj06Fbj8-8oyZDQ6" target="_blank" rel="noopener">Чат</a>
-    <a href="https://github.com/gitkalenyuk/cartelsia" target="_blank" rel="noopener">GitHub Репозиторій</a>
-    <a href="https://github.com/gitkalenyuk/cartelsia/releases/latest" target="_blank" rel="noopener">Всі релізи</a>
+    <div class="footer__left">
+      <span class="footer__brand">Cartelsia</span>
+      <span class="footer__ver">v2.2.0</span>
+      <span class="footer__copy">© 2026 YouTube Cartel. Розроблено для креаторів нового покоління.</span>
+    </div>
+    <div class="footer__links">
+      <a href="#top">Вгору</a>
+      <a href="#downloads">Завантажити</a>
+      <a href="#catchall">Гайд Catch-All</a>
+      <a href="https://github.com/gitkalenyuk/cartelsia" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="https://t.me/+e_g6IwDlVhg4OGJi" target="_blank" rel="noreferrer">Telegram</a>
+    </div>
   </div>
 </footer>
 
