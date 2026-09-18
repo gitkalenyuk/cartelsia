@@ -16,7 +16,7 @@ var ErrClosed = errors.New("window closed")
 
 func RunMainWindow(url, title, dataPath string) error {
 	w := webview2.NewWithOptions(webview2.WebViewOptions{
-		Debug:     true,
+		Debug:     false,
 		AutoFocus: true,
 		DataPath:  dataPath,
 		WindowOptions: webview2.WindowOptions{

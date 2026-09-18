@@ -311,11 +311,19 @@ type PreflightEstimate struct {
 	BlockedChunks  []BlockedChunk  `json:"blockedChunks"`
 }
 
+type UsageStatDay struct {
+	Day    string         `json:"day"`
+	PerKey map[string]int `json:"perKey"`
+	Total  int            `json:"total"`
+}
+
 type StatsSummary struct {
-	TotalChats      int `json:"totalChats"`
-	TotalChunks     int `json:"totalChunks"`
-	TotalCharacters int `json:"totalCharacters"`
-	ActiveKeysCount int `json:"activeKeysCount"`
+	TotalChars int               `json:"totalChars"`
+	MonthChars int               `json:"monthChars"`
+	ActiveKeys int               `json:"activeKeys"`
+	AvgPerDay  int               `json:"avgPerDay"`
+	Days       []UsageStatDay    `json:"days"`
+	KeyLabels  map[string]string `json:"keyLabels"`
 }
 
 type SavePathResult struct {

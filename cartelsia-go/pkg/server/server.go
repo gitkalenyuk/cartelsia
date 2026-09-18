@@ -1,13 +1,13 @@
 package server
 
 import (
-	"net/url"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -916,20 +916,103 @@ func (srv *Server) dispatch(channel string, args []json.RawMessage) (any, error)
 		}, nil
 
 	case "stats:get":
-		chats, _ := srv.storage.LoadChats()
-		totalChunks := 0
+		// 1. Prepare key labels map
+		keyLabels := make(map[string]string)
+		for _, k := range srv.keys.ListPublic() {
+			label := k.Label
+			if label == "" {
+				label = k.KeyMasked
+			}
+			keyLabels[k.ID] = label
+		}
+
+		// 2. Prepare 30 days array
+		const numDays = 30
+		now := time.Now().UTC()
+		days := make([]models.UsageStatDay, numDays)
+		dayIndex := make(map[string]int)
+		for i := numDays - 1; i >= 0; i-- {
+			d := now.AddDate(0, 0, -(numDays - 1 - i))
+			dayStr := d.Format("2006-01-02")
+			days[i] = models.UsageStatDay{
+				Day:    dayStr,
+				PerKey: make(map[string]int),
+				Total:  0,
+			}
+			dayIndex[dayStr] = i
+		}
+
+		// 3. Read events from data/usage.jsonl
 		totalChars := 0
-		for _, c := range chats {
-			totalChunks += len(c.Chunks)
-			for _, ch := range c.Chunks {
-				totalChars += len([]rune(ch.Text))
+		monthChars := 0
+		monthStart := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
+
+		usageFile := filepath.Join(srv.storage.DataDir(), "usage.jsonl")
+		if data, err := os.ReadFile(usageFile); err == nil {
+			lines := strings.Split(string(data), "\n")
+			for _, line := range lines {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				var ev struct {
+					Ts    string `json:"ts"`
+					KeyID string `json:"keyId"`
+					Chars int    `json:"chars"`
+				}
+				if err := json.Unmarshal([]byte(line), &ev); err == nil {
+					totalChars += ev.Chars
+					t, tErr := time.Parse(time.RFC3339, ev.Ts)
+					if tErr == nil && !t.Before(monthStart) {
+						monthChars += ev.Chars
+					}
+					dayStr := ev.Ts
+					if len(dayStr) >= 10 {
+						dayStr = dayStr[:10]
+					}
+					if idx, exists := dayIndex[dayStr]; exists {
+						days[idx].PerKey[ev.KeyID] += ev.Chars
+						days[idx].Total += ev.Chars
+					}
+				}
 			}
 		}
+
+		// Fallback to chats if usage.jsonl was empty
+		if totalChars == 0 {
+			chats, _ := srv.storage.LoadChats()
+			for _, c := range chats {
+				for _, ch := range c.Chunks {
+					if ch.Status == "done" {
+						chars := len([]rune(ch.Text))
+						totalChars += chars
+						monthChars += chars
+					}
+				}
+			}
+		}
+
+		// 4. Calculate average per active day
+		sumDaysTotal := 0
+		activeDays := 0
+		for _, d := range days {
+			if d.Total > 0 {
+				activeDays++
+			}
+			sumDaysTotal += d.Total
+		}
+		if activeDays == 0 {
+			activeDays = 1
+		}
+		avgPerDay := sumDaysTotal / activeDays
+
 		return models.StatsSummary{
-			TotalChats:      len(chats),
-			TotalChunks:     totalChunks,
-			TotalCharacters: totalChars,
-			ActiveKeysCount: srv.keys.ActiveKeysCount(),
+			TotalChars: totalChars,
+			MonthChars: monthChars,
+			ActiveKeys: srv.keys.ActiveKeysCount(),
+			AvgPerDay:  avgPerDay,
+			Days:       days,
+			KeyLabels:  keyLabels,
 		}, nil
 
 	case "subtitles:export":
