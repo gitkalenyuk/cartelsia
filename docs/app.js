@@ -1,4 +1,4 @@
-// Cartelsia site 2.1.3: reveal-on-scroll, лічильник завантажень, версія, hover-світло на картках
+// Cartelsia site 2.1.3: reveal-on-scroll, лічильник завантажень, версія, hover-світло на картках, таби
 (function () {
   'use strict'
 
@@ -14,11 +14,27 @@
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el))
 
   // ── Hover-підсвітка карток (radial за курсором) ──
-  document.querySelectorAll('.cardx').forEach((card) => {
+  document.querySelectorAll('.cardx, .dl-card').forEach((card) => {
     card.addEventListener('mousemove', (e) => {
       const r = card.getBoundingClientRect()
       card.style.setProperty('--mx', (e.clientX - r.left) + 'px')
       card.style.setProperty('--my', (e.clientY - r.top) + 'px')
+    })
+  })
+
+  // ── Інтерактивні таби інструкцій ──
+  const tabBtns = document.querySelectorAll('.tab-btn')
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      tabBtns.forEach((b) => b.classList.remove('is-active'))
+      document.querySelectorAll('.tab-content').forEach((c) => c.classList.remove('is-active'))
+
+      btn.classList.add('is-active')
+      const targetId = 'tab-' + btn.getAttribute('data-tab')
+      const targetContent = document.getElementById(targetId)
+      if (targetContent) {
+        targetContent.classList.add('is-active')
+      }
     })
   })
 
@@ -48,6 +64,6 @@
       }
       dlEl.textContent = total.toLocaleString('uk-UA')
     })
-    .catch(() => { dlEl.textContent = '700+' })
+    .catch(() => { dlEl.textContent = '800+' })
   }
 })()
