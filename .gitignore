@@ -13,3 +13,6 @@ REGER/
 dist-go/
 cartelsia-go/Cartelsia*
 !cartelsia-go/rsrc_windows_amd64.syso
+cartelsia-go/data/
+cartelsia-go/output/
+cartelsia-go/dist/

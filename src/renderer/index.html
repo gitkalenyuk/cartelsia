@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' media: blob: data:; connect-src 'self' media: blob:; worker-src 'self' blob:"
+      content="default-src 'self' http: blob: data:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: http:; media-src 'self' media: blob: data: http:; connect-src 'self' media: blob: http: ws:; worker-src 'self' blob:"
     />
   </head>
   <body>
