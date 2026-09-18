@@ -21,9 +21,23 @@ type Storage struct {
 func NewStorage(portable bool) (*Storage, error) {
 	var dataDir, outputDir string
 	if portable {
+		exe, err := os.Executable()
+		exeDir := ""
+		if err == nil {
+			exeDir = filepath.Dir(exe)
+		}
 		cwd, _ := os.Getwd()
-		dataDir = filepath.Join(cwd, "data")
-		outputDir = filepath.Join(cwd, "output")
+
+		if exeDir != "" {
+			if fi, err := os.Stat(filepath.Join(exeDir, "data")); err == nil && fi.IsDir() {
+				dataDir = filepath.Join(exeDir, "data")
+				outputDir = filepath.Join(exeDir, "output")
+			}
+		}
+		if dataDir == "" {
+			dataDir = filepath.Join(cwd, "data")
+			outputDir = filepath.Join(cwd, "output")
+		}
 	} else {
 		appData := os.Getenv("APPDATA")
 		if appData == "" {

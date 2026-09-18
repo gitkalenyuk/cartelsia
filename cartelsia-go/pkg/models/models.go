@@ -295,6 +295,17 @@ type Settings struct {
 	MasterApiKey         string             `json:"masterApiKey,omitempty"`
 }
 
+type ProxyEntry struct {
+	URL         string `json:"url"`
+	Status      string `json:"status"` // unchecked | working | dead | checking
+	LastChecked string `json:"lastChecked,omitempty"`
+	LatencyMs   int    `json:"latencyMs,omitempty"`
+}
+
+type ProxiesFile struct {
+	Proxies []ProxyEntry `json:"proxies"`
+}
+
 type AppPaths struct {
 	DataDir   string `json:"dataDir"`
 	OutputDir string `json:"outputDir"`

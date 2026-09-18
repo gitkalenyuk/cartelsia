@@ -83,7 +83,7 @@ type voicesResponse struct {
 }
 
 func (c *Client) ListVoices(apiKey string) ([]models.CartesiaVoice, error) {
-	req, err := http.NewRequest("GET", c.baseURL+"/voices", nil)
+	req, err := http.NewRequest("GET", c.baseURL+"/voices/?limit=1000&expand[]=preview_file_url", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -99,13 +99,23 @@ func (c *Client) ListVoices(apiKey string) ([]models.CartesiaVoice, error) {
 		return nil, fmt.Errorf("list voices failed: status %d", resp.StatusCode)
 	}
 
-	var res voicesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
 		return nil, err
 	}
 
-	voices := []models.CartesiaVoice{}
-	for _, v := range res.Data {
+	var rawList []rawVoice
+	if err := json.Unmarshal(bodyBytes, &rawList); err != nil {
+		var res voicesResponse
+		if err2 := json.Unmarshal(bodyBytes, &res); err2 == nil {
+			rawList = res.Data
+		} else {
+			return nil, fmt.Errorf("decode voices failed: %v", err)
+		}
+	}
+
+	voices := make([]models.CartesiaVoice, 0, len(rawList))
+	for _, v := range rawList {
 		voices = append(voices, models.CartesiaVoice{
 			ID:          v.ID,
 			Name:        v.Name,

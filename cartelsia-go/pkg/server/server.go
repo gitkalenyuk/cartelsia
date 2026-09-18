@@ -2,10 +2,12 @@ package server
 
 import (
 	"crypto/rand"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -24,6 +26,9 @@ import (
 )
 
 type Server struct {
+	cachedVoices   []models.CartesiaVoice
+	cachedVoicesAt time.Time
+	cachedVoicesMu sync.RWMutex
 	port         int
 	storage      *storage.Storage
 	keys         *keys.PoolManager
@@ -656,15 +661,41 @@ func (srv *Server) dispatch(channel string, args []json.RawMessage) (any, error)
 
 	// Voices
 	case "voices:list":
-		activeKey := srv.keys.GetFirstActiveKey()
-		if activeKey == "" {
+		srv.cachedVoicesMu.RLock()
+		if len(srv.cachedVoices) > 0 && time.Since(srv.cachedVoicesAt) < 15*time.Minute {
+			vCopy := make([]models.CartesiaVoice, len(srv.cachedVoices))
+			copy(vCopy, srv.cachedVoices)
+			srv.cachedVoicesMu.RUnlock()
+			return models.VoicesListResponse{Data: vCopy, HasMore: false}, nil
+		}
+		srv.cachedVoicesMu.RUnlock()
+
+		activeKeys := srv.keys.GetActiveKeys()
+		if len(activeKeys) == 0 {
+			if k := srv.keys.GetFirstActiveKey(); k != "" {
+				activeKeys = []string{k}
+			}
+		}
+		if len(activeKeys) == 0 {
 			return models.VoicesListResponse{Data: []models.CartesiaVoice{}}, nil
 		}
-		voices, err := srv.cartesia.ListVoices(activeKey)
-		if err != nil {
-			return models.VoicesListResponse{Data: []models.CartesiaVoice{}}, nil
+
+		var lastErr error
+		for _, key := range activeKeys {
+			voices, err := srv.cartesia.ListVoices(key)
+			if err == nil && len(voices) > 0 {
+				srv.cachedVoicesMu.Lock()
+				srv.cachedVoices = voices
+				srv.cachedVoicesAt = time.Now()
+				srv.cachedVoicesMu.Unlock()
+				return models.VoicesListResponse{Data: voices, HasMore: false}, nil
+			}
+			lastErr = err
 		}
-		return models.VoicesListResponse{Data: voices, HasMore: false}, nil
+		if lastErr != nil {
+			fmt.Println("[Cartelsia-Go] Error listing voices:", lastErr)
+		}
+		return models.VoicesListResponse{Data: []models.CartesiaVoice{}}, nil
 
 	case "voices:clones:list":
 		clones, _ := srv.storage.LoadClones()
@@ -892,21 +923,33 @@ func (srv *Server) dispatch(channel string, args []json.RawMessage) (any, error)
 		return srv.storage.LoadSettings()
 
 	case "settings:set", "settings:save":
-		var p struct {
-			Patch models.Settings `json:"patch"`
-		}
+		current, _ := srv.storage.LoadSettings()
 		if len(args) > 0 {
-			if err := json.Unmarshal(args[0], &p); err == nil && p.Patch.Defaults.ModelID != "" {
-				_ = srv.storage.SaveSettings(p.Patch)
-				return p.Patch, nil
-			}
-			var s models.Settings
-			if err := json.Unmarshal(args[0], &s); err == nil {
-				_ = srv.storage.SaveSettings(s)
-				return s, nil
+			var rawMap map[string]json.RawMessage
+			if err := json.Unmarshal(args[0], &rawMap); err == nil {
+				target := args[0]
+				if p, ok := rawMap["patch"]; ok {
+					target = p
+				}
+				curBytes, _ := json.Marshal(current)
+				var curMap map[string]any
+				_ = json.Unmarshal(curBytes, &curMap)
+
+				var patchMap map[string]any
+				if err := json.Unmarshal(target, &patchMap); err == nil {
+					for k, v := range patchMap {
+						curMap[k] = v
+					}
+					mergedBytes, _ := json.Marshal(curMap)
+					var updated models.Settings
+					if err := json.Unmarshal(mergedBytes, &updated); err == nil {
+						_ = srv.storage.SaveSettings(updated)
+						return updated, nil
+					}
+				}
 			}
 		}
-		return srv.storage.LoadSettings()
+		return current, nil
 
 	case "paths:get", "settings:get-paths":
 		return models.AppPaths{
@@ -1027,17 +1070,191 @@ func (srv *Server) dispatch(channel string, args []json.RawMessage) (any, error)
 		target := srv.storage.AudioPath(srtFile)
 		return models.SubtitlesExportResult{Path: &target}, nil
 
-	// Email & Autoreg stubs
+	// Email & Autoreg
 	case "email:testImap":
-		return map[string]any{"ok": true}, nil
+		var p struct {
+			Config *models.IMAPConfig `json:"config"`
+		}
+		cfg := &models.IMAPConfig{
+			Host: "imap.gmail.com",
+			Port: 993,
+			User: "ytcartel001@gmail.com",
+			Pass: "qotb uqbm tykv rfpg",
+			TLS:  true,
+		}
+		if len(args) > 0 {
+			_ = json.Unmarshal(args[0], &p)
+			if p.Config != nil && p.Config.Host != "" {
+				cfg = p.Config
+			}
+		}
+		addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+		conn, err := tls.DialWithDialer(&net.Dialer{Timeout: 7 * time.Second}, "tcp", addr, &tls.Config{InsecureSkipVerify: false})
+		if err != nil {
+			return map[string]any{"ok": false, "error": fmt.Sprintf("Не вдалося підключитися до IMAP %s: %v", addr, err)}, nil
+		}
+		_ = conn.Close()
+		return map[string]any{"ok": true, "message": fmt.Sprintf("Підключення до IMAP %s успішне!", addr)}, nil
+
 	case "autoreg:status":
 		return map[string]any{"status": "idle", "active": false}, nil
 	case "autoreg:stop":
 		return true, nil
 
-	// Proxy stubs
+	// Proxy endpoints
 	case "proxy:list":
-		return []any{}, nil
+		proxiesPath := filepath.Join(srv.storage.DataDir(), "proxies.json")
+		var pf models.ProxiesFile
+		if data, err := os.ReadFile(proxiesPath); err == nil {
+			_ = json.Unmarshal(data, &pf)
+		}
+		if pf.Proxies == nil {
+			pf.Proxies = []models.ProxyEntry{}
+		}
+		return pf.Proxies, nil
+
+	case "proxy:import", "proxy:importText":
+		var p struct {
+			Text string `json:"text"`
+		}
+		if len(args) > 0 {
+			_ = json.Unmarshal(args[0], &p)
+		}
+		proxiesPath := filepath.Join(srv.storage.DataDir(), "proxies.json")
+		var pf models.ProxiesFile
+		if data, err := os.ReadFile(proxiesPath); err == nil {
+			_ = json.Unmarshal(data, &pf)
+		}
+		existing := make(map[string]bool)
+		for _, px := range pf.Proxies {
+			existing[px.URL] = true
+		}
+		lines := strings.Split(p.Text, "\n")
+		added := 0
+		for _, line := range lines {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			if !strings.HasPrefix(line, "http://") && !strings.HasPrefix(line, "https://") && !strings.HasPrefix(line, "socks5://") {
+				line = "http://" + line
+			}
+			if !existing[line] {
+				pf.Proxies = append(pf.Proxies, models.ProxyEntry{
+					URL:    line,
+					Status: "unchecked",
+				})
+				existing[line] = true
+				added++
+			}
+		}
+		data, _ := json.MarshalIndent(pf, "", "  ")
+		_ = os.WriteFile(proxiesPath, data, 0644)
+		return map[string]any{"added": added, "proxies": pf.Proxies}, nil
+
+	case "proxy:remove":
+		var p struct {
+			URL string `json:"url"`
+		}
+		if len(args) > 0 {
+			_ = json.Unmarshal(args[0], &p)
+		}
+		proxiesPath := filepath.Join(srv.storage.DataDir(), "proxies.json")
+		var pf models.ProxiesFile
+		if data, err := os.ReadFile(proxiesPath); err == nil {
+			_ = json.Unmarshal(data, &pf)
+		}
+		var next []models.ProxyEntry
+		for _, px := range pf.Proxies {
+			if px.URL != p.URL {
+				next = append(next, px)
+			}
+		}
+		pf.Proxies = next
+		data, _ := json.MarshalIndent(pf, "", "  ")
+		_ = os.WriteFile(proxiesPath, data, 0644)
+		return map[string]any{"proxies": pf.Proxies}, nil
+
+	case "proxy:clear":
+		var p struct {
+			OnlyDead bool `json:"onlyDead"`
+		}
+		if len(args) > 0 {
+			_ = json.Unmarshal(args[0], &p)
+		}
+		proxiesPath := filepath.Join(srv.storage.DataDir(), "proxies.json")
+		var pf models.ProxiesFile
+		if data, err := os.ReadFile(proxiesPath); err == nil {
+			_ = json.Unmarshal(data, &pf)
+		}
+		var kept []models.ProxyEntry
+		removed := 0
+		for _, px := range pf.Proxies {
+			if p.OnlyDead && px.Status == "dead" {
+				removed++
+			} else if !p.OnlyDead {
+				removed++
+			} else {
+				kept = append(kept, px)
+			}
+		}
+		pf.Proxies = kept
+		data, _ := json.MarshalIndent(pf, "", "  ")
+		_ = os.WriteFile(proxiesPath, data, 0644)
+		return map[string]any{"removed": removed, "proxies": pf.Proxies}, nil
+
+	case "proxy:check", "proxy:checkStart":
+		proxiesPath := filepath.Join(srv.storage.DataDir(), "proxies.json")
+		var pf models.ProxiesFile
+		if data, err := os.ReadFile(proxiesPath); err == nil {
+			_ = json.Unmarshal(data, &pf)
+		}
+		nowStr := time.Now().UTC().Format(time.RFC3339)
+		for i := range pf.Proxies {
+			px := &pf.Proxies[i]
+			proxyURL, pErr := url.Parse(px.URL)
+			if pErr != nil {
+				px.Status = "dead"
+				px.LastChecked = nowStr
+				continue
+			}
+			transport := &http.Transport{
+				Proxy: http.ProxyURL(proxyURL),
+			}
+			checkClient := &http.Client{
+				Transport: transport,
+				Timeout:   10 * time.Second,
+			}
+			start := time.Now()
+			req, rErr := http.NewRequest("GET", "https://clerk.cartesia.ai/v1/client?__clerk_api_version=2026-05-12", nil)
+			if rErr != nil {
+				px.Status = "dead"
+				px.LastChecked = nowStr
+				continue
+			}
+			req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)")
+			resp, cErr := checkClient.Do(req)
+			latency := int(time.Since(start).Milliseconds())
+			if cErr != nil {
+				px.Status = "dead"
+				px.LastChecked = nowStr
+			} else {
+				_ = resp.Body.Close()
+				if resp.StatusCode == 429 || resp.StatusCode == 403 {
+					px.Status = "dead"
+				} else {
+					px.Status = "working"
+					px.LatencyMs = latency
+				}
+				px.LastChecked = nowStr
+			}
+		}
+		data, _ := json.MarshalIndent(pf, "", "  ")
+		_ = os.WriteFile(proxiesPath, data, 0644)
+		return pf.Proxies, nil
+
+	case "proxy:checkStop":
+		return true, nil
 
 	case "debug:setKeyUsage":
 		return true, nil

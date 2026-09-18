@@ -395,6 +395,18 @@ func (pm *PoolManager) ActiveKeysCount() int {
 	return count
 }
 
+func (pm *PoolManager) GetActiveKeys() []string {
+	pm.mu.RLock()
+	defer pm.mu.RUnlock()
+	var res []string
+	for _, id := range pm.order {
+		if mk := pm.keys[id]; mk.Status == models.KeyStatusActive {
+			res = append(res, mk.Key)
+		}
+	}
+	return res
+}
+
 func (pm *PoolManager) GetFirstActiveKey() string {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
